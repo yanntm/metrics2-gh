@@ -474,13 +474,13 @@ public class LayeredPackageTable extends TableTree implements Constants, Selecti
 				}
 			}
 		} catch (PartInitException x) {
-			System.err.println("Error selecting " + handle);
+			Log.logError("Error selecting " + handle,x);
 			x.printStackTrace();
 		} catch (JavaModelException x) {
-			System.err.println("Error selecting " + handle);
+			Log.logError("Error selecting " + handle,x);
 			x.printStackTrace();
 		} catch (Throwable t) {
-			System.err.println("Error selecting " + handle);
+			Log.logError("Error selecting " + handle,t);
 			t.printStackTrace();
 		}
 	}

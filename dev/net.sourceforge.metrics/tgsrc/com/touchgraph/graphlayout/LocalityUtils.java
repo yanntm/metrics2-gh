@@ -53,6 +53,8 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import net.sourceforge.metrics.core.Log;
+
 import com.touchgraph.graphlayout.graphelements.GESUtils;
 import com.touchgraph.graphlayout.graphelements.Locality;
 import com.touchgraph.graphlayout.graphelements.TGForEachNode;
@@ -222,7 +224,7 @@ public class LocalityUtils {
 					}
 
 				} catch (TGException tge) {
-					System.err.println("TGException: " + tge.getMessage());
+					Log.logError("TGException: " + tge.getMessage(), tge);
 				} catch (InterruptedException ex) {
 				}
 				tgPanel.resetDamper();
@@ -282,7 +284,7 @@ public class LocalityUtils {
 								locality.addNodeWithEdges(newNode);
 								Thread.sleep(50);
 							} catch (TGException tge) {
-								System.err.println("TGException: " + tge.getMessage());
+								Log.logError("TGException: " + tge.getMessage(), tge);
 							} catch (InterruptedException ex) {
 							}
 						} else if (!locality.contains(n.edgeAt(i))) {

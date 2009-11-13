@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
 
 /**
  * initialize package fragment root metrics (my children) and collect all results from the calculators for the project root level
@@ -153,6 +154,11 @@ public class ProjectMetrics extends AbstractMetricSource implements IGraphContri
 	 */
 	public Map<String, Set<String>> getEfferent() {
 		return efferent;
+	}
+
+	@Override
+	public ASTNode getASTNode() {
+		return null;
 	}
 
 }

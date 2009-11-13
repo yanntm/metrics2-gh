@@ -208,7 +208,7 @@ public class MetricsPlugin extends AbstractUIPlugin implements IPropertyChangeLi
 	 */
 	private void installMetrics() {
 		// System.err.println("Discovering and installing metrics");
-		IExtensionPoint p = Platform.getExtensionRegistry().getExtensionPoint(pluginId + ".metrics");
+		IExtensionPoint p = Platform.getExtensionRegistry().getExtensionPoint(PLUGIN_ID + ".metrics");
 		if (p != null) {
 			IExtension[] x = p.getExtensions();
 			for (IExtension element : x) {
@@ -228,7 +228,7 @@ public class MetricsPlugin extends AbstractUIPlugin implements IPropertyChangeLi
 
 	private void installExporters() {
 		// System.err.println("Discovering and installing metrics");
-		IExtensionPoint p = Platform.getExtensionRegistry().getExtensionPoint(pluginId + ".exporters");
+		IExtensionPoint p = Platform.getExtensionRegistry().getExtensionPoint(PLUGIN_ID + ".exporters");
 		if (p != null) {
 			IExtension[] x = p.getExtensions();
 			for (IExtension element : x) {

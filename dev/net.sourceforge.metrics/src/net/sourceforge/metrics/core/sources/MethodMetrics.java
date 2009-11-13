@@ -134,7 +134,6 @@ public class MethodMetrics extends AbstractMetricSource {
 	public MethodMetrics(MethodDeclaration methodDeclaration) {
 		astNode = methodDeclaration;
 		if (astNode == null) {
-			System.err.println("MethodMetrics: Must provide legal MethodDeclaration!");
 			throw new IllegalArgumentException("MethodMetrics: Must provide legal MethodDeclaration!");
 		}
 	}

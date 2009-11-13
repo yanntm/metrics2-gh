@@ -56,7 +56,7 @@ public class MetricsNature implements IProjectNature, Constants {
 		String[] natures = description.getNatureIds();
 		String[] newNatures = new String[natures.length + 1];
 		System.arraycopy(natures, 0, newNatures, 0, natures.length);
-		newNatures[natures.length] = pluginId + ".nature";
+		newNatures[natures.length] = PLUGIN_ID + ".nature";
 		description.setNatureIds(newNatures);
 		project.setDescription(description, monitor);
 	}
@@ -81,7 +81,7 @@ public class MetricsNature implements IProjectNature, Constants {
 		IProjectDescription description = project.getDescription();
 		String[] natures = description.getNatureIds();
 		List<String> lNatures = new ArrayList<String>(Arrays.asList(natures));
-		lNatures.remove(pluginId + ".nature");
+		lNatures.remove(PLUGIN_ID + ".nature");
 		String[] newNatures = lNatures.toArray(new String[] {});
 		if (newNatures.length < natures.length) {
 			description.setNatureIds(newNatures);
@@ -109,7 +109,7 @@ public class MetricsNature implements IProjectNature, Constants {
 		boolean found = false;
 
 		for (int i = 0; i < commands.length; ++i) {
-			if (commands[i].getBuilderName().equals(pluginId + ".builder")) {
+			if (commands[i].getBuilderName().equals(PLUGIN_ID + ".builder")) {
 				found = true;
 				break;
 			}
@@ -117,7 +117,7 @@ public class MetricsNature implements IProjectNature, Constants {
 		if (!found) {
 			// add builder to project
 			ICommand command = description.newCommand();
-			command.setBuilderName(pluginId + ".builder");
+			command.setBuilderName(PLUGIN_ID + ".builder");
 			ICommand[] newCommands = new ICommand[commands.length + 1];
 
 			// Add it before other builders.
@@ -137,7 +137,7 @@ public class MetricsNature implements IProjectNature, Constants {
 	public void deconfigure() throws CoreException {
 		IProjectDescription description = getProject().getDescription();
 		ICommand[] commands = description.getBuildSpec();
-		String builderID = pluginId + ".builder";
+		String builderID = PLUGIN_ID + ".builder";
 		for (int i = 0; i < commands.length; ++i) {
 			if (commands[i].getBuilderName().equals(builderID)) {
 				ICommand[] newCommands = new ICommand[commands.length - 1];

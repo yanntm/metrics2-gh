@@ -64,6 +64,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Vector;
 
+import net.sourceforge.metrics.core.Log;
+
 import com.touchgraph.graphlayout.graphelements.GraphEltSet;
 import com.touchgraph.graphlayout.graphelements.ImmutableGraphEltSet;
 import com.touchgraph.graphlayout.graphelements.TGForEachEdge;
@@ -983,7 +985,7 @@ public class TGPanel extends Panel {
 		try {
 			tgPanel.addNode(); // Add a starting node.
 		} catch (TGException tge) {
-			System.err.println(tge.getMessage());
+			Log.logWarrning(tge.getMessage(), tge);
 		}
 		tgPanel.setVisible(true);
 		new GLEditUI(tgPanel).activate();

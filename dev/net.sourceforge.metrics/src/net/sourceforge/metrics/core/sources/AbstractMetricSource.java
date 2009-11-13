@@ -375,7 +375,7 @@ public abstract class AbstractMetricSource implements Constants, Serializable {
 			if (m != null) {
 				metrics.add(m);
 			} else {
-				System.err.println("metric " + name + " not found in " + next.getJavaElement().getElementName());
+				Log.logMessage("metric " + name + " not found in " + next.getJavaElement().getElementName());
 			}
 		}
 		return metrics;
@@ -396,7 +396,7 @@ public abstract class AbstractMetricSource implements Constants, Serializable {
 			if (nextAvg != null) {
 				averages.add(nextAvg);
 			} else {
-				System.err.println("average " + name + "," + per + " not found in " + next.getJavaElement().getElementName());
+				Log.logMessage("average " + name + "," + per + " not found in " + next.getJavaElement().getElementName());
 			}
 		}
 		return averages;
@@ -480,9 +480,9 @@ public abstract class AbstractMetricSource implements Constants, Serializable {
 	 * @return IJavaElement
 	 * @see net.sourceforge.metrics.sources.CompilationUnitMetrics#getASTNode()
 	 */
-	public ASTNode getASTNode() {
+	public abstract ASTNode getASTNode();/* {
 		return null;
-	}
+	}*/
 
 	/**
 	 * get the original compilation unit for the given IJavaElement. If the compilation unit turns out to be a WorkingCopy this method returns its original source compilation unit

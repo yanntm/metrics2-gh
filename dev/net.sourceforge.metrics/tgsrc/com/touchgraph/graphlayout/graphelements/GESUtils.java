@@ -97,7 +97,7 @@ public class GESUtils {
 					if (adjNode.edgeCount() <= maxExpandEdgeCount) {
 						nodeQ.push(adjNode);
 					}
-					distHash.put(adjNode, new Integer(currDist + 1));
+					distHash.put(adjNode, Integer.valueOf(currDist + 1));
 				}
 			}
 		}

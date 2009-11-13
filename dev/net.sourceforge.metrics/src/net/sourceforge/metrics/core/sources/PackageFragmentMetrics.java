@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
 
 /**
  * initialize package fragment metrics (my children) and collect all results from the calculators for the package level
@@ -113,6 +114,11 @@ public class PackageFragmentMetrics extends AbstractMetricSource {
 	 */
 	public Set<String> getEfferentDependencies() {
 		return efferent;
+	}
+
+	@Override
+	public ASTNode getASTNode() {
+		return null;
 	}
 
 }

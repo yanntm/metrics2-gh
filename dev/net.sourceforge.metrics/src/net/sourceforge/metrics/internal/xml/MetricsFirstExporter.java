@@ -260,15 +260,15 @@ public class MetricsFirstExporter implements IExporter, Constants {
 
 	private boolean printValues(String id, AbstractMetricSource element, XMLPrintStream pOut, NumberFormat nf) {
 		boolean result = false;
-		for (int i = 0; i < pers.length; i++) {
+		for (int i = 0; i < PER_ARRAY.length; i++) {
 			Metric total = element.getValue(id);
 			MetricDescriptor md = plugin.getMetricDescriptor(id);
-			Avg avg = element.getAverage(id, pers[i]);
-			Max max = element.getMaximum(id, pers[i]);
+			Avg avg = element.getAverage(id, PER_ARRAY[i]);
+			Max max = element.getMaximum(id, PER_ARRAY[i]);
 			if ((avg != null) || (max != null)) {
 				pOut.indent(2);
 				pOut.print("<Values per = \"");
-				pOut.print(pers[i]);
+				pOut.print(PER_ARRAY[i]);
 				pOut.print("\"");
 				if (total != null) {
 					pOut.print(" total = \"");
@@ -309,11 +309,9 @@ public class MetricsFirstExporter implements IExporter, Constants {
 	 */
 	private void printValues(List<AbstractMetricSource> values, final String id, XMLPrintStream pOut, MetricDescriptor md, NumberFormat nf) {
 		// sort values first
-		Collections.sort(values, new Comparator<? super AbstractMetricSource>() {
+		Collections.sort(values, new Comparator<AbstractMetricSource>() {
 
-			public int compare(Object o1, Object o2) {
-				AbstractMetricSource left = (AbstractMetricSource) o1;
-				AbstractMetricSource right = (AbstractMetricSource) o2;
+			public int compare(AbstractMetricSource left, AbstractMetricSource right) {
 				Metric lm = left.getValue(id);
 				Metric rm = right.getValue(id);
 				int result;

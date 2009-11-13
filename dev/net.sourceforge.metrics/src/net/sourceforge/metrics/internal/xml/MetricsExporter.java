@@ -112,7 +112,7 @@ public abstract class MetricsExporter implements Constants {
 		if (m != null) {
 			p.put("value", format(m.doubleValue()));
 		}
-		for (String per : pers) {
+		for (String per : PER_ARRAY) {
 			Avg avg = source.getAverage(name, per);
 			Max max = source.getMaximum(name, per);
 			if ((avg != null) || (max != null)) {
