@@ -176,7 +176,7 @@ public class MetricsFirstExporter implements IExporter, Constants {
 	 * @param monitor
 	 */
 	private void maybePrintCycles(AbstractMetricSource root, XMLPrintStream pOut, IProgressMonitor monitor) {
-		Map dependencies = null;
+		Map<String, Set<String>> dependencies = null;
 		if (root.getLevel() == Constants.PACKAGEROOT) {
 			PackageFragmentRootMetrics pfr = (PackageFragmentRootMetrics) root;
 			dependencies = pfr.getEfferent();
@@ -226,20 +226,20 @@ public class MetricsFirstExporter implements IExporter, Constants {
 	}
 
 	// TODO refactor to common place between this and DependencyGraphPanel
-	private StrongComponent[] calculateCycles(Map efferent) {
+	private StrongComponent[] calculateCycles(Map<String, Set<String>> efferent) {
 		List<Vertex> graph = new ArrayList<Vertex>();
 		Map<String, Vertex> done = new HashMap<String, Vertex>();
-		for (Iterator i = efferent.keySet().iterator(); i.hasNext();) {
-			String key = (String) i.next();
+		for (Iterator<String> i = efferent.keySet().iterator(); i.hasNext();) {
+			String key = i.next();
 			Vertex from = done.get(key);
 			if (from == null) {
 				from = new AtomicVertex(new PackageAttributes(key));
 				done.put(key, from);
 				graph.add(from);
 			}
-			Set deps = (Set) efferent.get(key);
-			for (Iterator j = deps.iterator(); j.hasNext();) {
-				String dep = (String) j.next();
+			Set<String> deps = efferent.get(key);
+			for (Iterator<String> j = deps.iterator(); j.hasNext();) {
+				String dep = j.next();
 				Vertex to = done.get(dep);
 				if (to == null) {
 					to = new AtomicVertex(new PackageAttributes(dep));
@@ -256,7 +256,7 @@ public class MetricsFirstExporter implements IExporter, Constants {
 		return comps;
 	}
 
-	private Class[] filters = new Class[] { PackageFragmentMetrics.class, TypeMetrics.class, MethodMetrics.class };
+	private Class<? extends AbstractMetricSource>[] filters = new Class[] { PackageFragmentMetrics.class, TypeMetrics.class, MethodMetrics.class };
 
 	private boolean printValues(String id, AbstractMetricSource element, XMLPrintStream pOut, NumberFormat nf) {
 		boolean result = false;
@@ -358,7 +358,7 @@ public class MetricsFirstExporter implements IExporter, Constants {
 		}
 	}
 
-	protected List<AbstractMetricSource> getChildren(String handle, Class filter) {
+	protected List<AbstractMetricSource> getChildren(String handle, Class<? extends AbstractMetricSource> filter) {
 		List<String> handles = new ArrayList<String>(Cache.singleton.getKeysForHandle(handle));
 		List<AbstractMetricSource> result = new ArrayList<AbstractMetricSource>();
 		for (String next : handles) {

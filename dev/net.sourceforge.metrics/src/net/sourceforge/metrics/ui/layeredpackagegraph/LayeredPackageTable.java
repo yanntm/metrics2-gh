@@ -541,7 +541,7 @@ public class LayeredPackageTable extends TableTree implements Constants, Selecti
 		}
 	}
 
-	public static List getLayers() {
+	public static List<Set<PackageStats>> getLayers() {
 		return layers;
 	}
 
@@ -558,18 +558,16 @@ public class LayeredPackageTable extends TableTree implements Constants, Selecti
 	}
 
 	private static PackageStats getStat(String packageName) {
-		for (Object element : layers) {
-			Set packageSet = (Set) element;
-			for (Iterator j = packageSet.iterator(); j.hasNext();) {
-				PackageStats stats = (PackageStats) j.next();
+		for (Set<PackageStats> packageSet : layers) {
+			for (Iterator<PackageStats> j = packageSet.iterator(); j.hasNext();) {
+				PackageStats stats = j.next();
 				if (stats.getPackageName().equals(packageName)) {
 					return stats;
 				}
 			}
 		}
 
-		for (Object element : external) {
-			PackageStats stats = (PackageStats) element;
+		for (PackageStats stats : external) {
 			if (stats.getPackageName().equals(packageName)) {
 				return stats;
 			}

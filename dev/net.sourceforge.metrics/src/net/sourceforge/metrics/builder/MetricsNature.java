@@ -62,15 +62,6 @@ public class MetricsNature implements IProjectNature, Constants {
 	}
 
 	/**
-	 * @deprecated use <code>addNatureToProject(project, null)</code>
-	 * @see #addNatureToProject(IProject, IProgressMonitor)
-	 */
-	@Deprecated
-	public static void addNatureToProject(IProject project) throws CoreException {
-		addNatureToProject(project, null);
-	}
-
-	/**
 	 * disable (remove) the metrics builder
 	 * 
 	 * @param project
@@ -89,14 +80,6 @@ public class MetricsNature implements IProjectNature, Constants {
 		}
 	}
 
-	/**
-	 * @deprecated use <code>removeNatureFromProject(project, null)</code>
-	 * @see #removeNatureFromProject(IProject, IProgressMonitor)
-	 */
-	@Deprecated
-	public static void removeNatureFromProject(IProject project) throws CoreException {
-		removeNatureFromProject(project, null);
-	}
 
 	/**
 	 * add metrics builder to project description
@@ -106,10 +89,10 @@ public class MetricsNature implements IProjectNature, Constants {
 	public void configure() throws CoreException {
 		IProjectDescription description = project.getDescription();
 		ICommand[] commands = description.getBuildSpec();
-		boolean found = false;
+		boolean found=false;
 
 		for (int i = 0; i < commands.length; ++i) {
-			if (commands[i].getBuilderName().equals(PLUGIN_ID + ".builder")) {
+			if (commands[i].getBuilderName().equals(MetricsBuilder.BUILDER_ID)) {
 				found = true;
 				break;
 			}
@@ -117,7 +100,7 @@ public class MetricsNature implements IProjectNature, Constants {
 		if (!found) {
 			// add builder to project
 			ICommand command = description.newCommand();
-			command.setBuilderName(PLUGIN_ID + ".builder");
+			command.setBuilderName(MetricsBuilder.BUILDER_ID);
 			ICommand[] newCommands = new ICommand[commands.length + 1];
 
 			// Add it before other builders.
@@ -136,10 +119,9 @@ public class MetricsNature implements IProjectNature, Constants {
 	 */
 	public void deconfigure() throws CoreException {
 		IProjectDescription description = getProject().getDescription();
-		ICommand[] commands = description.getBuildSpec();
-		String builderID = PLUGIN_ID + ".builder";
+		ICommand[] commands = description.getBuildSpec();;
 		for (int i = 0; i < commands.length; ++i) {
-			if (commands[i].getBuilderName().equals(builderID)) {
+			if (commands[i].getBuilderName().equals(MetricsBuilder.BUILDER_ID)) {
 				ICommand[] newCommands = new ICommand[commands.length - 1];
 				System.arraycopy(commands, 0, newCommands, 0, i);
 				System.arraycopy(commands, i + 1, newCommands, i, commands.length - i - 1);

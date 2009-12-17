@@ -182,7 +182,6 @@ public class MetricsPlugin extends AbstractUIPlugin implements IPropertyChangeLi
 		return getDefault().getPreferenceStore().getBoolean("METRICS.enablewarnings");
 	}
 
-	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		if (!event.getProperty().startsWith("METRICS")) {
 			recordTimeAndClearCache();
@@ -348,17 +347,17 @@ public class MetricsPlugin extends AbstractUIPlugin implements IPropertyChangeLi
 	private void installPropagators(MetricDescriptor m) {
 		String nextLevel = m.getParentLevel();
 		if (nextLevel != null) {
-			List props = m.createPropagators();
-			for (Iterator i = props.iterator(); i.hasNext();) {
-				Propagator p = (Propagator) i.next();
+			List<Propagator> props = m.createPropagators();
+			for (Iterator<Propagator> i = props.iterator(); i.hasNext();) {
+				Propagator p = i.next();
 				getCalculators(nextLevel).add(p);
 				propagatePropagator(nextLevel, p, m);
 			}
 			String newAvgMaxAt = m.getNewAvgMaxAt();
 			if (newAvgMaxAt != null) {
 				props = m.createIntroducedAvgMax();
-				for (Iterator i = props.iterator(); i.hasNext();) {
-					Propagator p = (Propagator) i.next();
+				for (Iterator<Propagator> i = props.iterator(); i.hasNext();) {
+					Propagator p = i.next();
 					// System.err.println("Installing a " + p + " at level " +
 					// newAvgMaxAt);
 					getCalculators(newAvgMaxAt).add(p);

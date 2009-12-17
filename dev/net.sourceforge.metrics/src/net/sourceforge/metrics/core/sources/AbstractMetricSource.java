@@ -95,7 +95,7 @@ public abstract class AbstractMetricSource implements Constants, Serializable {
 	 * 
 	 * @return
 	 */
-	public List getChildHandles() {
+	public List<String> getChildHandles() {
 		return childHandles;
 	}
 
@@ -189,7 +189,7 @@ public abstract class AbstractMetricSource implements Constants, Serializable {
 
 	protected abstract void initializeChildren(AbstractMetricSource parentMetric);
 
-	public void initializeNewInstance(AbstractMetricSource newSource, IJavaElement element, Map data) {
+	public void initializeNewInstance(AbstractMetricSource newSource, IJavaElement element, Map<String, ? extends ASTNode> data) {
 		newSource.childHandles.clear();
 		newSource.setJavaElement(element);
 	}
@@ -303,7 +303,7 @@ public abstract class AbstractMetricSource implements Constants, Serializable {
 	 * 
 	 * @return Iterator
 	 */
-	public Map getValues() {
+	public Map<String, Metric> getValues() {
 		return values;
 	}
 
@@ -340,8 +340,8 @@ public abstract class AbstractMetricSource implements Constants, Serializable {
 		if (children == null) {
 			return;
 		}
-		for (Iterator i = children.iterator(); i.hasNext();) {
-			AbstractMetricSource next = (AbstractMetricSource) i.next();
+		for (Iterator<AbstractMetricSource> i = children.iterator(); i.hasNext();) {
+			AbstractMetricSource next = i.next();
 			next.dispose();
 			i.remove();
 		}
@@ -432,7 +432,7 @@ public abstract class AbstractMetricSource implements Constants, Serializable {
 		return averages.get(per + name);
 	}
 
-	public Map getAverages() {
+	public Map<String, Avg> getAverages() {
 		return averages;
 	}
 
@@ -447,7 +447,7 @@ public abstract class AbstractMetricSource implements Constants, Serializable {
 		return maxima.get(per + name);
 	}
 
-	public Map getMaxima() {
+	public Map<String, Max> getMaxima() {
 		return maxima;
 	}
 
@@ -497,19 +497,19 @@ public abstract class AbstractMetricSource implements Constants, Serializable {
 
 	public abstract int getLevel();
 
-	protected List getCalculators() {
-		return new ArrayList();
+	protected List<ICalculator> getCalculators() {
+		return new ArrayList<ICalculator>();
 	}
 
 	/**
 	 * invokes calculate() on all calculators. TODO fine-grained Cache lookup so we can add new metrics
 	 */
 	protected void invokeCalculators() {
-		for (Iterator i = getCalculators().iterator(); i.hasNext();) {
+		for (Iterator<ICalculator> i = getCalculators().iterator(); i.hasNext();) {
 			if (metricsInterruptus()) {
 				return;
 			}
-			ICalculator c = (ICalculator) i.next();
+			ICalculator c = i.next();
 			try {
 				c.calculate(this);
 			} catch (OutOfMemoryError m) {
