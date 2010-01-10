@@ -27,87 +27,100 @@ package net.sourceforge.metrics.core;
  */
 public interface Constants {
 
-	/** project level source */
-	public final static int PROJECT = 6;
-	/** source folder level source */
-	public final static int PACKAGEROOT = 5;
-	/** package level source */
-	public final static int PACKAGEFRAGMENT = 4;
-	/** compilation unit level source */
-	public final static int COMPILATIONUNIT = 3;
-	/** class level source */
-	public final static int TYPE = 2;
-	/** method level source */
-	public final static int METHOD = 1;
+    /** project level source */
+    public final static int PROJECT = 6;
+    /** source folder level source */
+    public final static int PACKAGEROOT = 5;
+    /** package level source */
+    public final static int PACKAGEFRAGMENT = 4;
+    /** compilation unit level source */
+    public final static int COMPILATIONUNIT = 3;
+    /** class level source */
+    public final static int TYPE = 2;
+    /** method level source */
+    public final static int METHOD = 1;
 
-	// basic metric ids
+    // basic metric ids
 
-	/** "NBD" */
-	public final static String NESTEDBLOCKDEPTH = "NBD";
-	/** "PAR" */
-	public final static String PARMS = "PAR";
-	/** "VG" */
-	public final static String MCCABE = "VG";
-	/** "NOM" */
-	public final static String NUM_METHODS = "NOM";
-	/** "NSM" */
-	public final static String NUM_STAT_METHODS = "NSM";
-	/** "NSF" */
-	public final static String NUM_STAT_FIELDS = "NSF";
-	/** "NOF" */
-	public final static String NUM_FIELDS = "NOF";
-	/** "NOC" */
-	public final static String NUM_TYPES = "NOC";
-	/** "NOP" */
-	public final static String NUM_PACKAGES = "NOP";
-	/** "NOI" */
-	public final static String NUM_INTERFACES = "NOI";
-	/** "DIT" */
-	public final static String INHERITANCE_DEPTH = "DIT";
-	/** "NSC" */
-	public final static String SUBCLASSES = "NSC";
-	/** "NUC" */
-	public final static String SUPERCLASSES = "NUC";
-	/** "U" */
-	public final static String REUSE_RATIO = "U";
-	/** "SIX" */
-	public final static String SPECIALIZATION_IN = "SIX";
-	/** "NORM" */
-	public final static String NORM = "NORM";
-	/** "WMC" */
-	public final static String WMC = "WMC";
-	/** "LCOM" */
-	public final static String LCOM = "LCOM";
-	/** "RMC" */
-	public final static String RMC = "RMC";
-	/** "CA" */
-	public final static String CA = "CA";
-	/** "CE" */
-	public final static String CE = "CE";
-	/** "RMI" */
-	public final static String RMI = "RMI";
-	/** "RMA" */
-	public final static String RMA = "RMA";
-	/** "RMD" */
-	public final static String RMD = "RMD";
-	/** "MLOC" */
-	public final static String MLOC = "MLOC";
-	/** "TLOC" */
-	public final static String TLOC = "TLOC";
+    /** "NBD" */
+    public final static String NESTEDBLOCKDEPTH = "NBD";
+    /** "PAR" */
+    public final static String PARMS = "PAR";
+    /** "VG" */
+    public final static String MCCABE = "VG";
+    /** "NOM" */
+    public final static String NUM_METHODS = "NOM";
+    /** "NSM" */
+    public final static String NUM_STAT_METHODS = "NSM";
+    /** "NSF" */
+    public final static String NUM_STAT_FIELDS = "NSF";
+    /** "NOF" */
+    public final static String NUM_FIELDS = "NOF";
+    /** "NOC" */
+    public final static String NUM_TYPES = "NOC";
+    /** "NOP" */
+    public final static String NUM_PACKAGES = "NOP";
+    /** "NOI" */
+    public final static String NUM_INTERFACES = "NOI";
+    /** "DIT" */
+    public final static String INHERITANCE_DEPTH = "DIT";
+    /** "NSC" */
+    public final static String SUBCLASSES = "NSC";
+    /** "NUC" */
+    public final static String SUPERCLASSES = "NUC";
+    /** "U" */
+    public final static String REUSE_RATIO = "U";
+    /** "SIX" */
+    public final static String SPECIALIZATION_IN = "SIX";
+    /** "NORM" */
+    public final static String NORM = "NORM";
+    /** "WMC" */
+    public final static String WMC = "WMC";
 
-	// scopes for averages and maxima
-	/** "method" */
-	public final static String PER_METHOD = "method";
-	/** "type" */
-	public final static String PER_CLASS = "type";
-	/** "packageFragment" */
-	public final static String PER_PACKAGE = "packageFragment";
+    /* Cohesion Constants */
 
-	public static final String[] PER_ARRAY = new String[] { PER_PACKAGE, PER_CLASS, PER_METHOD };
+    /** "LCC" - Loose Class Cohesion */
+    public final static String LCC = "LCC";
+    /** "LCOM" - Lack Of Cohesion of Methods */
+    public final static String LCOM = "LCOM";
+    /** "LCOMHS" - Lack Of Cohesion of Methods - Henderson-Sellers */
+    public static final String LCOMHS = "LCOMHS";
+    /** "LCOMCK" - Lack Of Cohesion of Methods - Chidamber & Kemmerer */
+    public static final String LCOMCK = "LCOMCK";
+    /** "TCC" - Tight Class Cohesion */
+    public final static String TCC = "TCC";
 
-	// namespaces for persistent storage and in-memory caching
-	public final static String PLUGIN_ID = "net.sourceforge.metrics";
+    /** "RMC" */
+    public final static String RMC = "RMC";
+    /** "CA" */
+    public final static String CA = "CA";
+    /** "CE" */
+    public final static String CE = "CE";
+    /** "RMI" */
+    public final static String RMI = "RMI";
+    /** "RMA" */
+    public final static String RMA = "RMA";
+    /** "RMD" */
+    public final static String RMD = "RMD";
+    /** "MLOC" */
+    public final static String MLOC = "MLOC";
+    /** "TLOC" */
+    public final static String TLOC = "TLOC";
 
-	public final static int FRACTION_DIGITS = 3;
+    // scopes for averages and maxima
+    /** "method" */
+    public final static String PER_METHOD = "method";
+    /** "type" */
+    public final static String PER_CLASS = "type";
+    /** "packageFragment" */
+    public final static String PER_PACKAGE = "packageFragment";
+
+    public static final String[] PER_ARRAY = new String[] { PER_PACKAGE,
+	    PER_CLASS, PER_METHOD };
+
+    // namespaces for persistent storage and in-memory caching
+    public final static String PLUGIN_ID = "net.sourceforge.metrics";
+
+    public final static int FRACTION_DIGITS = 3;
 
 }
