@@ -250,6 +250,24 @@
             level="type">
       </metric>
       <metric
+            propagateSum="false"
+            name="Lack of Cohesion of Methods - CK"
+            id="LCOMCK"
+            level="type">
+      </metric>
+      <metric
+            propagateSum="false"
+            name="Lack of Cohesion of Methods - HS"
+            id="LCOMHS"
+            level="type">
+      </metric>
+      <metric
+            propagateSum="false"
+            name="Cohesion - TCC"
+            id="TCC"
+            level="type">
+      </metric>
+      <metric
             name="Number of Attributes"
             id="NOF"
             level="type">
@@ -331,6 +349,21 @@
       <calculator
             name="Lack of Cohesion of Methods"
             calculatorClass="net.sourceforge.metrics.calculators.LackOfCohesion"
+            level="type">
+      </calculator>
+      <calculator
+            name="Lack of Cohesion of Methods - CK"
+            calculatorClass="net.sourceforge.metrics.calculators.LCOMCK"
+            level="type">
+      </calculator>
+      <calculator
+            name="Lack of Cohesion of Methods - HS"
+            calculatorClass="net.sourceforge.metrics.calculators.LCOMHS"
+            level="type">
+      </calculator>
+      <calculator
+            name="Cohesion - TCC"
+            calculatorClass="net.sourceforge.metrics.calculators.CohesionTCC"
             level="type">
       </calculator>
       <calculator
