@@ -110,6 +110,7 @@ public class CohesionTCC extends CohesionCalculator
 	if (source.getLevel() != TYPE) {
 	    throw new InvalidSourceException("TCC only applicable to types");
 	}
+	
 	TypeMetrics typeSource = (TypeMetrics) source;
 	CallData callData = typeSource.getCallData();
 	HashSet<IMethod> methodsToEval = getMethodsToEval(callData);
@@ -145,24 +146,27 @@ public class CohesionTCC extends CohesionCalculator
 	for (int i = 0; i < methodArray.length; i++) {
 	    HashSet<IField> iFields = accessedMap.get(methodArray[i]);
 
-	    for (int j = i + 1; j < methodArray.length; j++) {
-		// Cloned here because we use retainAll to determine the
-		// intersection
-		HashSet<IField> jFields = accessedMap.get(methodArray[j]);
+	    if (iFields != null) {
+		for (int j = i + 1; j < methodArray.length; j++) {
+		    // Cloned here because we use retainAll to determine the
+		    // intersection
+		    HashSet<IField> jFields = accessedMap.get(methodArray[j]);
 
-		// Determine whether there are commonly accessed attributes
-		if (jFields != null) {
-		    HashSet<IField> intersection = new HashSet<IField>(jFields);
-		    intersection.retainAll(iFields);
+		    // Determine whether there are commonly accessed attributes
+		    if (jFields != null) {
+			HashSet<IField> intersection = new HashSet<IField>(
+				jFields);
+			intersection.retainAll(iFields);
 
-		    // Increment the count if the methods access some of the
-		    // same attributes.
-		    if (intersection.size() != 0) {
-			ndc++;
-		    }
-		} // else fields != null
-	    } // inner for
-	} // outer for
+			// Increment the count if the methods access some of the
+			// same attributes.
+			if (intersection.size() != 0) {
+			    ndc++;
+			}
+		    } // if jFields != null
+		} // for j
+	    } // if iFields != null
+	} // for i
 	return ndc;
     }
 

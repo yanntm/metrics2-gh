@@ -122,6 +122,7 @@ public class CallData {
 		    calleesL = new HashSet<IMethod>();
 		}
 		calleesL.add(typeMethods[i]);
+		methodsCalledMap.put(caller, calleesL);
 	    }
 	}
     }
@@ -146,6 +147,7 @@ public class CallData {
 		    calleesL = new HashSet<IField>();
 		}
 		calleesL.add(typeFields[i]);
+		attributesAccessedMap.put(caller, calleesL);
 	    }
 	}
     }

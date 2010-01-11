@@ -49,109 +49,103 @@ import org.eclipse.jdt.core.IMethod;
  * 
  * @author Keith Cassell
  */
-public class LCOMCK extends CohesionCalculator
-{
+public class LCOMCK extends CohesionCalculator {
 
     /**
      * Constructor for LackOfCohesion.
      */
-    public LCOMCK()
-    {
-        super(LCOMCK);
+    public LCOMCK() {
+	super(LCOMCK);
     }
 
-    
     /**
-     * This metric calculates the number of dissimilar pairs of
-     * methods minus the number of similar pairs of methods where two methods are
-     * similar if they each access a common attribute directly. Being a
-     * "lack of cohesion" metric, large numbers indicate less cohesive classes.
-     * @param source the class being evaluated
+     * This metric calculates the number of dissimilar pairs of methods minus
+     * the number of similar pairs of methods where two methods are similar if
+     * they each access a common attribute directly. Being a "lack of cohesion"
+     * metric, large numbers indicate less cohesive classes.
+     * 
+     * @param source
+     *            the class being evaluated
      * @see net.sourceforge.metrics.calculators.Calculator#calculate(net.sourceforge.metrics.core.sources.AbstractMetricSource)
      */
     public void calculate(AbstractMetricSource source)
-            throws InvalidSourceException
-    {
-        if (source.getLevel() != TYPE)
-        {
-            throw new InvalidSourceException("LCOMCK only applicable to types");
-        }
-        TypeMetrics typeSource = (TypeMetrics) source;
-        CallData callData = typeSource.getCallData();
-        HashSet<IField> attributes = callData.getAttributes();
-        HashSet<IMethod> methods = callData.getMethods();
-        HashMap<IMethod,HashSet<IField>> accessedMap = callData.getAttributesAccessedMap();
-        double value = 0;
+	    throws InvalidSourceException {
+	if (source.getLevel() != TYPE) {
+	    throw new InvalidSourceException("LCOMCK only applicable to types");
+	}
+	TypeMetrics typeSource = (TypeMetrics) source;
+	CallData callData = typeSource.getCallData();
+	HashSet<IField> attributes = callData.getAttributes();
+	HashSet<IMethod> methods = callData.getMethods();
+	HashMap<IMethod, HashSet<IField>> accessedMap =
+	    callData.getAttributesAccessedMap();
+	double value = 0;
 
-        // If there are no attributes or less than two methods, then
-        // LCOM = 0.
-        if ((attributes.size() == 0) || (methods.size() < 2))
-        {
-            value = 0;
-        }
-        // The "normal" case - multiple methods and attributes.
-        else
-        {
-            value = calculateCommonCase(methods, accessedMap);
-        }   // else
-        // TODO remove
-        System.out.println("Setting CK to " + value + " for "
-                + source.getName());
-        source.setValue(new Metric(LCOMCK, value));
+	// If there are no attributes or less than two methods, then
+	// LCOM = 0.
+	if ((attributes.size() == 0) || (methods.size() < 2)) {
+	    value = 0;
+	}
+	// The "normal" case - multiple methods and attributes.
+	else {
+	    value = calculateCommonCase(methods, accessedMap);
+	} // else
+	// TODO remove
+	System.out.println("Setting CK to " + value + " for "
+		+ source.getName());
+	source.setValue(new Metric(LCOMCK, value));
     }
 
-
     /**
-     * This metric calculates the number of dissimilar pairs of
-     * methods minus the number of similar pairs of methods where two methods are
-     * similar if they each access a common attribute directly. 
-     * @param methods the methods in the class being evaluated
-     * @param accessedMap indicates which fields are directly accessed by each method
-     * @return the number of dissimilar pairs of
-     *   methods minus the number of similar pairs of methods
+     * This metric calculates the number of dissimilar pairs of methods minus
+     * the number of similar pairs of methods where two methods are similar if
+     * they each access a common attribute directly.
+     * 
+     * @param methods
+     *            the methods in the class being evaluated
+     * @param accessedMap
+     *            indicates which fields are directly accessed by each method
+     * @return the number of dissimilar pairs of methods minus the number of
+     *         similar pairs of methods
      */
     private double calculateCommonCase(HashSet<IMethod> methods,
-            HashMap<IMethod, HashSet<IField>> accessedMap)
-    {
-        double value = 0;
-        int similar = 0;
-        int dissimilar = 0;
-        Object[] methodArray = methods.toArray();
-        for (int i = 0; i < methodArray.length; i++)
-        {
-            HashSet<IField> iFields = accessedMap.get(methodArray[i]);
-            for (int j = i + 1; j < methodArray.length; j++)
-            {
-                // Cloned here because we use retainAll to determine the intersection
-                HashSet<IField> jFields = accessedMap.get(methodArray[j]);
-                
-                if (jFields == null)
-                {
-                    dissimilar++;
-                }
-                else
-                {
-                    HashSet<IField> intersection = new HashSet<IField>(jFields);
-                    intersection.retainAll(iFields);
-                    
-                    // If the methods don't access any of the same attributes,
-                    // they are dissimilar
-                    if (intersection.size() == 0)
-                    {
-                        dissimilar++;
-                    }
-                    else
-                    {
-                        similar++;
-                    }
-                }   // else fields != null
-            }   // inner for
-        }   // outer for
-        if (dissimilar > similar)
-        {
-            value = dissimilar - similar;
-        }
-        return value;
+	    HashMap<IMethod, HashSet<IField>> accessedMap) {
+	double value = 0;
+	int similar = 0;
+	int dissimilar = 0;
+	Object[] methodArray = methods.toArray();
+	for (int i = 0; i < methodArray.length; i++) {
+	    HashSet<IField> iFields = accessedMap.get(methodArray[i]);
+	    if (iFields == null) {
+		dissimilar++;
+	    } else
+		for (int j = i + 1; j < methodArray.length; j++) {
+		    // Cloned here because we use retainAll to determine the
+		    // intersection
+		    HashSet<IField> jFields = accessedMap.get(methodArray[j]);
+
+		    if (jFields == null) {
+			dissimilar++;
+		    } else {
+			HashSet<IField> intersection =
+			    new HashSet<IField>(jFields);
+			intersection.retainAll(iFields);
+
+			// If the methods don't access any of the same
+			// attributes,
+			// they are dissimilar
+			if (intersection.size() == 0) {
+			    dissimilar++;
+			} else {
+			    similar++;
+			}
+		    } // else fields != null
+		} // inner for
+	} // outer for
+	if (dissimilar > similar) {
+	    value = dissimilar - similar;
+	}
+	return value;
     }
 
 }
