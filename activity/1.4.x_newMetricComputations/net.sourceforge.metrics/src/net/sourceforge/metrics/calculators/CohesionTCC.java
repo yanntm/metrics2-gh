@@ -24,14 +24,12 @@ package net.sourceforge.metrics.calculators;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import net.sourceforge.metrics.core.Log;
 import net.sourceforge.metrics.core.Metric;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 import net.sourceforge.metrics.core.sources.TypeMetrics;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
 
 /**
  * Calculates cohesion using Bieman and Kang's TCC metric.  TCC measures the
@@ -68,30 +66,6 @@ public class CohesionTCC extends CohesionCalculator
     }
     
     /**
-     * TCC doesn't consider constructors in its calculations.  This method
-     * returns the methods that are not constructors.
-     * @param callData the method call data
-     * @return the non-constructor methods
-     */
-    private HashSet<IMethod> getMethodsToEval(CallData callData) {
-	HashSet<IMethod> methods = callData.getMethods();
-	HashSet<IMethod> methodsToEval = new HashSet<IMethod>();
-	
-	// Remove constructors from consideration
-	for (IMethod method : methods) {
-	    try {
-		if (!method.isConstructor()) {
-		    methodsToEval.add(method);
-		}
-	    } catch (JavaModelException e) {
-		Log.logError("Unable to determine if " + method.toString()
-			+ " is a constructor.", e);
-	    }
-	}
-	return methodsToEval;
-    }
-
-    /**
      * Calculates Tight Cohesion of a Class (TCC).
      * Let NP(C) be the total number of pairs of abstracted methods
      * in an abstracted class. NP is the maximum possible number
@@ -113,7 +87,7 @@ public class CohesionTCC extends CohesionCalculator
 	
 	TypeMetrics typeSource = (TypeMetrics) source;
 	CallData callData = typeSource.getCallData();
-	HashSet<IMethod> methodsToEval = getMethodsToEval(callData);
+	HashSet<IMethod> methodsToEval = callData.getNonConstructorMethods();
 	int n = methodsToEval.size();
 	double npc = n * (n - 1) / 2;
 	double value = 0;
