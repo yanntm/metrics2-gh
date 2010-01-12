@@ -21,6 +21,7 @@ package net.sourceforge.metrics.calculators;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -55,6 +56,138 @@ import org.eclipse.jdt.core.search.SearchRequestor;
  * @author Keith Cassell
  */
 public class CallData {
+    /**
+     * A class that keeps track of connectivity data, i.e. what objects are
+     * connected to what other objects.  The meaning of "connected" is
+     * determined by the user of the class.  For example, connected might mean
+     * "calls directly", "reachable from", or any other relation.
+     * 
+     * The underlying data is stored in a two dimensional array.  A nonzero
+     * entry in position matrix[x,y] indicates that x is connected to y. 
+     * @author Keith Cassell
+     *
+     */
+    static class ConnectivityMatrix {
+
+	static final int CONNECTED = 1;
+	static final int DISCONNECTED = 0;
+
+	/** The raw data. For now at least, a square matrix. */
+	int[][] matrix;
+
+	ArrayList<IMember> headers;
+	/** keeps track of which index in the array corresponds to each member. */
+	HashMap<IMember, Integer> memberIndex = new HashMap<IMember, Integer>();
+
+	public ConnectivityMatrix(ArrayList<IMember> headers) {
+	    this.headers = headers;
+	    int index = 0;
+
+	    // Keep track of which index in the array corresponds to each member
+	    for (IMember member : headers) {
+		memberIndex.put(member, index++);
+	    }
+
+	    int size = headers.size();
+	    matrix = new int[size][size];
+
+	    // Initialize matrix to no connections
+	    for (int i = 0; i < size; i++) {
+		for (int j = 0; j < size; j++) {
+		    matrix[i][j] = DISCONNECTED;
+		}
+	    }
+	}
+
+	public static ConnectivityMatrix buildAdjacencyMatrix(
+		HashMap<IField, HashSet<IMethod>> attributeAccessedByMap,
+		HashMap<IMethod, HashSet<IMethod>> methodCalledByMap) {
+	    Set<IField> attributeKeySet = attributeAccessedByMap.keySet();
+	    ArrayList<IMember> headers = new ArrayList<IMember>(attributeKeySet);
+	    Set<IMethod> methodKeySet = methodCalledByMap.keySet();
+	    headers.addAll(methodKeySet);
+	    ConnectivityMatrix matrix = new ConnectivityMatrix(headers);
+
+	    matrix.populateAdjacencies(attributeAccessedByMap,
+		    methodCalledByMap);
+	    return matrix;
+	}
+
+	/**
+	 * Populates the matrix using data from the maps
+	 * 
+	 * @param attributeAccessedByMap
+	 *            info about the methods that access attributes
+	 * @param methodCalledByMap
+	 *            info about the methods that call other methods
+	 */
+	private void populateAdjacencies(
+		HashMap<IField, HashSet<IMethod>> attributeAccessedByMap,
+		HashMap<IMethod, HashSet<IMethod>> methodCalledByMap) {
+	    Set<IField> attributeKeySet = attributeAccessedByMap.keySet();
+
+	    for (IField field : attributeKeySet) {
+		HashSet<IMethod> callers = attributeAccessedByMap.get(field);
+		int fieldIndex = memberIndex.get(field);
+
+		for (IMethod caller : callers) {
+		    int methodIndex = memberIndex.get(caller);
+		    matrix[methodIndex][fieldIndex] = CONNECTED;
+		}
+	    }
+	    Set<IMethod> methodKeySet = methodCalledByMap.keySet();
+
+	    for (IMethod callee : methodKeySet) {
+		HashSet<IMethod> callers = methodCalledByMap.get(callee);
+		int calleeIndex = memberIndex.get(callee);
+
+		for (IMethod caller : callers) {
+		    int callerIndex = memberIndex.get(caller);
+		    matrix[callerIndex][calleeIndex] = CONNECTED;
+		}
+	    }
+	}
+
+	/**
+	 * Builds a reachability matrix from an adjacency matrix using
+	 * Warshall's algorithm for transitive closure.
+	 * 
+	 * @return the reachability matrix
+	 */
+	public ConnectivityMatrix buildReachabilityMatrix() {
+	    /*
+	     * Algorithm derived from
+	     * http://datastructures.itgo.com/graphs/transclosure.htm Step-1:
+	     * Copy the Adjacency matrix into another matrix called the Path
+	     * matrix Step-2: Find in the Path matrix for every element in the
+	     * Graph, the incoming and outgoing edges Step-3: For every such
+	     * pair of incoming and outgoing edges put a 1 in the Path matrix
+	     */
+	    ConnectivityMatrix rMatrix = new ConnectivityMatrix(headers);
+	    rMatrix.matrix = matrix.clone();
+	    int max = headers.size();
+
+	    for (int i = 0; i < max; i++) {
+		for (int j = 0; j < max; j++) {
+		    if (rMatrix.matrix[i][j] == 1) {
+			for (int k = 0; k < max; k++) {
+			    if (rMatrix.matrix[j][k] == 1) {
+				rMatrix.matrix[i][k] = 1;
+			    }
+			} // for k
+		    } // if there is a connection
+		} // for j
+	    } // for i
+	    return rMatrix;
+	}
+	
+	public int getIndex(IMember member) {
+	    return memberIndex.get(member);
+	}
+
+    }	// class ConnectivityMatrix
+    
+    
     /** The set of known attributes (fields). */
     protected HashSet<IField> attributes = new HashSet<IField>();
 
@@ -88,7 +221,24 @@ public class CallData {
      */
     protected HashMap<IField, HashSet<IMethod>> attributeAccessedByMap =
 	new HashMap<IField, HashSet<IMethod>>();
+    
+    //TODO determine whether to maintain ConnectivityMatrices as fields here
+    //  Currently, only used by CohesionLCC
+    /* * Keeps track of the direct connections between methods and
+     * other methods and attributes.     */
+    //protected ConnectivityMatrix adjacencyMatrix = null;
+    
+    /* * Keeps track of the indirect connections between methods and
+     * other methods and attributes.     */
+    //protected ConnectivityMatrix reachabilityMatrix = null;
 
+    /**
+     * Gathers call information about the given class and stores the
+     * information about the members, attributes (fields), and call
+     * relationships between them.  This information is obtainable
+     * via the various get* methods.
+     * @param source the class to analyze
+     */
     public void collectCallData(TypeMetrics source) {
 	IType type = (IType) source.getJavaElement();
 
@@ -96,12 +246,18 @@ public class CallData {
 	    collectMethodCallData(source, type);
 	    collectFieldCallData(source, type);
 	} catch (JavaModelException e) {
-		Log.logError("collectCallData failed for " +
-			type.getElementName() + ":\n", e);
+	    Log.logError("collectCallData failed for " + type.getElementName()
+		    + ":\n", e);
 	    e.printStackTrace();
 	}
     }
 
+    /**
+     * Gathers call information about methods calling methods within the given class.
+     * This information is stored in the methodCalledByMap and methodsCalledMap.
+     * @param source the metric source (class)
+     * @param type the class to analyze
+     */
     private void collectMethodCallData(AbstractMetricSource source, IType type)
 	    throws JavaModelException {
 	IMethod[] typeMethods = type.getMethods();
@@ -127,6 +283,13 @@ public class CallData {
 	}
     }
 
+    /**
+     * Gathers call information about methods accessing
+     * fields within the given class.  This information is stored in the
+     * attributeAccessedByMap and attributesAccessedMap.
+     * @param source the metric source (class)
+     * @param type the class to analyze
+     */
     private void collectFieldCallData(AbstractMetricSource source, IType type)
 	    throws JavaModelException {
 	IField[] typeFields = type.getFields();
@@ -239,6 +402,27 @@ public class CallData {
      */
     public HashSet<IMethod> getMethods() {
 	return methods;
+    }
+
+    /**
+     * This method returns the methods that are not constructors.
+     * @return the non-constructor methods
+     */
+    public HashSet<IMethod> getNonConstructorMethods() {
+	HashSet<IMethod> methodsToEval = new HashSet<IMethod>();
+	
+	// Remove constructors from consideration
+	for (IMethod method : methods) {
+	    try {
+		if (!method.isConstructor()) {
+		    methodsToEval.add(method);
+		}
+	    } catch (JavaModelException e) {
+		Log.logError("Unable to determine if " + method.toString()
+			+ " is a constructor.", e);
+	    }
+	}
+	return methodsToEval;
     }
 
     /**
