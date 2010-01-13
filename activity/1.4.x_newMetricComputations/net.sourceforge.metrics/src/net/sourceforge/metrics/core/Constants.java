@@ -79,6 +79,10 @@ public interface Constants {
 
     /* Cohesion Constants */
 
+    /** "DCD" - Degree of Cohesion (Direct)*/
+    public final static String DCD = "DCD";
+    /** "DCI" - Degree of Cohesion (Indirect)*/
+    public final static String DCI = "DCI";
     /** "LCC" - Loose Class Cohesion */
     public final static String LCC = "LCC";
     /** "LCOM" - Lack Of Cohesion of Methods */
