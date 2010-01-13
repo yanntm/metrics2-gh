@@ -1,9 +1,9 @@
 // TODO Distribute responsibilities between CohesionCalculator and this class
 /*
- * Copyright (c) 2003 Frank Sauer. All rights reserved.
+ * Copyright (c) 2010 Keith Cassell. All rights reserved.
  *
- * Licenced under CPL 1.0 (Common Public License Version 1.0).
- * The licence is available at http://www.eclipse.org/legal/cpl-v10.html.
+ * Licensed under CPL 1.0 (Common Public License Version 1.0).
+ * The license is available at http://www.eclipse.org/legal/cpl-v10.html.
  *
  *
  * DISCLAIMER OF WARRANTIES AND LIABILITY:
@@ -16,13 +16,10 @@
  * ANY FURNISHING, PRACTICING, MODIFYING OR ANY USE OF THE SOFTWARE, EVEN IF THE AUTHOR
  * HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
  *
- *
- * $Id: LackOfCohesion.java,v 1.15 2005/01/16 21:32:04 sauerf Exp $
  */
 package net.sourceforge.metrics.calculators;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 
 import net.sourceforge.metrics.calculators.CallData.ConnectivityMatrix;
@@ -41,6 +38,9 @@ import org.eclipse.jdt.core.IMethod;
  * non-private methods. LCC considers methods to be connected when they access a
  * common attribute either directly of indirectly. With LCC, large numbers
  * indicate more cohesive classes.
+ * 
+ * Bieman and Kang do not specify how to treat the "abnormal" case of two or
+ * fewer methods, so we give the maximal cohesion score of one for that case.
  * 
  * @see BIEMAN, J. M., AND KANG, B.-K. Cohesion and reuse in an object oriented
  *      system. SIGSOFT Softw. Eng. Notes 20, SI (1995), 259–262.
@@ -78,7 +78,6 @@ public class CohesionLCC extends CohesionCalculator
      * directly connected methods:
      *     LCC(C) = NIC(C)/NP(C)
      * @param source the class being evaluated
-     * @see net.sourceforge.metrics.calculators.Calculator#calculate(net.sourceforge.metrics.core.sources.AbstractMetricSource)
      */
     public void calculate(AbstractMetricSource source)
 	    throws InvalidSourceException {
@@ -88,7 +87,8 @@ public class CohesionLCC extends CohesionCalculator
 	
 	TypeMetrics typeSource = (TypeMetrics) source;
 	CallData callData = typeSource.getCallData();
-	HashSet<IMethod> methodsToEval = callData.getNonConstructorMethods();
+	HashSet<IMethod> methodsToEval = CohesionTCC.getEvaluableMethods(callData);
+	// TODO only consider non-private methods in calculation
 	int n = methodsToEval.size();
 	double npc = n * (n - 1) / 2;
 	double value = 0;
@@ -97,6 +97,9 @@ public class CohesionLCC extends CohesionCalculator
 	if (npc != 0) {
 	    int nic = calculateNIC(callData, methodsToEval);
 	    value = nic / npc;
+	}
+	else {
+	    value = 1.0;
 	}
 	// TODO remove
 	System.out.println("Setting LCC to " + value + " for "
@@ -115,44 +118,21 @@ public class CohesionLCC extends CohesionCalculator
      */
     private int calculateNIC(CallData callData, HashSet<IMethod> methodsToEval) {
 	int nic = 0;
-	HashMap<IField,HashSet<IMethod>> attributeAccessedByMap =
-	    callData.getAttributeAccessedByMap();
-	HashMap<IMethod,HashSet<IMethod>> methodCalledByMap = callData.getMethodCalledByMap();
-	ConnectivityMatrix adjacencyMatrix =
-	    ConnectivityMatrix.buildAdjacencyMatrix(
-		    attributeAccessedByMap, methodCalledByMap);
-	ConnectivityMatrix reachabilityMatrix =
-	    adjacencyMatrix.buildReachabilityMatrix();
-	ArrayList<Integer> attributeIndices =
-	    getAttributeIndices(callData, adjacencyMatrix);
 	IMethod[] methodArray =
 	    methodsToEval.toArray(new IMethod[methodsToEval.size()]);
+	ConnectivityMatrix directMatrix =
+	    CohesionTCC.buildDirectlyConnectedMatrix(callData, methodArray);
+	ConnectivityMatrix indirectMatrix =
+	    ConnectivityMatrix.buildReachabilityMatrix(directMatrix);
 	
-	for (int i = 0; i < methodArray.length; i++) {
-	    int iIndex = adjacencyMatrix.getIndex(methodArray[i]);
-	    HashSet<Integer> iFields =
-		getFieldsAccessedBy(iIndex, attributeIndices, reachabilityMatrix);
-
-	    if (iFields != null) {
-		for (int j = i + 1; j < methodArray.length; j++) {
-		    int jIndex = adjacencyMatrix.getIndex(methodArray[j]);
-		    HashSet<Integer> jFields =
-			getFieldsAccessedBy(jIndex, attributeIndices, reachabilityMatrix);
-
-		    // Determine whether there are commonly accessed attributes
-		    if (jFields != null) {
-			HashSet<Integer> intersection = new HashSet<Integer>(jFields);
-			intersection.retainAll(iFields);
-
-			// Increment the count if the methods access some of the
-			// same attributes.
-			if (intersection.size() != 0) {
-			    nic++;
-			}
-		    } // if jFields != null
-		} // for j
-	    } // if iFields != null
-	} // for i
+	for (int i = 0; i < indirectMatrix.matrix.length; i++) {
+	    for (int j = i + 1; j < indirectMatrix.matrix.length; j++) {
+		if (indirectMatrix.matrix[i][j] ==
+		        ConnectivityMatrix.CONNECTED) {
+		    nic++;
+		}
+	    }
+	}
 	return nic;
     }
     
@@ -177,6 +157,14 @@ public class CohesionLCC extends CohesionCalculator
 	return iFields;
     }
 
+    /**
+     * Get the numeric indices that indicate the positions of the
+     * attributes in the matrix
+     * @param callData the class's call data
+     * @param adjacencyMatrix the matrix indicating relationships
+     *   between methods and attributes
+     * @return the indices of the attributes in the matrix
+     */
     private ArrayList<Integer> getAttributeIndices(
 	    CallData callData, ConnectivityMatrix adjacencyMatrix) {
 	ArrayList<Integer> indices = new ArrayList<Integer>();

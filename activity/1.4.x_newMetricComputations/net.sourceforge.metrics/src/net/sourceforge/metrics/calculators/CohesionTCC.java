@@ -1,9 +1,9 @@
 // TODO Distribute responsibilities between CohesionCalculator and this class
 /*
- * Copyright (c) 2003 Frank Sauer. All rights reserved.
+ * Copyright (c) 2010 Keith Cassell. All rights reserved.
  *
- * Licenced under CPL 1.0 (Common Public License Version 1.0).
- * The licence is available at http://www.eclipse.org/legal/cpl-v10.html.
+ * Licensed under CPL 1.0 (Common Public License Version 1.0).
+ * The license is available at http://www.eclipse.org/legal/cpl-v10.html.
  *
  *
  * DISCLAIMER OF WARRANTIES AND LIABILITY:
@@ -16,29 +16,35 @@
  * ANY FURNISHING, PRACTICING, MODIFYING OR ANY USE OF THE SOFTWARE, EVEN IF THE AUTHOR
  * HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
  *
- *
- * $Id: LackOfCohesion.java,v 1.15 2005/01/16 21:32:04 sauerf Exp $
  */
 package net.sourceforge.metrics.calculators;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.HashSet;
 
+import net.sourceforge.metrics.calculators.CallData.ConnectivityMatrix;
+import net.sourceforge.metrics.core.Log;
 import net.sourceforge.metrics.core.Metric;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 import net.sourceforge.metrics.core.sources.TypeMetrics;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaModelException;
 
 /**
  * Calculates cohesion using Bieman and Kang's TCC metric.  TCC measures the
  * proportion of connected methods to the maximum possible number of connected
  * methods.  It considers only "visible" methods and further omits constructors
- * and destructors from consideration.  By visible, we assume they consider
+ * from consideration.  By visible, we assume they consider
  * all non-private methods.  TCC considers methods to be connected when they
  * directly access a common attribute.  With TCC, large numbers indicate more
  * cohesive classes.
+ * 
+ * Bieman and Kang do not specify how to treat the "abnormal" case of two or
+ * fewer methods, so we give the maximal cohesion score of one for that case.
  * 
  * @see BIEMAN, J. M., AND KANG, B.-K. Cohesion and reuse in an object oriented
  *    system. SIGSOFT Softw. Eng. Notes 20, SI (1995), 259–262.
@@ -71,13 +77,11 @@ public class CohesionTCC extends CohesionCalculator
      * in an abstracted class. NP is the maximum possible number
      * of direct or indirect connections in a class. If there
      * are N methods in a class C, NP(C) is N * (N – 1)/2.
-     * Let NDC(C) be the number of direct connections and
-     * NIC(C) be the number of indirect connections in an abstracted class.
+     * Let NDC(C) be the number of direct connections in an abstracted class.
      * Tight class cohesion (TCC) is the relative number of
      * directly connected methods:
      *     TCC(C) = NDC(C)/NP(C)
      * @param source the class being evaluated
-     * @see net.sourceforge.metrics.calculators.Calculator#calculate(net.sourceforge.metrics.core.sources.AbstractMetricSource)
      */
     public void calculate(AbstractMetricSource source)
 	    throws InvalidSourceException {
@@ -87,7 +91,8 @@ public class CohesionTCC extends CohesionCalculator
 	
 	TypeMetrics typeSource = (TypeMetrics) source;
 	CallData callData = typeSource.getCallData();
-	HashSet<IMethod> methodsToEval = callData.getNonConstructorMethods();
+	HashSet<IMethod> methodsToEval = getEvaluableMethods(callData);
+	// TODO only consider non-private methods in calculation
 	int n = methodsToEval.size();
 	double npc = n * (n - 1) / 2;
 	double value = 0;
@@ -97,6 +102,10 @@ public class CohesionTCC extends CohesionCalculator
 	    int ndc = calculateNDC(callData, methodsToEval);
 	    value = ndc / npc;
 	}
+	// If 0 - 1 methods, make maximally cohesive
+	else {
+	    value = 1.0;
+	}
 	// TODO remove
 	System.out.println("Setting TCC to " + value + " for "
 		+ source.getName());
@@ -105,43 +114,149 @@ public class CohesionTCC extends CohesionCalculator
 
     /**
      * Calculates the number of direct connections (NDC) in a class,
-     * i.e. when methods directly access a common attribute.
+     * i.e. when methods directly access a common attribute or (transitively) 
+     * call methods that access a common attribute.
      * @param callData contains information about which
      *   methods access which attributes
      * @param methodsToEval the methods involved in the calculation
-     * @return the number of direct connections
+     * @return the number of connections
      */
     private int calculateNDC(CallData callData, HashSet<IMethod> methodsToEval) {
 	int ndc = 0;
-	Object[] methodArray = methodsToEval.toArray();
-	HashMap<IMethod, HashSet<IField>> accessedMap =
-	callData.getAttributesAccessedMap();
+	IMethod[] methodArray =
+	    methodsToEval.toArray(new IMethod[methodsToEval.size()]);
+	ConnectivityMatrix directMatrix =
+	    buildDirectlyConnectedMatrix(callData, methodArray);
+	int size = directMatrix.matrix.length;
 
+	for (int i = 0; i < size; i++) {
+	    for (int j = i + 1; j < size; j++) {
+		if (directMatrix.matrix[i][j] ==
+		        ConnectivityMatrix.CONNECTED) {
+		    ndc++;
+		}
+	    }
+	}
+	return ndc;
+    }
+
+    /**
+     * Builds the matrix indicating methods that are directly connected, i.e,
+     * methods that either directly or indirectly access at least one common
+     * attribute.
+     * @param callData contains information about which
+     *   methods access which attributes
+     * @param methodArray
+     * @return the matrix indicating methods that are directly connected
+     */
+    public static ConnectivityMatrix buildDirectlyConnectedMatrix(CallData callData,
+	    IMethod[] methodArray) {
+	//TODO cache this matrix, so it can be built once and then used by both TCC. LCC
+	ConnectivityMatrix reachabilityMatrix = callData.getReachabilityMatrix();
+	ArrayList<IMember> headers =
+	    new ArrayList<IMember>(reachabilityMatrix.headers);
+	ConnectivityMatrix directlyConnectedMatrix =
+	    new ConnectivityMatrix(headers);
+	ArrayList<Integer> attributeIndices =
+	    getAttributeIndices(callData, reachabilityMatrix);
+	
 	for (int i = 0; i < methodArray.length; i++) {
-	    HashSet<IField> iFields = accessedMap.get(methodArray[i]);
+	    int iIndex = reachabilityMatrix.getIndex(methodArray[i]);
+	    HashSet<Integer> iFields =
+		getFieldsAccessedBy(iIndex, attributeIndices, reachabilityMatrix);
 
 	    if (iFields != null) {
 		for (int j = i + 1; j < methodArray.length; j++) {
-		    // Cloned here because we use retainAll to determine the
-		    // intersection
-		    HashSet<IField> jFields = accessedMap.get(methodArray[j]);
+		    int jIndex = reachabilityMatrix.getIndex(methodArray[j]);
+		    HashSet<Integer> jFields =
+			getFieldsAccessedBy(
+				jIndex, attributeIndices, reachabilityMatrix);
 
 		    // Determine whether there are commonly accessed attributes
 		    if (jFields != null) {
-			HashSet<IField> intersection = new HashSet<IField>(
-				jFields);
+			HashSet<Integer> intersection =
+			    new HashSet<Integer>(jFields);
 			intersection.retainAll(iFields);
 
-			// Increment the count if the methods access some of the
-			// same attributes.
+			// Mark connected if the methods access some of the
+			// same attributes.  This is nondirectional, so we
+			// mark the matrix in two places
 			if (intersection.size() != 0) {
-			    ndc++;
+			    directlyConnectedMatrix.matrix[iIndex][jIndex] =
+				ConnectivityMatrix.CONNECTED;
+			    directlyConnectedMatrix.matrix[jIndex][iIndex] =
+				ConnectivityMatrix.CONNECTED;
 			}
 		    } // if jFields != null
 		} // for j
 	    } // if iFields != null
 	} // for i
-	return ndc;
+	return directlyConnectedMatrix;
     }
+    
+    /**
+     * @param methodIndex the index of a method in the reachability matrix
+     * @param attributeIndices the indices of all of the methods
+     * in the reachability matrix
+     * @param reachabilityMatrix
+     * @return the indices of the attributes accessed by the method
+     */
+    private static HashSet<Integer> getFieldsAccessedBy(
+	    int methodIndex,
+	    ArrayList<Integer> attributeIndices,
+	    ConnectivityMatrix reachabilityMatrix) {
+	HashSet<Integer> iFields = new HashSet<Integer>();
+	for (Integer aIndex: attributeIndices) {
+	    if (reachabilityMatrix.matrix[methodIndex][aIndex] ==
+	            CallData.ConnectivityMatrix.CONNECTED) {
+		iFields.add(aIndex);
+	    }
+	}
+	return iFields;
+    }
+
+    /**
+     * Get the numeric indices that indicate the positions of the
+     * attributes in the matrix
+     * @param callData the class's call data
+     * @param the matrix indicating relationships
+     *   between methods and attributes
+     * @return the indices of the attributes in the matrix
+     */
+    private static ArrayList<Integer> getAttributeIndices(
+	    CallData callData, ConnectivityMatrix matrix) {
+	ArrayList<Integer> indices = new ArrayList<Integer>();
+	HashSet<IField> attributes = callData.getAttributes();
+	for (IField field : attributes) {
+	    int index = matrix.getIndex(field);
+	    indices.add(index);
+	}
+	return indices;
+    }
+    
+    /**
+     * This method returns the methods that are visible and not constructors.
+     * @param callData call data containing method information
+     * @return the visible, non-constructor methods
+     */
+    public static HashSet<IMethod> getEvaluableMethods(CallData callData) {
+	HashSet<IMethod> methodsToEval = new HashSet<IMethod>();
+	
+	// Remove constructors from consideration
+	for (IMethod method : callData.getMethods()) {
+	    try {
+		int flags = method.getFlags();
+		if (!method.isConstructor()
+			&& (!Flags.isPrivate(flags))) {
+		    methodsToEval.add(method);
+		}
+	    } catch (JavaModelException e) {
+		Log.logError("Unable to determine if " + method.toString()
+			+ " is a constructor.", e);
+	    }
+	}
+	return methodsToEval;
+    }
+
 
 }

@@ -1,9 +1,9 @@
 // TODO Distribute responsibilities between CohesionCalculator and this class
 /*
- * Copyright (c) 2003 Frank Sauer. All rights reserved.
+ * Copyright (c) 2010 Keith Cassell. All rights reserved.
  *
- * Licenced under CPL 1.0 (Common Public License Version 1.0).
- * The licence is available at http://www.eclipse.org/legal/cpl-v10.html.
+ * Licensed under CPL 1.0 (Common Public License Version 1.0).
+ * The license is available at http://www.eclipse.org/legal/cpl-v10.html.
  *
  *
  * DISCLAIMER OF WARRANTIES AND LIABILITY:
@@ -16,8 +16,6 @@
  * ANY FURNISHING, PRACTICING, MODIFYING OR ANY USE OF THE SOFTWARE, EVEN IF THE AUTHOR
  * HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
  *
- *
- * $Id: LackOfCohesion.java,v 1.15 2005/01/16 21:32:04 sauerf Exp $
  */
 package net.sourceforge.metrics.calculators;
 
@@ -70,6 +68,7 @@ public class LCOMHS extends CohesionCalculator {
 
 	double value = 0;
 
+	// TODO check attributes > 1 with paper
 	if ((attributes.size() > 1) && (methods.size() > 1)) {
 	    if (attributeAccessedByMap.size() > 0) {
 		// TODO boolean countStatics = getPrefs().countStaticMethods();

@@ -1,4 +1,6 @@
 /*
+ * Copyright (c) 2010 Keith Cassell. All rights reserved.
+ *
  * Licensed under CPL 1.0 (Common Public License Version 1.0).
  * The license is available at http://www.eclipse.org/legal/cpl-v10.html.
  *
@@ -13,8 +15,6 @@
  * ANY FURNISHING, PRACTICING, MODIFYING OR ANY USE OF THE SOFTWARE, EVEN IF THE AUTHOR
  * HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
  *
- *
- * $Id: LackOfCohesion.java,v 1.15 2005/01/16 21:32:04 sauerf Exp $
  */
 package net.sourceforge.metrics.calculators;
 
@@ -154,7 +154,7 @@ public class CallData {
 	 * 
 	 * @return the reachability matrix
 	 */
-	public ConnectivityMatrix buildReachabilityMatrix() {
+	public static ConnectivityMatrix buildReachabilityMatrix(ConnectivityMatrix adjMatrix) {
 	    /*
 	     * Algorithm derived from
 	     * http://datastructures.itgo.com/graphs/transclosure.htm Step-1:
@@ -163,9 +163,9 @@ public class CallData {
 	     * Graph, the incoming and outgoing edges Step-3: For every such
 	     * pair of incoming and outgoing edges put a 1 in the Path matrix
 	     */
-	    ConnectivityMatrix rMatrix = new ConnectivityMatrix(headers);
-	    rMatrix.matrix = matrix.clone();
-	    int max = headers.size();
+	    ConnectivityMatrix rMatrix = new ConnectivityMatrix(adjMatrix.headers);
+	    rMatrix.matrix = adjMatrix.matrix.clone();
+	    int max = adjMatrix.headers.size();
 
 	    for (int i = 0; i < max; i++) {
 		for (int j = 0; j < max; j++) {
@@ -183,6 +183,27 @@ public class CallData {
 	
 	public int getIndex(IMember member) {
 	    return memberIndex.get(member);
+	}
+	
+	/**
+	 * @return a human-readable form of the matrix
+	 */
+	public String toString() {
+	    StringBuffer buf =
+		new StringBuffer("ConnectivityMatrix@" + hashCode() + "\n");
+	    int size = headers.size();
+	    // print rows
+	    for (int i = 0; i < size; i++) {
+		buf.append(" ").append(i).append(" ");
+		String member = headers.get(i).getElementName();
+		member = String.format("%-10.10s", member);
+		buf.append(member);
+		for (int j = 0; j < size; j++) {
+		    buf.append(" ").append(matrix[i][j]);
+		}
+		buf.append("\n");
+	    }
+	    return buf.toString();
 	}
 
     }	// class ConnectivityMatrix
@@ -222,15 +243,13 @@ public class CallData {
     protected HashMap<IField, HashSet<IMethod>> attributeAccessedByMap =
 	new HashMap<IField, HashSet<IMethod>>();
     
-    //TODO determine whether to maintain ConnectivityMatrices as fields here
-    //  Currently, only used by CohesionLCC
-    /* * Keeps track of the direct connections between methods and
+    /** Keeps track of the direct connections between methods and
      * other methods and attributes.     */
-    //protected ConnectivityMatrix adjacencyMatrix = null;
+    protected ConnectivityMatrix adjacencyMatrix = null;
     
-    /* * Keeps track of the indirect connections between methods and
+    /** Keeps track of the indirect connections between methods and
      * other methods and attributes.     */
-    //protected ConnectivityMatrix reachabilityMatrix = null;
+    protected ConnectivityMatrix reachabilityMatrix = null;
 
     /**
      * Gathers call information about the given class and stores the
@@ -402,27 +421,6 @@ public class CallData {
      */
     public HashSet<IMethod> getMethods() {
 	return methods;
-    }
-
-    /**
-     * This method returns the methods that are not constructors.
-     * @return the non-constructor methods
-     */
-    public HashSet<IMethod> getNonConstructorMethods() {
-	HashSet<IMethod> methodsToEval = new HashSet<IMethod>();
-	
-	// Remove constructors from consideration
-	for (IMethod method : methods) {
-	    try {
-		if (!method.isConstructor()) {
-		    methodsToEval.add(method);
-		}
-	    } catch (JavaModelException e) {
-		Log.logError("Unable to determine if " + method.toString()
-			+ " is a constructor.", e);
-	    }
-	}
-	return methodsToEval;
     }
 
     /**
@@ -622,6 +620,31 @@ public class CallData {
 	    attributesAccessedMapToString() +
 	    methodsCalledMapToString();
 	return result;
+    }
+
+    /**
+     * Return the adjacency matrix, constructing it if necessary.
+     * @return the adjacency matrix
+     */
+    public ConnectivityMatrix getAdjacencyMatrix() {
+	if (adjacencyMatrix == null) {
+	    adjacencyMatrix = ConnectivityMatrix.buildAdjacencyMatrix(
+		    attributeAccessedByMap, methodCalledByMap);
+	}
+	return adjacencyMatrix;
+    }
+
+    /**
+     * Return the reachability matrix, constructing it if necessary.
+     * @return the reachability matrix
+     */
+    public ConnectivityMatrix getReachabilityMatrix() {
+	if (reachabilityMatrix == null) {
+	    getAdjacencyMatrix();
+	    reachabilityMatrix =
+		ConnectivityMatrix.buildReachabilityMatrix(adjacencyMatrix);
+	}
+	return reachabilityMatrix;
     }
 
 }
