@@ -36,64 +36,46 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
 /**
- * Calculates cohesion using Bieman and Kang's TCC metric.  TCC measures the
- * proportion of connected methods to the maximum possible number of connected
- * methods.  It considers only "visible" methods and further omits constructors
- * from consideration.  By visible, we assume they consider
- * all non-private methods.  TCC considers methods to be connected when they
- * directly access a common attribute.  With TCC, large numbers indicate more
- * cohesive classes.
+ * Calculates cohesion using Badri and Badri's Degree of Cohesion in a class
+ * (Direct) DCD metric.  DCD measures the proportion of connected methods to the
+ * maximum possible number of connected methods.  Classes with fewer than two
+ * methods were considered as special classes and excluded from the Badris'
+ * measurements.  They also excluded all abstract classes.  Overloaded methods
+ * within the same class were treated as one method. Moreover, all special
+ * methods (constructor, destructor) are removed in our approach.  TCC considers
+ * methods to be connected when they directly access a common attribute.  With
+ * DCD, large numbers indicate more cohesive classes.
  * 
- * Bieman and Kang do not specify how to treat the "abnormal" case of two or
- * fewer methods, so we give the maximal cohesion score of one for that case.
- * 
- * @see BIEMAN, J. M., AND KANG, B.-K. Cohesion and reuse in an object oriented
- *    system. SIGSOFT Softw. Eng. Notes 20, SI (1995), 259–262.
+ * BADRI, L., AND BADRI, M. A proposal of a new class cohesion criterion:
+ *   An empirical study. Journal of Object Technology 3, 4 (2004).
  * 
  * @author Keith Cassell
  */
-public class CohesionTCC extends CohesionCalculator
+public class CohesionDCD extends CohesionCalculator
 {
-    //TODO Options to (possibly) implement
-    /* 
-     * "A subclass inherits methods and instance variables from its superclass. 
-     * We have several options for evaluating cohesion of a subclass. We can 
-     * (1) include all inherited components in the subclass in our evaluation, 
-     * (2) include only methods and instance variables defined in the subclass, or 
-     * (3) include inherited instance variables but not inherited methods. 
-     * The class cohesion measures that we develop can be applied using any one 
-     * of these options."
-     */
+    //TODO Determine how to handle non-existent values in the metrics2 framework
 
     /**
      * Constructor for LackOfCohesion.
      */
-    public CohesionTCC() {
-	super(TCC);
+    public CohesionDCD() {
+	super(DCD);
     }
     
     /**
-     * Calculates Tight Cohesion of a Class (TCC).
-     * Let NP(C) be the total number of pairs of abstracted methods
-     * in an abstracted class. NP is the maximum possible number
-     * of direct or indirect connections in a class. If there
-     * are N methods in a class C, NP(C) is N * (N – 1)/2.
-     * Let NDC(C) be the number of direct connections in an abstracted class.
-     * Tight class cohesion (TCC) is the relative number of
-     * directly connected methods:
-     *     TCC(C) = NDC(C)/NP(C)
+     * Calculates Degree of Cohesion (Direct) of a Class (DCD).
      * @param source the class being evaluated
      */
     public void calculate(AbstractMetricSource source)
 	    throws InvalidSourceException {
 	if (source.getLevel() != TYPE) {
-	    throw new InvalidSourceException("TCC only applicable to types");
+	    throw new InvalidSourceException("DCD only applicable to types");
 	}
 	
 	TypeMetrics typeSource = (TypeMetrics) source;
 	CallData callData = typeSource.getCallData();
 	HashSet<IMethod> methodsToEval = getEvaluableMethods(callData);
-	// TODO only consider non-private methods in calculation
+	// TODO only consider public methods in calculation
 	int n = methodsToEval.size();
 	double npc = n * (n - 1) / 2;
 	double value = 0;
@@ -103,22 +85,20 @@ public class CohesionTCC extends CohesionCalculator
 	    int ndc = calculateNDC(callData, methodsToEval);
 	    value = ndc / npc;
 	}
-	// If 0 - 1 methods, make maximally cohesive
 	else {
+	    // TODO According to the Badris, this should be undefined
 	    value = 1.0;
 	}
 	// TODO remove
-	System.out.println("Setting TCC to " + value + " for "
+	System.out.println("Setting DCD to " + value + " for "
 		+ source.getName());
-	source.setValue(new Metric(TCC, value));
+	source.setValue(new Metric(DCD, value));
     }
 
     /**
-     * Calculates the number of direct connections (NDC) in a class,
-     * i.e. when methods directly access a common attribute or (transitively) 
-     * call methods that access a common attribute.
-     * @param callData contains information about which
-     *   methods access which attributes
+     * Calculates Degree of Cohesion (Direct) of a Class (DCD).
+     * i.e. when methods directly or indirectly access a common member.
+     * @param callData method call data
      * @param methodsToEval the methods involved in the calculation
      * @return the number of connections
      */
@@ -152,7 +132,7 @@ public class CohesionTCC extends CohesionCalculator
      */
     public static ConnectivityMatrix buildDirectlyConnectedMatrix(CallData callData,
 	    IMethod[] methodArray) {
-	//TODO cache this matrix, so it can be built once and then used by both TCC. LCC
+	//TODO cache this matrix, so it can be built once and then used by both DCD and DCI.
 	ConnectivityMatrix reachabilityMatrix = callData.getReachabilityMatrix();
 	ArrayList<IMember> headers =
 	    new ArrayList<IMember>(reachabilityMatrix.headers);
@@ -236,19 +216,19 @@ public class CohesionTCC extends CohesionCalculator
     }
     
     /**
-     * This method returns the methods that are visible and not constructors.
+     * This method returns the methods that are public and not constructors.
      * @param callData call data containing method information
-     * @return the visible, non-constructor methods
+     * @return the public non-constructor methods
      */
     public static HashSet<IMethod> getEvaluableMethods(CallData callData) {
 	HashSet<IMethod> methodsToEval = new HashSet<IMethod>();
 	
-	// Remove constructors from consideration
+	// Remove constructors and nonpublic methods from consideration
 	for (IMethod method : callData.getMethods()) {
 	    try {
 		int flags = method.getFlags();
 		if (!method.isConstructor()
-			&& (!Flags.isPrivate(flags))) {
+			&& Flags.isPublic(flags)) {
 		    methodsToEval.add(method);
 		}
 	    } catch (JavaModelException e) {
@@ -258,6 +238,5 @@ public class CohesionTCC extends CohesionCalculator
 	}
 	return methodsToEval;
     }
-
 
 }

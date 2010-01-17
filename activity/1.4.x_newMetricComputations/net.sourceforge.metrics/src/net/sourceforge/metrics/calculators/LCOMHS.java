@@ -19,9 +19,9 @@
  */
 package net.sourceforge.metrics.calculators;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import net.sourceforge.metrics.core.Metric;
@@ -61,9 +61,9 @@ public class LCOMHS extends CohesionCalculator {
 	}
 	TypeMetrics typeSource = (TypeMetrics) source;
 	CallData callData = typeSource.getCallData();
-	HashSet<IField> attributes = callData.getAttributes();
-	HashSet<IMethod> methods = callData.getMethods();
-	HashMap<IField, HashSet<IMethod>> attributeAccessedByMap =
+	Set<IField> attributes = callData.getAttributes();
+	Set<IMethod> methods = callData.getMethods();
+	Map<IField, HashSet<IMethod>> attributeAccessedByMap =
 	    callData.getAttributeAccessedByMap();
 
 	double value = 0;
@@ -85,7 +85,7 @@ public class LCOMHS extends CohesionCalculator {
      *         methods that access a
      */
     private double calculateResult(
-	    HashMap<IField, HashSet<IMethod>> attributeAccessedByMap) {
+	    Map<IField, HashSet<IMethod>> attributeAccessedByMap) {
 	int sum = 0;
 	int numAttributes = 0;
 	Set<IMethod> allMethods = new HashSet<IMethod>();

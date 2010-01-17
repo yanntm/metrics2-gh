@@ -19,8 +19,9 @@
  */
 package net.sourceforge.metrics.calculators;
 
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import net.sourceforge.metrics.core.Metric;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
@@ -73,9 +74,9 @@ public class LCOMCK extends CohesionCalculator {
 	}
 	TypeMetrics typeSource = (TypeMetrics) source;
 	CallData callData = typeSource.getCallData();
-	HashSet<IField> attributes = callData.getAttributes();
-	HashSet<IMethod> methods = callData.getMethods();
-	HashMap<IMethod, HashSet<IField>> accessedMap =
+	Set<IField> attributes = callData.getAttributes();
+	Set<IMethod> methods = callData.getMethods();
+	Map<IMethod, HashSet<IField>> accessedMap =
 	    callData.getAttributesAccessedMap();
 	double value = 0;
 
@@ -106,8 +107,8 @@ public class LCOMCK extends CohesionCalculator {
      * @return the number of dissimilar pairs of methods minus the number of
      *         similar pairs of methods
      */
-    private double calculateCommonCase(HashSet<IMethod> methods,
-	    HashMap<IMethod, HashSet<IField>> accessedMap) {
+    private double calculateCommonCase(Set<IMethod> methods,
+	    Map<IMethod, HashSet<IField>> accessedMap) {
 	double value = 0;
 	int similar = 0;
 	int dissimilar = 0;

@@ -19,7 +19,6 @@
  */
 package net.sourceforge.metrics.calculators;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 import net.sourceforge.metrics.calculators.CallData.ConnectivityMatrix;
@@ -27,14 +26,13 @@ import net.sourceforge.metrics.core.Metric;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 import net.sourceforge.metrics.core.sources.TypeMetrics;
 
-import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 
 /**
  * Calculates cohesion using Bieman and Kang's LCC metric. LCC measures the
  * proportion of connected methods to the maximum possible number of connected
  * methods. It considers only "visible" methods and further omits constructors
- * and destructors from consideration. By visible, we assume they consider all
+ * from consideration. By visible, we assume they consider all
  * non-private methods. LCC considers methods to be connected when they access a
  * common attribute either directly of indirectly. With LCC, large numbers
  * indicate more cohesive classes.
@@ -134,46 +132,6 @@ public class CohesionLCC extends CohesionCalculator
 	    }
 	}
 	return nic;
-    }
-    
-    /**
-     * @param methodIndex the index of a method in the reachability matrix
-     * @param attributeIndices the indices of all of the methods
-     * in the reachability matrix
-     * @param reachabilityMatrix
-     * @return the indices of the attributes accessed by the method
-     */
-    private HashSet<Integer> getFieldsAccessedBy(
-	    int methodIndex,
-	    ArrayList<Integer> attributeIndices,
-	    ConnectivityMatrix reachabilityMatrix) {
-	HashSet<Integer> iFields = new HashSet<Integer>();
-	for (Integer aIndex: attributeIndices) {
-	    if (reachabilityMatrix.matrix[methodIndex][aIndex] ==
-	            CallData.ConnectivityMatrix.CONNECTED) {
-		iFields.add(aIndex);
-	    }
-	}
-	return iFields;
-    }
-
-    /**
-     * Get the numeric indices that indicate the positions of the
-     * attributes in the matrix
-     * @param callData the class's call data
-     * @param adjacencyMatrix the matrix indicating relationships
-     *   between methods and attributes
-     * @return the indices of the attributes in the matrix
-     */
-    private ArrayList<Integer> getAttributeIndices(
-	    CallData callData, ConnectivityMatrix adjacencyMatrix) {
-	ArrayList<Integer> indices = new ArrayList<Integer>();
-	HashSet<IField> attributes = callData.getAttributes();
-	for (IField field : attributes) {
-	    int index = adjacencyMatrix.getIndex(field);
-	    indices.add(index);
-	}
-	return indices;
     }
     
     

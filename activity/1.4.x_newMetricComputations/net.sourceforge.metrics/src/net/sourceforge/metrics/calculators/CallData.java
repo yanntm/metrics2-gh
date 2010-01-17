@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import net.sourceforge.metrics.core.Log;
@@ -73,11 +74,13 @@ public class CallData {
 	static final int DISCONNECTED = 0;
 
 	/** The raw data. For now at least, a square matrix. */
-	int[][] matrix;
+	protected int[][] matrix;
 
-	ArrayList<IMember> headers;
+	/** The members used for row and column headers. */
+	protected ArrayList<IMember> headers;
+	
 	/** keeps track of which index in the array corresponds to each member. */
-	HashMap<IMember, Integer> memberIndex = new HashMap<IMember, Integer>();
+	protected HashMap<IMember, Integer> memberIndex = new HashMap<IMember, Integer>();
 
 	public ConnectivityMatrix(ArrayList<IMember> headers) {
 	    this.headers = headers;
@@ -412,42 +415,42 @@ public class CallData {
     /**
      * @return the attributes
      */
-    public HashSet<IField> getAttributes() {
+    public Set<IField> getAttributes() {
 	return attributes;
     }
 
     /**
      * @return the methods
      */
-    public HashSet<IMethod> getMethods() {
+    public Set<IMethod> getMethods() {
 	return methods;
     }
 
     /**
      * @return the methodsCalledMap
      */
-    public HashMap<IMethod, HashSet<IMethod>> getMethodsCalledMap() {
+    public Map<IMethod, HashSet<IMethod>> getMethodsCalledMap() {
 	return methodsCalledMap;
     }
 
     /**
      * @return the attributesAccessedMap
      */
-    public HashMap<IMethod, HashSet<IField>> getAttributesAccessedMap() {
+    public Map<IMethod, HashSet<IField>> getAttributesAccessedMap() {
 	return attributesAccessedMap;
     }
 
     /**
      * @return the methodCalledByMap
      */
-    public HashMap<IMethod, HashSet<IMethod>> getMethodCalledByMap() {
+    public Map<IMethod, HashSet<IMethod>> getMethodCalledByMap() {
 	return methodCalledByMap;
     }
 
     /**
      * @return the attributeAccessedByMap
      */
-    public HashMap<IField, HashSet<IMethod>> getAttributeAccessedByMap() {
+    public Map<IField, HashSet<IMethod>> getAttributeAccessedByMap() {
 	return attributeAccessedByMap;
     }
 
