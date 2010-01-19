@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import net.sourceforge.metrics.core.Log;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
@@ -80,7 +81,8 @@ public class CallData {
 	protected List<IMember> headers;
 	
 	/** keeps track of which index in the array corresponds to each member. */
-	protected HashMap<IMember, Integer> memberIndex = new HashMap<IMember, Integer>();
+	protected HashMap<IMember, Integer> memberIndex =
+	    new HashMap<IMember, Integer>();
 
 	/**
 	 * Builds a connectivity matrix using the headers provided.
@@ -165,26 +167,39 @@ public class CallData {
 	private void populateAdjacencies(
 		Map<IField, HashSet<IMethod>> attributeAccessedByMap,
 		Map<IMethod, HashSet<IMethod>> methodCalledByMap) {
-	    Set<IField> attributeKeySet = attributeAccessedByMap.keySet();
+	    Set<Entry<IField, HashSet<IMethod>>> attributeEntrySet =
+		attributeAccessedByMap.entrySet();
 
-	    for (IField field : attributeKeySet) {
-		HashSet<IMethod> callers = attributeAccessedByMap.get(field);
+	    for (Entry<IField, HashSet<IMethod>> entry : attributeEntrySet) {
+		HashSet<IMethod> callers = entry.getValue();
+		IField field = entry.getKey();
 		int fieldIndex = getIndex(field);
 
 		for (IMethod caller : callers) {
-		    int methodIndex = getIndex(caller);
-		    matrix[methodIndex][fieldIndex] = CONNECTED;
+		    if (caller != null) {
+			int methodIndex = getIndex(caller);
+			
+			if (methodIndex >= 0) {
+			    matrix[methodIndex][fieldIndex] = CONNECTED;
+			}
+		    }
 		}
 	    }
-	    Set<IMethod> methodKeySet = methodCalledByMap.keySet();
+	    Set<Entry<IMethod, HashSet<IMethod>>> methodEntrySet =
+		methodCalledByMap.entrySet();
 
-	    for (IMethod callee : methodKeySet) {
-		HashSet<IMethod> callers = methodCalledByMap.get(callee);
+	    for (Entry<IMethod, HashSet<IMethod>> entry : methodEntrySet) {
+		HashSet<IMethod> callers = entry.getValue();
+		IMethod callee = entry.getKey();
 		int calleeIndex = getIndex(callee);
 
 		for (IMethod caller : callers) {
-		    int callerIndex = getIndex(caller);
-		    matrix[callerIndex][calleeIndex] = CONNECTED;
+		    if (caller != null) {
+			int callerIndex = getIndex(caller);
+			if (callerIndex >= 0) {
+			    matrix[callerIndex][calleeIndex] = CONNECTED;
+			}
+		    }
 		}
 	    }
 	}
@@ -216,8 +231,22 @@ public class CallData {
 	    return rMatrix;
 	}
 	
+	/**
+	 * Gets the index corresponding to the supplied member.
+	 * @param member the member whose index value is being searched for
+	 * @return the nonnegative index if the index exists; negative otherwise
+	 */
 	public int getIndex(IMember member) {
-	    return memberIndex.get(member);
+	    int index = -1;
+
+	    Integer indexInteger = memberIndex.get(member);
+	    // For some reason, some methods within anonymous classes don't get
+	    // indexed properly.
+	    // TODO figure out why error can occur and/or write to log
+	    if (indexInteger != null) {
+		index = indexInteger;
+	    }
+	    return index;
 	}
 	
 	/**
