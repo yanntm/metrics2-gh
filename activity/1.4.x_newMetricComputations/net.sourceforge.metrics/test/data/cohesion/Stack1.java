@@ -7,11 +7,11 @@ package data.cohesion;
  * 
  * @author Keith Cassell
  */
-public class StackBK {
+public class Stack1 {
     int top, size;
     int[] array;
 
-    public StackBK(int s) {
+    public Stack1(int s) {
 	size = s;
 	array = new int[size];
 	top = 0;
@@ -25,22 +25,34 @@ public class StackBK {
 	return size;
     }
 
-    public int Vtop() {
+    private int Vtop() {
 	return array[top - 1];
     }
 
     public void Push(int item) {
 	if (top == size)
-	    System.out.println("Empty stack.");
+	    print("Empty stack.");
 	else
 	    array[top++] = item;
     }
 
     public int Pop() {
 	if (Isempty())
-	    System.out.println("Full stack.");
+	    print("Full stack.");
 	else
 	    --top;
 	return array[top + 1];
+    }
+    
+    public void justPrint1() {
+	print("1");
+    }
+    
+    public void justPrint2() {
+	print("2");
+    }
+    
+    protected void print(String s) {
+	System.out.println(s);
     }
 }
