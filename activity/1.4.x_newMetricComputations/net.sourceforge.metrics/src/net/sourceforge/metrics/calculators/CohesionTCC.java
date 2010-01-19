@@ -21,6 +21,7 @@ package net.sourceforge.metrics.calculators;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import net.sourceforge.metrics.calculators.CallData.ConnectivityMatrix;
@@ -92,7 +93,7 @@ public class CohesionTCC extends CohesionCalculator
 	
 	TypeMetrics typeSource = (TypeMetrics) source;
 	CallData callData = typeSource.getCallData();
-	HashSet<IMethod> methodsToEval = getEvaluableMethods(callData);
+	List<Integer> methodsToEval = getEvaluableMethodReachabilityIndices(callData);
 	// TODO only consider non-private methods in calculation
 	int n = methodsToEval.size();
 	double npc = n * (n - 1) / 2;
@@ -119,15 +120,13 @@ public class CohesionTCC extends CohesionCalculator
      * call methods that access a common attribute.
      * @param callData contains information about which
      *   methods access which attributes
-     * @param methodsToEval the methods involved in the calculation
+     * @param methodsToEval the indices of the methods involved in the calculation
      * @return the number of connections
      */
-    private int calculateNDC(CallData callData, HashSet<IMethod> methodsToEval) {
+    private int calculateNDC(CallData callData, List<Integer> methodsToEval) {
 	int ndc = 0;
-	IMethod[] methodArray =
-	    methodsToEval.toArray(new IMethod[methodsToEval.size()]);
 	ConnectivityMatrix directMatrix =
-	    buildDirectlyConnectedMatrix(callData, methodArray);
+	    buildDirectlyConnectedMatrix(callData, methodsToEval);
 	int size = directMatrix.matrix.length;
 
 	for (int i = 0; i < size; i++) {
@@ -151,41 +150,39 @@ public class CohesionTCC extends CohesionCalculator
      * @return the matrix indicating methods that are directly connected
      */
     public static ConnectivityMatrix buildDirectlyConnectedMatrix(CallData callData,
-	    IMethod[] methodArray) {
+	    List<Integer> methodArray) {
 	//TODO cache this matrix, so it can be built once and then used by both TCC. LCC
 	ConnectivityMatrix reachabilityMatrix = callData.getReachabilityMatrix();
-	ArrayList<IMember> headers =
-	    new ArrayList<IMember>(reachabilityMatrix.headers);
+	List<IMember> headers = getDCMatrixHeaders(reachabilityMatrix, methodArray);
 	ConnectivityMatrix directlyConnectedMatrix =
 	    new ConnectivityMatrix(headers);
 	ArrayList<Integer> attributeIndices =
 	    getAttributeIndices(callData, reachabilityMatrix);
 	
-	for (int i = 0; i < methodArray.length; i++) {
-	    int iIndex = reachabilityMatrix.getIndex(methodArray[i]);
-	    HashSet<Integer> iFields =
+	for (int i = 0; i < methodArray.size(); i++) {
+	    int iIndex = methodArray.get(i);
+	    Set<Integer> iFields =
 		getFieldsAccessedBy(iIndex, attributeIndices, reachabilityMatrix);
 
 	    if (iFields != null) {
-		for (int j = i + 1; j < methodArray.length; j++) {
-		    int jIndex = reachabilityMatrix.getIndex(methodArray[j]);
-		    HashSet<Integer> jFields =
+		for (int j = i + 1; j < methodArray.size(); j++) {
+		    int jIndex = methodArray.get(j);
+		    Set<Integer> jFields =
 			getFieldsAccessedBy(
 				jIndex, attributeIndices, reachabilityMatrix);
 
 		    // Determine whether there are commonly accessed attributes
 		    if (jFields != null) {
-			HashSet<Integer> intersection =
-			    new HashSet<Integer>(jFields);
+			Set<Integer> intersection = new HashSet<Integer>(jFields);
 			intersection.retainAll(iFields);
 
 			// Mark connected if the methods access some of the
 			// same attributes.  This is nondirectional, so we
 			// mark the matrix in two places
 			if (intersection.size() != 0) {
-			    directlyConnectedMatrix.matrix[iIndex][jIndex] =
+			    directlyConnectedMatrix.matrix[i][j] =
 				ConnectivityMatrix.CONNECTED;
-			    directlyConnectedMatrix.matrix[jIndex][iIndex] =
+			    directlyConnectedMatrix.matrix[j][i] =
 				ConnectivityMatrix.CONNECTED;
 			}
 		    } // if jFields != null
@@ -193,6 +190,27 @@ public class CohesionTCC extends CohesionCalculator
 	    } // if iFields != null
 	} // for i
 	return directlyConnectedMatrix;
+    }
+
+    /**
+     * Return the methods that will serve as headers for the matrix.
+     * @param reachabilityMatrix the reachability matrix containing
+     * the source information for headers
+     * @param methodsToEval the indices of the methods to evaluate in
+     *    the reachability matrix
+     * @return the methods to evaluate
+     */
+    private static List<IMember> getDCMatrixHeaders(
+	    ConnectivityMatrix reachabilityMatrix,
+	    List<Integer> methodsToEval) {
+	List<IMember> reachabilityHeaders = reachabilityMatrix.getHeaders();
+	ArrayList<IMember> headers = new ArrayList<IMember>();
+	for (int i = 0; i < methodsToEval.size(); i++) {
+	    Integer method = methodsToEval.get(i);
+	    IMember member = reachabilityHeaders.get(method);
+	    headers.add(member);
+	}
+	return headers;
     }
     
     /**
@@ -236,12 +254,15 @@ public class CohesionTCC extends CohesionCalculator
     }
     
     /**
-     * This method returns the methods that are visible and not constructors.
+     * This method returns indices within the reachability matrix of
+     * the methods that are visible and not constructors.
      * @param callData call data containing method information
-     * @return the visible, non-constructor methods
+     * @return the indices within the reachability matrix
+     *   of the visible, non-constructor methods
      */
-    public static HashSet<IMethod> getEvaluableMethods(CallData callData) {
-	HashSet<IMethod> methodsToEval = new HashSet<IMethod>();
+    public static List<Integer> getEvaluableMethodReachabilityIndices(CallData callData) {
+	ArrayList<Integer> methodsToEval = new ArrayList<Integer>();
+	ConnectivityMatrix reachabilityMatrix = callData.getReachabilityMatrix();
 	
 	// Remove constructors from consideration
 	for (IMethod method : callData.getMethods()) {
@@ -249,7 +270,8 @@ public class CohesionTCC extends CohesionCalculator
 		int flags = method.getFlags();
 		if (!method.isConstructor()
 			&& (!Flags.isPrivate(flags))) {
-		    methodsToEval.add(method);
+		    int index = reachabilityMatrix.getIndex(method);
+		    methodsToEval.add(index);
 		}
 	    } catch (JavaModelException e) {
 		Log.logError("Unable to determine if " + method.toString()

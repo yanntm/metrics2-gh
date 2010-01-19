@@ -34,7 +34,9 @@ import org.eclipse.jdt.core.IMethod;
 /**
  * Calculates the Lack of Cohesion of Methods (LCOM*) metric using the
  * Henderson-Sellers method (See book page 147): (avg(m(a)) - m)/(1 - m) where
- * m(a) is the number of methods that access a. Note that whether static
+ * m(a) is the number of methods that access a.  The book does not
+ * mention what to do with 0-1 attributes/methods.  In that case, we return
+ * a value of 0 (maximally cohesive).  Note that whether static
  * attributes and static methods are considered is configurable from
  * preferences.
  * 
@@ -68,7 +70,9 @@ public class LCOMHS extends CohesionCalculator {
 
 	double value = 0;
 
-	// TODO check attributes > 1 with paper
+	// TODO check attributes > 1 with paper.  The book does not
+	// mention what to do with 0-1 attributes/methods, but references
+	// another Henderson-Sellers paper which is not easily obtainable.
 	if ((attributes.size() > 1) && (methods.size() > 1)) {
 	    if (attributeAccessedByMap.size() > 0) {
 		// TODO boolean countStatics = getPrefs().countStaticMethods();

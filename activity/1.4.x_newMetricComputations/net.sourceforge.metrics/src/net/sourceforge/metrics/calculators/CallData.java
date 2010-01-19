@@ -58,7 +58,7 @@ import org.eclipse.jdt.core.search.SearchRequestor;
  */
 public class CallData {
     /**
-     * A class that keeps track of connectivity data, i.e. what objects are
+     * A ConnectivityMatrix keeps track of connectivity data, i.e. what objects are
      * connected to what other objects.  The meaning of "connected" is
      * determined by the user of the class.  For example, connected might mean
      * "calls directly", "reachable from", or any other relation.
@@ -77,12 +77,17 @@ public class CallData {
 	protected int[][] matrix;
 
 	/** The members used for row and column headers. */
-	protected ArrayList<IMember> headers;
+	protected List<IMember> headers;
 	
 	/** keeps track of which index in the array corresponds to each member. */
 	protected HashMap<IMember, Integer> memberIndex = new HashMap<IMember, Integer>();
 
-	public ConnectivityMatrix(ArrayList<IMember> headers) {
+	/**
+	 * Builds a connectivity matrix using the headers provided.
+	 * All entries in the matrix are initialized to "not connected".
+	 * @param headers the members to use as headers
+	 */
+	public ConnectivityMatrix(List<IMember> headers) {
 	    this.headers = headers;
 	    int index = 0;
 
@@ -102,6 +107,39 @@ public class CallData {
 	    }
 	}
 
+	/**
+	 * Builds a connectivity matrix using the headers provided.
+	 * All entries in the matrix are initialized to "not connected".
+	 * @param headers the members to use as headers
+	 */
+	public ConnectivityMatrix(ConnectivityMatrix original) {
+	    this.headers = original.headers;
+	    int index = 0;
+
+	    // Keep track of which index in the array corresponds to each member
+	    for (IMember member : headers) {
+		memberIndex.put(member, index++);
+	    }
+
+	    int size = headers.size();
+	    this.matrix = new int[size][size];
+
+	    // Initialize matrix to no connections
+	    for (int i = 0; i < size; i++) {
+		for (int j = 0; j < size; j++) {
+		    this.matrix[i][j] = original.matrix[i][j];
+		}
+	    }
+	}
+
+	/**
+	 * Builds a matrix where the element at [row, column] is 1 if
+	 * the member at [row] is a method that directly accesses the
+	 * member at [column], and 0 otherwise.
+	 * @param attributeAccessedByMap lists the methods that access an attribute
+	 * @param methodCalledByMap  lists the methods that access a method
+	 * @return the adjacency matrix
+	 */
 	public static ConnectivityMatrix buildAdjacencyMatrix(
 		HashMap<IField, HashSet<IMethod>> attributeAccessedByMap,
 		HashMap<IMethod, HashSet<IMethod>> methodCalledByMap) {
@@ -125,16 +163,16 @@ public class CallData {
 	 *            info about the methods that call other methods
 	 */
 	private void populateAdjacencies(
-		HashMap<IField, HashSet<IMethod>> attributeAccessedByMap,
-		HashMap<IMethod, HashSet<IMethod>> methodCalledByMap) {
+		Map<IField, HashSet<IMethod>> attributeAccessedByMap,
+		Map<IMethod, HashSet<IMethod>> methodCalledByMap) {
 	    Set<IField> attributeKeySet = attributeAccessedByMap.keySet();
 
 	    for (IField field : attributeKeySet) {
 		HashSet<IMethod> callers = attributeAccessedByMap.get(field);
-		int fieldIndex = memberIndex.get(field);
+		int fieldIndex = getIndex(field);
 
 		for (IMethod caller : callers) {
-		    int methodIndex = memberIndex.get(caller);
+		    int methodIndex = getIndex(caller);
 		    matrix[methodIndex][fieldIndex] = CONNECTED;
 		}
 	    }
@@ -152,9 +190,12 @@ public class CallData {
 	}
 
 	/**
-	 * Builds a reachability matrix from an adjacency matrix using
-	 * Warshall's algorithm for transitive closure.
+	 * Builds a reachability matrix from an adjacency matrix where the element at
+	 * [row, column] is 1 if the member at [row] is a method that (directly
+	 * or indirectly) accesses the member at [column], and 0 otherwise.
+	 * This method uses Warshall's algorithm for transitive closure, 
 	 * 
+	 * @param adjMatrix adjacency matrix containing information about direct connections
 	 * @return the reachability matrix
 	 */
 	public static ConnectivityMatrix buildReachabilityMatrix(ConnectivityMatrix adjMatrix) {
@@ -166,16 +207,15 @@ public class CallData {
 	     * Graph, the incoming and outgoing edges Step-3: For every such
 	     * pair of incoming and outgoing edges put a 1 in the Path matrix
 	     */
-	    ConnectivityMatrix rMatrix = new ConnectivityMatrix(adjMatrix.headers);
-	    rMatrix.matrix = adjMatrix.matrix.clone();
-	    int max = adjMatrix.headers.size();
+	    ConnectivityMatrix rMatrix = new ConnectivityMatrix(adjMatrix);
+	    int max = rMatrix.headers.size();
 
-	    for (int i = 0; i < max; i++) {
-		for (int j = 0; j < max; j++) {
-		    if (rMatrix.matrix[i][j] == 1) {
-			for (int k = 0; k < max; k++) {
-			    if (rMatrix.matrix[j][k] == 1) {
-				rMatrix.matrix[i][k] = 1;
+	    for (int k = 0; k < max; k++) {
+		for (int i = 0; i < max; i++) {
+		    if (rMatrix.matrix[i][k] == 1) {
+			for (int j = 0; j < max; j++) {
+			    if (rMatrix.matrix[k][j] == 1) {
+				rMatrix.matrix[i][j] = 1;
 			    }
 			} // for k
 		    } // if there is a connection
@@ -188,6 +228,13 @@ public class CallData {
 	    return memberIndex.get(member);
 	}
 	
+	/**
+	 * @return the headers
+	 */
+	public List<IMember> getHeaders() {
+	    return headers;
+	}
+
 	/**
 	 * @return a human-readable form of the matrix
 	 */

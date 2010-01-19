@@ -19,14 +19,12 @@
  */
 package net.sourceforge.metrics.calculators;
 
-import java.util.HashSet;
+import java.util.List;
 
 import net.sourceforge.metrics.calculators.CallData.ConnectivityMatrix;
 import net.sourceforge.metrics.core.Metric;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 import net.sourceforge.metrics.core.sources.TypeMetrics;
-
-import org.eclipse.jdt.core.IMethod;
 
 /**
  * Calculates cohesion using Bieman and Kang's LCC metric. LCC measures the
@@ -85,7 +83,8 @@ public class CohesionLCC extends CohesionCalculator
 	
 	TypeMetrics typeSource = (TypeMetrics) source;
 	CallData callData = typeSource.getCallData();
-	HashSet<IMethod> methodsToEval = CohesionTCC.getEvaluableMethods(callData);
+	List<Integer> methodsToEval =
+	    CohesionTCC.getEvaluableMethodReachabilityIndices(callData);
 	// TODO only consider non-private methods in calculation
 	int n = methodsToEval.size();
 	double npc = n * (n - 1) / 2;
@@ -114,12 +113,10 @@ public class CohesionLCC extends CohesionCalculator
      * @param methodsToEval the methods involved in the calculation
      * @return the number of connections
      */
-    private int calculateNIC(CallData callData, HashSet<IMethod> methodsToEval) {
+    private int calculateNIC(CallData callData, List<Integer> methodsToEval) {
 	int nic = 0;
-	IMethod[] methodArray =
-	    methodsToEval.toArray(new IMethod[methodsToEval.size()]);
 	ConnectivityMatrix directMatrix =
-	    CohesionTCC.buildDirectlyConnectedMatrix(callData, methodArray);
+	    CohesionTCC.buildDirectlyConnectedMatrix(callData, methodsToEval);
 	ConnectivityMatrix indirectMatrix =
 	    ConnectivityMatrix.buildReachabilityMatrix(directMatrix);
 	
