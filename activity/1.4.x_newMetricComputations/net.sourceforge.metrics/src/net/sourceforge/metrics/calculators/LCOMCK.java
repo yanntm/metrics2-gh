@@ -114,26 +114,25 @@ public class LCOMCK extends CohesionCalculator {
 	int dissimilar = 0;
 	Object[] methodArray = methods.toArray();
 	for (int i = 0; i < methodArray.length - 1; i++) {
-	    HashSet<IField> iFields = accessedMap.get(methodArray[i]);
+	    Set<IField> iFields = accessedMap.get(methodArray[i]);
 	    if (iFields == null) {
-		dissimilar++;
+		dissimilar += (methodArray.length - (i + 1));
 	    } else
 		for (int j = i + 1; j < methodArray.length; j++) {
 		    // Cloned here because we use retainAll to determine the
 		    // intersection
-		    HashSet<IField> jFields = accessedMap.get(methodArray[j]);
+		    Set<IField> jFields = accessedMap.get(methodArray[j]);
 
 		    if (jFields == null) {
 			dissimilar++;
 		    } else {
-			HashSet<IField> intersection =
-			    new HashSet<IField>(jFields);
+			Set<IField> intersection = new HashSet<IField>(jFields);
 			intersection.retainAll(iFields);
 
 			// If the methods don't access any of the same
 			// attributes,
 			// they are dissimilar
-			if (intersection.size() == 0) {
+			if (intersection.isEmpty()) {
 			    dissimilar++;
 			} else {
 			    similar++;

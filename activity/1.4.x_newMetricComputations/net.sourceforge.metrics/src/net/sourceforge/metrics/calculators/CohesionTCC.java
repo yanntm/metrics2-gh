@@ -146,29 +146,29 @@ public class CohesionTCC extends CohesionCalculator
      * attribute.
      * @param callData contains information about which
      *   methods access which attributes
-     * @param methodArray
+     * @param methodsToEval
      * @return the matrix indicating methods that are directly connected
      */
     public static ConnectivityMatrix buildDirectlyConnectedMatrix(CallData callData,
-	    List<Integer> methodArray) {
+	    List<Integer> methodsToEval) {
 	//TODO cache this matrix, so it can be built once and then used by both TCC. LCC
 	ConnectivityMatrix reachabilityMatrix = callData.getReachabilityMatrix();
-	List<IMember> headers = getDCMatrixHeaders(reachabilityMatrix, methodArray);
+	List<IMember> headers = getMatrixHeaders(reachabilityMatrix, methodsToEval);
 	ConnectivityMatrix directlyConnectedMatrix =
 	    new ConnectivityMatrix(headers);
 	ArrayList<Integer> attributeIndices =
 	    getAttributeIndices(callData, reachabilityMatrix);
 	
-	for (int i = 0; i < methodArray.size(); i++) {
-	    int iIndex = methodArray.get(i);
+	for (int i = 0; i < methodsToEval.size(); i++) {
+	    int iIndex = methodsToEval.get(i);
 	    Set<Integer> iFields =
-		getFieldsAccessedBy(iIndex, attributeIndices, reachabilityMatrix);
+		getAttributesAccessedBy(iIndex, attributeIndices, reachabilityMatrix);
 
 	    if (iFields != null) {
-		for (int j = i + 1; j < methodArray.size(); j++) {
-		    int jIndex = methodArray.get(j);
+		for (int j = i + 1; j < methodsToEval.size(); j++) {
+		    int jIndex = methodsToEval.get(j);
 		    Set<Integer> jFields =
-			getFieldsAccessedBy(
+			getAttributesAccessedBy(
 				jIndex, attributeIndices, reachabilityMatrix);
 
 		    // Determine whether there are commonly accessed attributes
@@ -194,16 +194,16 @@ public class CohesionTCC extends CohesionCalculator
 
     /**
      * Return the methods that will serve as headers for the matrix.
-     * @param reachabilityMatrix the reachability matrix containing
+     * @param connectityMatrix the matrix containing
      * the source information for headers
      * @param methodsToEval the indices of the methods to evaluate in
-     *    the reachability matrix
+     *    the connectivity matrix
      * @return the methods to evaluate
      */
-    private static List<IMember> getDCMatrixHeaders(
-	    ConnectivityMatrix reachabilityMatrix,
+    private static List<IMember> getMatrixHeaders(
+	    ConnectivityMatrix connectityMatrix,
 	    List<Integer> methodsToEval) {
-	List<IMember> reachabilityHeaders = reachabilityMatrix.getHeaders();
+	List<IMember> reachabilityHeaders = connectityMatrix.getHeaders();
 	ArrayList<IMember> headers = new ArrayList<IMember>();
 	for (int i = 0; i < methodsToEval.size(); i++) {
 	    Integer method = methodsToEval.get(i);
@@ -215,12 +215,12 @@ public class CohesionTCC extends CohesionCalculator
     
     /**
      * @param methodIndex the index of a method in the reachability matrix
-     * @param attributeIndices the indices of all of the methods
+     * @param attributeIndices the indices of all of the attributes
      * in the reachability matrix
      * @param reachabilityMatrix
      * @return the indices of the attributes accessed by the method
      */
-    private static HashSet<Integer> getFieldsAccessedBy(
+    private static Set<Integer> getAttributesAccessedBy(
 	    int methodIndex,
 	    ArrayList<Integer> attributeIndices,
 	    ConnectivityMatrix reachabilityMatrix) {
@@ -274,8 +274,7 @@ public class CohesionTCC extends CohesionCalculator
 		    methodsToEval.add(index);
 		}
 	    } catch (JavaModelException e) {
-		Log.logError("Unable to determine if " + method.toString()
-			+ " is a constructor.", e);
+		Log.logError("Unable to get information on " + method, e);
 	    }
 	}
 	return methodsToEval;

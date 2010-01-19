@@ -180,10 +180,10 @@ public class CallData {
 
 	    for (IMethod callee : methodKeySet) {
 		HashSet<IMethod> callers = methodCalledByMap.get(callee);
-		int calleeIndex = memberIndex.get(callee);
+		int calleeIndex = getIndex(callee);
 
 		for (IMethod caller : callers) {
-		    int callerIndex = memberIndex.get(caller);
+		    int callerIndex = getIndex(caller);
 		    matrix[callerIndex][calleeIndex] = CONNECTED;
 		}
 	    }
@@ -199,14 +199,6 @@ public class CallData {
 	 * @return the reachability matrix
 	 */
 	public static ConnectivityMatrix buildReachabilityMatrix(ConnectivityMatrix adjMatrix) {
-	    /*
-	     * Algorithm derived from
-	     * http://datastructures.itgo.com/graphs/transclosure.htm Step-1:
-	     * Copy the Adjacency matrix into another matrix called the Path
-	     * matrix Step-2: Find in the Path matrix for every element in the
-	     * Graph, the incoming and outgoing edges Step-3: For every such
-	     * pair of incoming and outgoing edges put a 1 in the Path matrix
-	     */
 	    ConnectivityMatrix rMatrix = new ConnectivityMatrix(adjMatrix);
 	    int max = rMatrix.headers.size();
 
