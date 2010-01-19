@@ -1,9 +1,9 @@
 Class\Metr  CK  HS  TCC LCC
-A           0   .5? 1.0 1.0
+A           0   0   1.0 1.0
 ChaeA       0   .67 0.5 0.5
-ChaeB       0   .67 1.0 0.5
+ChaeB       0   .67 0.5 1.0
 ChaeC       0   .33 1.0 1.0
 ChaeD       0   0   1.0 1.0
-MA          0   ?   1.0 1.0
-MMA         0   ?   1.0 1.0
+MA          0   0   1.0 1.0
+MMA         1   0   1.0 1.0
 StackBK     0   0.4 0.7 1.0
