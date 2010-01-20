@@ -192,19 +192,16 @@ public class CohesionDCDmod extends CohesionCalculator
 	    Set<Integer> iMembers, int j, Set<Integer> jMembers) {
 	// Determine whether there are commonly accessed members
 	if (jMembers != null) {
-	HashSet<Integer> intersection =
-	    new HashSet<Integer>(jMembers);
-	intersection.retainAll(iMembers);
+	    HashSet<Integer> intersection = new HashSet<Integer>(jMembers);
+	    intersection.retainAll(iMembers);
 
-	// Mark connected if the methods access some of the
-	// same members.  This is nondirectional, so we
-	// mark the matrix in two places
-	if (intersection.size() != 0) {
-	    directlyConnectedMatrix.matrix[i][j] =
-		ConnectivityMatrix.CONNECTED;
-	    directlyConnectedMatrix.matrix[j][i] =
-		ConnectivityMatrix.CONNECTED;
-	}
+	    // Mark connected if the methods access some of the
+	    // same members. This is nondirectional, so we
+	    // mark the matrix in two places
+	    if (intersection.size() != 0) {
+		directlyConnectedMatrix.matrix[i][j] = ConnectivityMatrix.CONNECTED;
+		directlyConnectedMatrix.matrix[j][i] = ConnectivityMatrix.CONNECTED;
+	    }
 	} // if jFields != null
     }
     
