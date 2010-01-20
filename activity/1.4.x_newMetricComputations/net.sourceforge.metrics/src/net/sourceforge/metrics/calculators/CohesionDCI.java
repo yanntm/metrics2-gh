@@ -27,64 +27,46 @@ import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 import net.sourceforge.metrics.core.sources.TypeMetrics;
 
 /**
- * Calculates cohesion using Bieman and Kang's LCC metric. LCC measures the
- * proportion of connected methods to the maximum possible number of connected
- * methods. It considers only "visible" methods and further omits constructors
- * from consideration. By visible, we assume they consider all
- * non-private methods. LCC considers methods to be connected when they access a
- * common attribute either directly of indirectly. With LCC, large numbers
- * indicate more cohesive classes.
+ * Calculates cohesion based on Badri and Badri's Degree of Cohesion in a class
+ * (Indirect) DCI metric. DCI measures the proportion of connected methods to the
+ * maximum possible number of connected methods.
  * 
- * Bieman and Kang do not specify how to treat the "abnormal" case of two or
- * fewer methods, so we give the maximal cohesion score of one for that case.
+ * In the 2004 paper, classes with fewer than two methods were considered as
+ * special classes and excluded from the measurements, as were abstract classes.
+ * Overloaded methods within the same class were treated as one method.
+ * Moreover, all special methods (constructor, destructor) were removed.
  * 
- * @see BIEMAN, J. M., AND KANG, B.-K. Cohesion and reuse in an object oriented
- *      system. SIGSOFT Softw. Eng. Notes 20, SI (1995), 259–262.
+ * This class modifies the original DCI in the following ways:
+ * (1) classes with fewer than two methods receive a value of 1.0 (max. cohesion)
+ * (2) Overloaded methods within the same class are treated as separate methods.
+ * 
+ * With DCI, large numbers indicate more cohesive classes.
+ * 
+ * BADRI, L., AND BADRI, M. A proposal of a new class cohesion criterion: An
+ * empirical study. Journal of Object Technology 3, 4 (2004).
  * 
  * @author Keith Cassell
  */
-public class CohesionLCC extends CohesionCalculator
+public class CohesionDCI extends CohesionCalculator
 {
-    //TODO Options to (possibly) implement
-    /* 
-     * "A subclass inherits methods and instance variables from its superclass. 
-     * We have several options for evaluating cohesion of a subclass. We can 
-     * (1) include all inherited components in the subclass in our evaluation, 
-     * (2) include only methods and instance variables defined in the subclass, or 
-     * (3) include inherited instance variables but not inherited methods. 
-     * The class cohesion measures that we develop can be applied using any one 
-     * of these options."
-     */
-
-    /**
-     * Constructor for LackOfCohesion.
-     */
-    public CohesionLCC() {
-	super(LCC);
+    public CohesionDCI() {
+	super(DCI);
     }
     
     /**
-     * Calculates Loose Cohesion of a Class (LCC).
-     * Let NP(C) be the total number of pairs of abstracted methods
-     * in an abstracted class. NP is the maximum possible number
-     * of direct or indirect connections in a class. If there
-     * are N methods in a class C, NP(C) is N * (N – 1)/2.
-     * Let NIC(C) be the number of indirect connections in an abstracted class.
-     * Loose class cohesion (LCC) is the relative number of
-     * directly connected methods:
-     *     LCC(C) = NIC(C)/NP(C)
+     * Calculates Degree of Cohesion (Indirect) of a Class (DCI).
      * @param source the class being evaluated
      */
     public void calculate(AbstractMetricSource source)
 	    throws InvalidSourceException {
 	if (source.getLevel() != TYPE) {
-	    throw new InvalidSourceException("LCC only applicable to types");
+	    throw new InvalidSourceException("DCI only applicable to types");
 	}
 	
 	TypeMetrics typeSource = (TypeMetrics) source;
 	CallData callData = typeSource.getCallData();
 	List<Integer> methodsToEval =
-	    CohesionTCC.getEvaluableMethodReachabilityIndices(callData);
+	    CohesionDCD.getEvaluableMethodReachabilityIndices(callData);
 	int n = methodsToEval.size();
 	double npc = n * (n - 1) / 2;
 	double value = 0;
@@ -97,24 +79,24 @@ public class CohesionLCC extends CohesionCalculator
 	else {
 	    value = 1.0;
 	}
-//	System.out.println("Setting LCC to " + value + " for "
+//	System.out.println("Setting DCI to " + value + " for "
 //		+ source.getName());
-	source.setValue(new Metric(LCC, value));
+	source.setValue(new Metric(DCI, value));
     }
 
     /**
      * Calculates the number of indirect connections (NIC) in a class,
-     * i.e. when methods directly access a common attribute or (transitively) 
-     * call methods that access a common attribute.
+     * i.e. when methods indirectly access a common member or (transitively) 
+     * call methods that access a common member.
      * @param callData contains information about which
-     *   methods access which attributes
+     *   methods access which members
      * @param methodsToEval the methods involved in the calculation
      * @return the number of connections
      */
     private int calculateNIC(CallData callData, List<Integer> methodsToEval) {
 	int nic = 0;
 	ConnectivityMatrix directMatrix =
-	    CohesionTCC.buildDirectlyConnectedMatrix(callData, methodsToEval);
+	    CohesionDCD.buildDirectlyConnectedMatrix(callData, methodsToEval);
 	ConnectivityMatrix indirectMatrix =
 	    ConnectivityMatrix.buildReachabilityMatrix(directMatrix);
 	

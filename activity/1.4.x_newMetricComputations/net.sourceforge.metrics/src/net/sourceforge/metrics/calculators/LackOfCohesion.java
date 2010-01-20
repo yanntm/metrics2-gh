@@ -89,6 +89,8 @@ public class LackOfCohesion extends Calculator implements Constants {
 					value = calculateResult();
 				}
 			}
+//			System.out.println("Setting LCOM* to " + value + " for "
+//				+ source.getName());
 			source.setValue(new Metric(LCOM, value));
 		} catch (JavaModelException e) {
 		}

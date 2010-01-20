@@ -33,7 +33,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 
 /**
- * Calculates the Lack of Cohesion of Methods (LCOM*) metric using the
+ * Calculates the modified Lack of Cohesion of Methods (LCOM*) metric using the
  * Henderson-Sellers method (See book page 147): (avg(m(a)) - m)/(1 - m) where
  * m(a) is the number of methods that access a.  The book does not
  * mention what to do with 0-1 attributes/methods.  In that case, we return
@@ -75,8 +75,8 @@ public class LCOMHS extends CohesionCalculator {
 		// TODO boolean countStatics = getPrefs().countStaticMethods();
 		value = calculateResult(callData);
 	}
-	System.out.println("Setting HS to " + value + " for "
-		+ source.getName());
+//	System.out.println("Setting HS to " + value + " for "
+//		+ source.getName());
 	source.setValue(new Metric(LCOMHS, value));
     }
 

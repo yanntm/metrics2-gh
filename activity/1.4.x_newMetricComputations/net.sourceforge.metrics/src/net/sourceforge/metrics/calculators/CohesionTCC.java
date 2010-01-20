@@ -94,7 +94,6 @@ public class CohesionTCC extends CohesionCalculator
 	TypeMetrics typeSource = (TypeMetrics) source;
 	CallData callData = typeSource.getCallData();
 	List<Integer> methodsToEval = getEvaluableMethodReachabilityIndices(callData);
-	// TODO only consider non-private methods in calculation
 	int n = methodsToEval.size();
 	double npc = n * (n - 1) / 2;
 	double value = 0;
@@ -108,9 +107,8 @@ public class CohesionTCC extends CohesionCalculator
 	else {
 	    value = 1.0;
 	}
-	// TODO remove
-	System.out.println("Setting TCC to " + value + " for "
-		+ source.getName());
+//	System.out.println("Setting TCC to " + value + " for "
+//		+ source.getName());
 	source.setValue(new Metric(TCC, value));
     }
 

@@ -89,9 +89,8 @@ public class LCOMCK extends CohesionCalculator {
 	else {
 	    value = calculateCommonCase(methods, accessedMap);
 	} // else
-	// TODO remove
-	System.out.println("Setting CK to " + value + " for "
-		+ source.getName());
+//	System.out.println("Setting CK to " + value + " for "
+//		+ source.getName());
 	source.setValue(new Metric(LCOMCK, value));
     }
 
