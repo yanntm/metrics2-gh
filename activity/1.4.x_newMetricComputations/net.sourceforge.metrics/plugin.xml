@@ -274,6 +274,18 @@
             level="type">
       </metric>
       <metric
+            propagateSum="false"
+            name="Cohesion - DCD"
+            id="DCD"
+            level="type">
+      </metric>
+      <metric
+            propagateSum="false"
+            name="Cohesion - DCI"
+            id="DCI"
+            level="type">
+      </metric>
+      <metric
             name="Number of Attributes"
             id="NOF"
             level="type">
@@ -375,6 +387,16 @@
       <calculator
             name="Cohesion - LCC"
             calculatorClass="net.sourceforge.metrics.calculators.CohesionLCC"
+            level="type">
+      </calculator>
+      <calculator
+            name="Cohesion - DCD"
+            calculatorClass="net.sourceforge.metrics.calculators.CohesionDCDmod"
+            level="type">
+      </calculator>
+      <calculator
+            name="Cohesion - DCI"
+            calculatorClass="net.sourceforge.metrics.calculators.CohesionDCImod"
             level="type">
       </calculator>
       <calculator
