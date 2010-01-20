@@ -1,12 +1,5 @@
 package data.cohesion;
 
-/**
- * This class is derived from the one used as an example in BIEMAN, J. M., AND
- * KANG, B.-K. Cohesion and reuse in an object oriented system. SIGSOFT Softw.
- * Eng. Notes 20, SI (1995), 259–262.
- * 
- * @author Keith Cassell
- */
 public class Stack1 {
     int top, size;
     int[] array;
@@ -21,38 +14,36 @@ public class Stack1 {
 	return top == 0;
     }
 
-    public int Size() {
-	return size;
-    }
-
-    private int Vtop() {
-	return array[top - 1];
-    }
-
     public void Push(int item) {
 	if (top == size)
-	    print("Empty stack.");
+	    print("Full stack.");
 	else
 	    array[top++] = item;
     }
 
     public int Pop() {
 	if (Isempty())
-	    print("Full stack.");
+	    print("Empty stack.");
 	else
 	    --top;
 	return array[top + 1];
     }
-    
-    public void justPrint1() {
-	print("1");
+
+    public void printStack() {
+	printLoop();
     }
-    
-    public void justPrint2() {
-	print("2");
+
+    private void printLoop() {
+	for (int i = 0; i < top; i++) {
+	    println("" + array[i]);
+	}
     }
-    
-    protected void print(String s) {
+
+    private void println(String s) {
+	print(s + "\n");
+    }
+
+    private void print(String s) {
 	System.out.println(s);
     }
 }
