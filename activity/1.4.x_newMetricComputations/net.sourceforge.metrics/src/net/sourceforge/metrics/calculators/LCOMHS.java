@@ -63,7 +63,7 @@ public class LCOMHS extends CohesionCalculator {
 	    throw new InvalidSourceException("LCOMHS only applicable to types");
 	}
 	TypeMetrics typeSource = (TypeMetrics) source;
-	CallData callData = typeSource.getCallData();
+	CallData callData = typeSource.getCallData(getPrefs());
 	Set<IField> attributes = callData.getAttributes();
 	Set<IMethod> methods = callData.getMethods();
 	double value = 0;

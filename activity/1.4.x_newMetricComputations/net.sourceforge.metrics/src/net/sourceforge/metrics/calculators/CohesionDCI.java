@@ -64,7 +64,7 @@ public class CohesionDCI extends CohesionCalculator
 	}
 	
 	TypeMetrics typeSource = (TypeMetrics) source;
-	CallData callData = typeSource.getCallData();
+	CallData callData = typeSource.getCallData(getPrefs());
 	List<Integer> methodsToEval =
 	    CohesionDCD.getEvaluableMethodReachabilityIndices(callData);
 	int n = methodsToEval.size();

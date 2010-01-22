@@ -78,7 +78,7 @@ public class CohesionDCD extends CohesionCalculator
 	}
 	
 	TypeMetrics typeSource = (TypeMetrics) source;
-	CallData callData = typeSource.getCallData();
+	CallData callData = typeSource.getCallData(getPrefs());
 	List<Integer> methodsToEval = getEvaluableMethodReachabilityIndices(callData);
 	int n = methodsToEval.size();
 	double npc = n * (n - 1) / 2;
@@ -90,7 +90,7 @@ public class CohesionDCD extends CohesionCalculator
 	    value = dcd / npc;
 	}
 	else {
-	    // TODO According to the Badris, this should be undefined
+	    // TODO According to the Badris, this should be undefined.
 	    value = 1.0;
 	}
 //	System.out.println("Setting DCD to " + value + " for "

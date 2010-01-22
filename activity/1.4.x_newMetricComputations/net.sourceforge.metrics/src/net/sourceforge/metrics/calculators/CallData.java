@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,11 +29,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import net.sourceforge.metrics.calculators.CohesionCalculator.CohesionPreferences;
 import net.sourceforge.metrics.core.Log;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 import net.sourceforge.metrics.core.sources.TypeMetrics;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -69,10 +70,10 @@ public class CallData {
      * @author Keith Cassell
      *
      */
-    static class ConnectivityMatrix {
+    static public class ConnectivityMatrix {
 
-	static final int CONNECTED = 1;
-	static final int DISCONNECTED = 0;
+	public static final int CONNECTED = 1;
+	public static final int DISCONNECTED = 0;
 
 	/** The raw data. For now at least, a square matrix. */
 	protected int[][] matrix;
@@ -321,7 +322,13 @@ public class CallData {
     /** Keeps track of the indirect connections between methods and
      * other methods and attributes.     */
     protected ConnectivityMatrix reachabilityMatrix = null;
+    
+    /** Flag to determine whether information about static attributes should be kept. */
+    protected static boolean countStaticAttributes = true;
 
+    /** Flag to determine whether information about static methods should be kept. */
+    protected static boolean countStaticMethods = true;
+    
     /**
      * Gathers call information about the given class and stores the
      * information about the members, attributes (fields), and call
@@ -329,7 +336,11 @@ public class CallData {
      * via the various get* methods.
      * @param source the class to analyze
      */
-    public void collectCallData(TypeMetrics source) {
+    public void collectCallData(TypeMetrics source, CohesionPreferences prefs) {
+	if (prefs != null) {
+	    countStaticAttributes = prefs.countStaticAttributes();
+	    countStaticMethods = prefs.countStaticMethods();
+	}
 	IType type = (IType) source.getJavaElement();
 
 	try {
@@ -351,23 +362,30 @@ public class CallData {
     private void collectMethodCallData(AbstractMetricSource source, IType type)
 	    throws JavaModelException {
 	IMethod[] typeMethods = type.getMethods();
-	List<IMethod> methodList = Arrays.asList(typeMethods);
-	methods.addAll(methodList);
+	
+	// Add the method to the methods field
+	// unless it is static and the user has specified no statics
+	for (int i = 0; i < typeMethods.length; i++) {
+	    int flags = typeMethods[i].getFlags();
+	    if (countStaticMethods || !Flags.isStatic(flags)) {
+		methods.add(typeMethods[i]);
+	    }
+	}
 
 	// Update the stored information about the methods of the class
-	for (int i = 0; i < typeMethods.length; i++) {
+	for (IMethod method : methods) {
 	    // Update the methodCalledByMap for typeMethods[i]
 	    Set<IMethod> callers =
-		getCallingMethods(source, type, typeMethods[i]);
-	    methodCalledByMap.put(typeMethods[i], new HashSet<IMethod>(callers));
+		getCallingMethods(source, type, method);
+	    methodCalledByMap.put(method, new HashSet<IMethod>(callers));
 
-	    // Update the methodsCalledMap for typeMethods[i]
+	    // Update the methodsCalledMap for method
 	    for (IMethod caller : callers) {
 		HashSet<IMethod> calleesL = methodsCalledMap.get(caller);
 		if (calleesL == null) {
 		    calleesL = new HashSet<IMethod>();
 		}
-		calleesL.add(typeMethods[i]);
+		calleesL.add(method);
 		methodsCalledMap.put(caller, calleesL);
 	    }
 	}
@@ -383,23 +401,29 @@ public class CallData {
     private void collectFieldCallData(AbstractMetricSource source, IType type)
 	    throws JavaModelException {
 	IField[] typeFields = type.getFields();
-	attributes.addAll(Arrays.asList(typeFields));
+	
+	// Add the attribute to the attributes field
+	// unless it is static and the user has specified no statics
+	for (int i = 0; i < typeFields.length; i++) {
+	    int flags = typeFields[i].getFlags();
+	    if (countStaticAttributes || !Flags.isStatic(flags)) {
+		attributes.add(typeFields[i]);
+	    }
+	}
 
 	// Update the stored information about the fields of the class
-	for (int i = 0; i < typeFields.length; i++) {
-	    // Update the fieldCalledByMap for typeFields[i]
-	    Set<IMethod> callers = getCallingMethods(source, type,
-		    typeFields[i]);
-	    attributeAccessedByMap.put(typeFields[i], new HashSet<IMethod>(
-		    callers));
+	for (IField attribute : attributes) {
+	    // Update the fieldCalledByMap for attribute
+	    Set<IMethod> callers = getCallingMethods(source, type, attribute);
+	    attributeAccessedByMap.put(attribute, new HashSet<IMethod>(callers));
 
-	    // Update the fieldsCalledMap for typeFields[i]
+	    // Update the fieldsCalledMap for attribute
 	    for (IMethod caller : callers) {
 		HashSet<IField> calleesL = attributesAccessedMap.get(caller);
 		if (calleesL == null) {
 		    calleesL = new HashSet<IField>();
 		}
-		calleesL.add(typeFields[i]);
+		calleesL.add(attribute);
 		attributesAccessedMap.put(caller, calleesL);
 	    }
 	}
@@ -559,7 +583,11 @@ public class CallData {
 	    Object matchingElement = match.getElement();
 
 	    if (matchingElement instanceof IMethod) {
-		results.add((IMethod) matchingElement);
+		IMethod method = (IMethod) matchingElement;
+		int flags = method.getFlags();
+		if (countStaticMethods || !Flags.isStatic(flags)) {
+		    results.add(method);
+		}
 	    }
 	}
 

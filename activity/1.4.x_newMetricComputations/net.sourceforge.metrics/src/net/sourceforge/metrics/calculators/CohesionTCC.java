@@ -55,17 +55,6 @@ import org.eclipse.jdt.core.JavaModelException;
  */
 public class CohesionTCC extends CohesionCalculator
 {
-    //TODO Options to (possibly) implement
-    /* 
-     * "A subclass inherits methods and instance variables from its superclass. 
-     * We have several options for evaluating cohesion of a subclass. We can 
-     * (1) include all inherited components in the subclass in our evaluation, 
-     * (2) include only methods and instance variables defined in the subclass, or 
-     * (3) include inherited instance variables but not inherited methods. 
-     * The class cohesion measures that we develop can be applied using any one 
-     * of these options."
-     */
-
     /**
      * Constructor for LackOfCohesion.
      */
@@ -92,7 +81,7 @@ public class CohesionTCC extends CohesionCalculator
 	}
 	
 	TypeMetrics typeSource = (TypeMetrics) source;
-	CallData callData = typeSource.getCallData();
+	CallData callData = typeSource.getCallData(getPrefs());
 	List<Integer> methodsToEval = getEvaluableMethodReachabilityIndices(callData);
 	int n = methodsToEval.size();
 	double npc = n * (n - 1) / 2;
@@ -107,8 +96,8 @@ public class CohesionTCC extends CohesionCalculator
 	else {
 	    value = 1.0;
 	}
-//	System.out.println("Setting TCC to " + value + " for "
-//		+ source.getName());
+	System.out.println("Setting TCC to " + value + " for "
+		+ source.getName());
 	source.setValue(new Metric(TCC, value));
     }
 

@@ -39,7 +39,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 public abstract class CohesionCalculator extends Calculator implements
 	Constants {
 
-    protected static Preferences prefs;
+    protected static CohesionPreferences prefs;
 
     // TODO generate preferences mechanism for preferences that (1) apply to all
     // cohesion metrics and (2) apply to certain specific cohesion metrics
@@ -71,9 +71,9 @@ public abstract class CohesionCalculator extends Calculator implements
      * 
      * @return Preferences
      */
-    public static Preferences getPrefs() {
+    public static CohesionPreferences getPrefs() {
 	if (prefs == null) {
-	    prefs = new Preferences();
+	    prefs = new CohesionPreferences();
 	}
 	return prefs;
     }
@@ -133,12 +133,21 @@ public abstract class CohesionCalculator extends Calculator implements
      * Statically cache preference values, yet register for change events so
      * they get updated when they change.
      */
-    public static class Preferences implements IPropertyChangeListener {
+    public static class CohesionPreferences implements IPropertyChangeListener {
+	// TODO Options to (possibly) implement
+	/*
+	 * "A subclass inherits methods and instance variables from its
+	 * superclass. We have several options for evaluating cohesion of a
+	 * subclass. We can (1) include all inherited components in the subclass
+	 * in our evaluation, (2) include only methods and instance variables
+	 * defined in the subclass, or (3) include inherited instance variables
+	 * but not inherited methods.  The current default is (2)."
+	 */
 
 	private boolean countStaticMethods;
 	private boolean countStaticAttributes;
 
-	public Preferences() {
+	public CohesionPreferences() {
 	    init();
 	    getPreferences().addPropertyChangeListener(this);
 	}
@@ -151,6 +160,8 @@ public abstract class CohesionCalculator extends Calculator implements
 	}
 
 	public boolean countStaticMethods() {
+	    // TODO remove
+	    System.out.println("countStaticMethods: " + countStaticMethods);
 	    return countStaticMethods;
 	}
 

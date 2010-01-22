@@ -82,7 +82,7 @@ public class CohesionLCC extends CohesionCalculator
 	}
 	
 	TypeMetrics typeSource = (TypeMetrics) source;
-	CallData callData = typeSource.getCallData();
+	CallData callData = typeSource.getCallData(getPrefs());
 	List<Integer> methodsToEval =
 	    CohesionTCC.getEvaluableMethodReachabilityIndices(callData);
 	int n = methodsToEval.size();

@@ -73,7 +73,7 @@ public class LCOMCK extends CohesionCalculator {
 	    throw new InvalidSourceException("LCOMCK only applicable to types");
 	}
 	TypeMetrics typeSource = (TypeMetrics) source;
-	CallData callData = typeSource.getCallData();
+	CallData callData = typeSource.getCallData(getPrefs());
 	Set<IField> attributes = callData.getAttributes();
 	Set<IMethod> methods = callData.getMethods();
 	Map<IMethod, HashSet<IField>> accessedMap =
