@@ -24,7 +24,6 @@ import java.util.List;
 import net.sourceforge.metrics.calculators.CallData.ConnectivityMatrix;
 import net.sourceforge.metrics.core.Metric;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
-import net.sourceforge.metrics.core.sources.TypeMetrics;
 
 /**
  * Calculates cohesion based on Badri and Badri's Degree of Cohesion in a class
@@ -59,12 +58,7 @@ public class CohesionDCI extends CohesionCalculator
      */
     public void calculate(AbstractMetricSource source)
 	    throws InvalidSourceException {
-	if (source.getLevel() != TYPE) {
-	    throw new InvalidSourceException("DCI only applicable to types");
-	}
-	
-	TypeMetrics typeSource = (TypeMetrics) source;
-	CallData callData = typeSource.getCallData(getPrefs());
+	CallData callData = getCallDataFromSource(source);
 	List<Integer> methodsToEval =
 	    CohesionDCD.getEvaluableMethodReachabilityIndices(callData);
 	int n = methodsToEval.size();

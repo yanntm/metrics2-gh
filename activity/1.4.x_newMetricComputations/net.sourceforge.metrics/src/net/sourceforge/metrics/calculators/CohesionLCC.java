@@ -24,7 +24,6 @@ import java.util.List;
 import net.sourceforge.metrics.calculators.CallData.ConnectivityMatrix;
 import net.sourceforge.metrics.core.Metric;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
-import net.sourceforge.metrics.core.sources.TypeMetrics;
 
 /**
  * Calculates cohesion using Bieman and Kang's LCC metric. LCC measures the
@@ -77,12 +76,7 @@ public class CohesionLCC extends CohesionCalculator
      */
     public void calculate(AbstractMetricSource source)
 	    throws InvalidSourceException {
-	if (source.getLevel() != TYPE) {
-	    throw new InvalidSourceException("LCC only applicable to types");
-	}
-	
-	TypeMetrics typeSource = (TypeMetrics) source;
-	CallData callData = typeSource.getCallData(getPrefs());
+	CallData callData = getCallDataFromSource(source);
 	List<Integer> methodsToEval =
 	    CohesionTCC.getEvaluableMethodReachabilityIndices(callData);
 	int n = methodsToEval.size();

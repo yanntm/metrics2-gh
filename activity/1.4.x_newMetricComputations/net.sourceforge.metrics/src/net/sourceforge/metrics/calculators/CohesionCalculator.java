@@ -23,6 +23,7 @@ import java.util.Set;
 
 import net.sourceforge.metrics.core.Constants;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
+import net.sourceforge.metrics.core.sources.TypeMetrics;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IMethod;
@@ -76,6 +77,39 @@ public abstract class CohesionCalculator extends Calculator implements
 	    prefs = new CohesionPreferences();
 	}
 	return prefs;
+    }
+
+    /**
+     * Checks to make sure that the calculator is working with a type/class.
+     * If not, it throws an exception
+     * @param source the metric source to check
+     * @throws InvalidSourceException when the source's level isn't TYPE
+     */
+    protected void checkApplicability(AbstractMetricSource source)
+	    throws InvalidSourceException {
+	if (source.getLevel() != TYPE) {
+	    throw new InvalidSourceException(name + " only applicable to types");
+	}
+    }
+
+    /**
+     * Gets the call data associated with a particular class.
+     * @param source the class's metric data, including call data
+     * @return the callData
+     * @throws InvalidSourceException when the source's level isn't TYPE
+     */
+    protected CallData getCallDataFromSource(AbstractMetricSource source)
+	    throws InvalidSourceException {
+	getPrefs();
+	checkApplicability(source);
+	TypeMetrics metrics = (TypeMetrics) source;
+	CallData callData = metrics.getCallData();
+	if (callData == null) {
+	    callData = new CallData();
+	    callData.collectCallData(metrics, prefs);
+	    metrics.setCallData(callData);
+	}
+	return callData;
     }
 
     /**
@@ -177,6 +211,26 @@ public abstract class CohesionCalculator extends Calculator implements
 		init();
 	    }
 	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+	    return "CohesionPreferences [countStaticAttributes="
+		    + countStaticAttributes + ", countStaticMethods="
+		    + countStaticMethods + "]";
+	}
     }
+    
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+	return "CohesionCalculator [name=" + name + ", prefs = " + prefs + "]";
+    }
+
 
 }

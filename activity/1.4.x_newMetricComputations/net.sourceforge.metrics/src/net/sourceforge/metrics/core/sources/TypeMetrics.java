@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.Set;
 
 import net.sourceforge.metrics.calculators.CallData;
-import net.sourceforge.metrics.calculators.CohesionCalculator.CohesionPreferences;
 import net.sourceforge.metrics.core.ICalculator;
 import net.sourceforge.metrics.core.Log;
 import net.sourceforge.metrics.core.Metric;
@@ -277,11 +276,7 @@ public class TypeMetrics extends AbstractMetricSource {
     /**
      * @return the callData
      */
-    public CallData getCallData(CohesionPreferences prefs) {
-	if (callData == null) {
-	    callData = new CallData();
-	    callData.collectCallData(this, prefs);
-	}
+    public CallData getCallData() {
 	return callData;
     }
 

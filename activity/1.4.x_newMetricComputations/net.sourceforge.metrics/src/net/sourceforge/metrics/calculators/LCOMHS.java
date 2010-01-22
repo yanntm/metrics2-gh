@@ -27,7 +27,6 @@ import java.util.Set;
 
 import net.sourceforge.metrics.core.Metric;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
-import net.sourceforge.metrics.core.sources.TypeMetrics;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
@@ -59,11 +58,7 @@ public class LCOMHS extends CohesionCalculator {
      */
     public void calculate(AbstractMetricSource source)
 	    throws InvalidSourceException {
-	if (source.getLevel() != TYPE) {
-	    throw new InvalidSourceException("LCOMHS only applicable to types");
-	}
-	TypeMetrics typeSource = (TypeMetrics) source;
-	CallData callData = typeSource.getCallData(getPrefs());
+	CallData callData = getCallDataFromSource(source);
 	Set<IField> attributes = callData.getAttributes();
 	Set<IMethod> methods = callData.getMethods();
 	double value = 0;

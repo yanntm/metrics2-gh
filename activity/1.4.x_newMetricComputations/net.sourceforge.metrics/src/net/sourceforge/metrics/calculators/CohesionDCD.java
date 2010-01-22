@@ -28,7 +28,6 @@ import net.sourceforge.metrics.calculators.CallData.ConnectivityMatrix;
 import net.sourceforge.metrics.core.Log;
 import net.sourceforge.metrics.core.Metric;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
-import net.sourceforge.metrics.core.sources.TypeMetrics;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMember;
@@ -73,12 +72,7 @@ public class CohesionDCD extends CohesionCalculator
      */
     public void calculate(AbstractMetricSource source)
 	    throws InvalidSourceException {
-	if (source.getLevel() != TYPE) {
-	    throw new InvalidSourceException("DCD only applicable to types");
-	}
-	
-	TypeMetrics typeSource = (TypeMetrics) source;
-	CallData callData = typeSource.getCallData(getPrefs());
+	CallData callData = getCallDataFromSource(source);
 	List<Integer> methodsToEval = getEvaluableMethodReachabilityIndices(callData);
 	int n = methodsToEval.size();
 	double npc = n * (n - 1) / 2;
