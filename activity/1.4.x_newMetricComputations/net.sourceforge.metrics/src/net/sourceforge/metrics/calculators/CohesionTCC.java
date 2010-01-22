@@ -90,8 +90,8 @@ public class CohesionTCC extends CohesionCalculator
 	else {
 	    value = 1.0;
 	}
-	System.out.println("Setting TCC to " + value + " for "
-		+ source.getName());
+//	System.out.println("Setting TCC to " + value + " for "
+//		+ source.getName());
 	source.setValue(new Metric(TCC, value));
     }
 

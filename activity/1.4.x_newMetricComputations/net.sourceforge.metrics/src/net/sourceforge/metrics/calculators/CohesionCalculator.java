@@ -194,8 +194,6 @@ public abstract class CohesionCalculator extends Calculator implements
 	}
 
 	public boolean countStaticMethods() {
-	    // TODO remove
-	    System.out.println("countStaticMethods: " + countStaticMethods);
 	    return countStaticMethods;
 	}
 
