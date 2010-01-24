@@ -65,7 +65,7 @@ public class TypeMetrics extends AbstractMetricSource {
     transient private ITypeHierarchy hierarchy = null;
 
     /** Information about the members accessed by the methods of the class. */
-    protected CallData callData = null;
+    protected transient CallData callData = null;
 
     public TypeMetrics() {
 	super();
