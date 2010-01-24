@@ -1,4 +1,3 @@
-// TODO Distribute responsibilities between CohesionCalculator and this class
 /*
  * Copyright (c) 2010 Keith Cassell. All rights reserved.
  *
@@ -25,7 +24,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import net.sourceforge.metrics.core.Metric;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 
 import org.eclipse.jdt.core.IField;
@@ -67,12 +65,9 @@ public class LCOMHS extends CohesionCalculator {
 	// mention what to do with 0-1 attributes/methods, but references
 	// another Henderson-Sellers paper which is not easily obtainable.
 	if ((attributes.size() > 1) && (methods.size() > 1)) {
-		// TODO boolean countStatics = getPrefs().countStaticMethods();
 		value = calculateResult(callData);
 	}
-//	System.out.println("Setting HS to " + value + " for "
-//		+ source.getName());
-	source.setValue(new Metric(LCOMHS, value));
+	setResult(source, value);
     }
 
     /**

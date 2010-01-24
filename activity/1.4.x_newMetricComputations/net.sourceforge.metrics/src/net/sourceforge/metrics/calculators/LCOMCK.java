@@ -1,4 +1,3 @@
-// TODO Distribute responsibilities between CohesionCalculator and this class
 /*
  * Copyright (c) 2010 Keith Cassell. All rights reserved.
  *
@@ -23,7 +22,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import net.sourceforge.metrics.core.Metric;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 
 import org.eclipse.jdt.core.IField;
@@ -84,9 +82,7 @@ public class LCOMCK extends CohesionCalculator {
 	else {
 	    value = calculateCommonCase(methods, accessedMap);
 	} // else
-//	System.out.println("Setting CK to " + value + " for "
-//		+ source.getName());
-	source.setValue(new Metric(LCOMCK, value));
+	setResult(source, value);
     }
 
     /**

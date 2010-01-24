@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.sourceforge.metrics.core.Constants;
+import net.sourceforge.metrics.core.Metric;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 import net.sourceforge.metrics.core.sources.TypeMetrics;
 
@@ -110,6 +111,17 @@ public abstract class CohesionCalculator extends Calculator implements
 	    metrics.setCallData(callData);
 	}
 	return callData;
+    }
+    
+    /**
+     * Save the measurement for the indicated source
+     * @param source the code being measured
+     * @param value the measurement
+     */
+    protected void setResult(AbstractMetricSource source, double value) {
+//	System.out.println("Setting " + name + " to " + value + " for "
+//	+ source.getName());
+	source.setValue(new Metric(name, value));
     }
 
     /**

@@ -1,4 +1,3 @@
-// TODO Distribute responsibilities between CohesionCalculator and this class
 /*
  * Copyright (c) 2010 Keith Cassell. All rights reserved.
  *
@@ -26,7 +25,6 @@ import java.util.Set;
 
 import net.sourceforge.metrics.calculators.CallData.ConnectivityMatrix;
 import net.sourceforge.metrics.core.Log;
-import net.sourceforge.metrics.core.Metric;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 
 import org.eclipse.jdt.core.Flags;
@@ -90,9 +88,7 @@ public class CohesionTCC extends CohesionCalculator
 	else {
 	    value = 1.0;
 	}
-//	System.out.println("Setting TCC to " + value + " for "
-//		+ source.getName());
-	source.setValue(new Metric(TCC, value));
+	setResult(source, value);
     }
 
     /**

@@ -1,4 +1,3 @@
-// TODO Distribute responsibilities between CohesionCalculator and this class
 /*
  * Copyright (c) 2010 Keith Cassell. All rights reserved.
  *
@@ -26,7 +25,6 @@ import java.util.Set;
 
 import net.sourceforge.metrics.calculators.CallData.ConnectivityMatrix;
 import net.sourceforge.metrics.core.Log;
-import net.sourceforge.metrics.core.Metric;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 
 import org.eclipse.jdt.core.Flags;
@@ -87,9 +85,7 @@ public class CohesionDCD extends CohesionCalculator
 	    // TODO According to the Badris, this should be undefined.
 	    value = 1.0;
 	}
-//	System.out.println("Setting DCD to " + value + " for "
-//		+ source.getName());
-	source.setValue(new Metric(DCD, value));
+	setResult(source, value);
     }
 
     /**

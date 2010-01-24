@@ -1,4 +1,3 @@
-// TODO Distribute responsibilities between CohesionCalculator and this class
 /*
  * Copyright (c) 2010 Keith Cassell. All rights reserved.
  *
@@ -22,7 +21,6 @@ package net.sourceforge.metrics.calculators;
 import java.util.List;
 
 import net.sourceforge.metrics.calculators.CallData.ConnectivityMatrix;
-import net.sourceforge.metrics.core.Metric;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 
 /**
@@ -73,9 +71,7 @@ public class CohesionDCI extends CohesionCalculator
 	else {
 	    value = 1.0;
 	}
-//	System.out.println("Setting DCI to " + value + " for "
-//		+ source.getName());
-	source.setValue(new Metric(DCI, value));
+	setResult(source, value);
     }
 
     /**
