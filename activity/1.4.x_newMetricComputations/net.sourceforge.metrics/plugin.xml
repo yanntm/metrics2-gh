@@ -391,12 +391,12 @@
       </calculator>
       <calculator
             name="Cohesion - DCD"
-            calculatorClass="net.sourceforge.metrics.calculators.CohesionDCDmod"
+            calculatorClass="net.sourceforge.metrics.calculators.CohesionDCD"
             level="type">
       </calculator>
       <calculator
             name="Cohesion - DCI"
-            calculatorClass="net.sourceforge.metrics.calculators.CohesionDCImod"
+            calculatorClass="net.sourceforge.metrics.calculators.CohesionDCI"
             level="type">
       </calculator>
       <calculator
