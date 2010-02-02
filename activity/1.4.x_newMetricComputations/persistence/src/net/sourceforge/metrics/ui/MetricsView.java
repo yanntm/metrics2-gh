@@ -487,12 +487,12 @@ public class MetricsView extends ViewPart implements ISelectionListener, IMetric
      * export the selected metrics to thr database
      * @throws InvocationTargetException 
      */
-    public void exportToDB() throws InvocationTargetException {
-	if (selection != null) {
-	    MetricsDBTransaction transaction = new MetricsDBTransaction();
-	    transaction.saveToDB(selection);
+	public void exportToDB() throws InvocationTargetException {
+		if (selection != null) {
+			MetricsDBTransaction transaction = new MetricsDBTransaction();
+			transaction.saveToDB(selection);
+		}
 	}
-    }
 
 	private void doExport(Shell activeShell, final File outputFile, final IExporter exporter) {
 		try {
