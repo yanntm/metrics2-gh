@@ -10,6 +10,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Properties;
 
+import net.sourceforge.metrics.core.Log;
+
 /**
  * <p>
  * This class provides JDBC access to a Derby database.
@@ -64,7 +66,7 @@ public class Database
 //	"user=" + user + ";password=" + password + ";";
     
     /** Indicates whether client or embedded databases should be used. */
-    protected boolean isEmbedded = true;
+    protected boolean isEmbedded = false;
     
     /** The driver class for use in accessing a database. */
     protected String driver = clientDriver;
@@ -436,7 +438,7 @@ public class Database
      * @param statements
      * @param resultSet
      */
-    protected void releaseResources(Connection connection,
+    public void releaseResources(Connection connection,
 	    ArrayList<Statement> statements, ResultSet resultSet) {
 	// ResultSet
 	try {
@@ -547,6 +549,8 @@ public class Database
         // Exception.
         while (e != null)
         {
+			Log.logError("SQL State:  " + e.getSQLState() +
+					"  Error Code: " + e.getErrorCode(), e);
             // TODO change to log messages
             System.err.println("\n----- SQLException -----");
             System.err.println("  SQL State:  " + e.getSQLState());
