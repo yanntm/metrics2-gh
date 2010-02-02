@@ -52,6 +52,12 @@ Export-Package: classycle.graph,
    org.eclipse.core.runtime,
    org.eclipse.jdt.core,
    net.sourceforge.metrics.core",
+ net.sourceforge.metrics.persistence;
+  uses:="net.sourceforge.metrics.core.sources,
+   org.eclipse.jdt.core.dom,
+   org.eclipse.core.runtime,
+   org.eclipse.jdt.core.search,
+   net.sourceforge.metrics.core",
  net.sourceforge.metrics.propagators;uses:="net.sourceforge.metrics.core.sources,net.sourceforge.metrics.calculators,net.sourceforge.metrics.core",
  net.sourceforge.metrics.properties;
   uses:="org.eclipse.swt.events,
