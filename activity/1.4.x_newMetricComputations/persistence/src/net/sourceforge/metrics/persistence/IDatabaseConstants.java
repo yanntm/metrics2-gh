@@ -5,9 +5,13 @@ public interface IDatabaseConstants {
 	// Database commands
 	
 	String CREATE = "CREATE TABLE ";
+	String DELETE = "DELETE FROM ";
 	String DROP = "DROP TABLE ";
+	String FROM = "FROM ";
 	String INSERT = "INSERT INTO ";
+	String SELECT = "SELECT ";
 	String VALUES = "VALUES ";
+	String WHERE = "WHERE ";
 	
 	String TERMINATOR = ";";
 	
@@ -19,8 +23,8 @@ public interface IDatabaseConstants {
 	String METRIC_ID_TABLE = SCHEMA_NAME + ".MetricID ";
 	String METRIC_LEVELS_TABLE = SCHEMA_NAME + ".MetricLevels ";
 	String METRIC_VALUES_TABLE = SCHEMA_NAME + ".MetricValues ";
-	String SOURCE_COMPOSED_OF_TABLE = SCHEMA_NAME + ".SourceComposedOf ";
-	String SOURCE_ID_TABLE = SCHEMA_NAME + ".SourceID ";
+	//String SOURCE_COMPOSED_OF_TABLE = SCHEMA_NAME + ".SourceComposedOf ";
+	//String SOURCE_ID_TABLE = SCHEMA_NAME + ".SourceID ";
 
 	// Field names
 	
