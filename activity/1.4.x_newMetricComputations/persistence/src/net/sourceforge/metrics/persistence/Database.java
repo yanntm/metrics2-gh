@@ -2,9 +2,7 @@ package net.sourceforge.metrics.persistence;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -241,108 +239,6 @@ public class Database
     }
 
     /**
-     * <p>
-     * Starts the demo by creating a new instance of this class and running
-     * the <code>go()</code> method.</p>
-     * <p>
-     * When you run this application, you may give one of the following
-     * arguments:
-     *  <ul>
-          <li><code>embedded</code> - default, if none specified. Will use
-     *        Derby's embedded driver. This driver is included in the derby.jar
-     *        file.</li>
-     *    <li><code>derbyclient</code> - will use the Derby client driver to
-     *        access the Derby Network Server. This driver is included in the
-     *        derbyclient.jar file.</li>
-     *  </ul>
-     * <p>
-     * When you are using a client/server framework, the network server must
-     * already be running when trying to obtain client connections to Derby.
-     * This demo program will will try to connect to a network server on this
-     * host (the localhost), see the <code>protocol</code> instance variable.
-     * </p>
-     * <p>
-     * When running this demo, you must include the correct driver in the
-     * classpath of the JVM. See <a href="example.html">example.html</a> for
-     * details.
-     * </p>
-     * @param args This program accepts one optional argument specifying which
-     *        connection framework (JDBC driver) to use (see above). The default
-     *        is to use the embedded JDBC driver.
-     */
-    public static void main(String[] args)
-    {
-        new Database().go();
-        System.out.println("Database test finished");
-    }
-
-    /**
-     * This is a test driver that
-     * starts the actual demo activities. This includes loading the correct
-     * JDBC driver, creating a database by making a connection to Derby,
-     * creating a table in the database, and inserting, updating and retrieving
-     * some data. Some of the retrieved data is then verified (compared) against
-     * the expected results. Finally, the table is deleted and, if the embedded
-     * framework is used, the database is shut down.</p>
-     * <p>
-     * Generally, when using a client/server framework, other clients may be
-     * (or want to be) connected to the database, so you should be careful about
-     * doing shutdown unless you know that no one else needs to access the
-     * database until it is rebooted. That is why this demo will not shut down
-     * the database unless it is running Derby embedded.</p>
-     */
-    private void go()
-    {
-        System.out.println("SimpleApp starting in " +
-        	(isEmbedded?"embedded":"client/server") + " mode");
-
-        /* load the desired JDBC driver */
-        loadDriver();
-        Connection connection = null;
-        /* We are storing the Statement and Prepared statement object references
-         * in an array list for convenience.         */
-        ArrayList<Statement> statements = new ArrayList<Statement>(); // list of Statements, PreparedStatements
-        Statement statement = null;
-        ResultSet resultSet = null;
-        /* We will be using Statement and PreparedStatement objects for
-         * executing SQL. These objects, as well as Connections and ResultSets,
-         * are resources that should be released explicitly after use, hence
-         * the try-catch-finally pattern used below.
-         */
-        try
-        {
-            connection = prepareConnection();
-
-            /* Creating a statement object that we can use for running various
-             * SQL statements commands against the database.*/
-	    statement = connection.createStatement(
-//		    ResultSet.TYPE_FORWARD_ONLY,
-//		    ResultSet.CONCUR_READ_ONLY,
-//		    ResultSet.CLOSE_CURSORS_AT_COMMIT
-		    );
-            statements.add(statement);
-
-            resultSet = getMetricLevels(statement);
-	    resultSet.close();
-	    PreparedStatement psInsert = connection
-		    .prepareStatement("INSERT INTO JOOMP.MetricValues values (?, ?, ?)");
-	    statements.add(psInsert);
-	    saveMetricValue(psInsert);
-	    connection.commit();
-            System.out.println("Committed the transaction");
-
-            // In embedded mode, an application should shut down the database.
-            shutDownEmbedded();
-        }
-        catch (SQLException sqle) {
-            printSQLException(sqle);
-        } finally {
-            // release all open resources to avoid unnecessary memory usage
-            releaseResources(connection, statements, resultSet);
-        }
-    }
-
-    /**
      * In embedded mode, an application should shut down the database.
      * If the application fails to shut down the database,
      * Derby will not perform a checkpoint when the JVM shuts down.
@@ -476,30 +372,6 @@ public class Database
 	}
     }
     
-    private ResultSet getMetricLevels(Statement statement) throws SQLException {
-	ResultSet resultSet;
-	resultSet = statement.executeQuery(
-	        "SELECT * from JOOMP.MetricLevels");
-	ResultSetMetaData metaData = resultSet.getMetaData();
-	String columnLabel1 = metaData.getColumnLabel(1);
-	String columnLabel2 = metaData.getColumnLabel(2);
-	System.out.println(columnLabel1 + "\t" + columnLabel2);
-	while (resultSet.next()) {
-	    String result =
-		"\t" + resultSet.getInt(1) + ":\t" + resultSet.getString(2);
-	    System.out.println(result);
-	}
-	return resultSet;
-    }
-
-    private void saveMetricValue(PreparedStatement insertPreparedStatement)
-	    throws SQLException {
-	insertPreparedStatement.setString(1, "testClassName");
-	insertPreparedStatement.setString(2, "KAC");
-	insertPreparedStatement.setDouble(3, 666.6);
-	insertPreparedStatement.executeUpdate();
-    }
-
     /**
      * Loads the appropriate JDBC driver for this environment/framework. For
      * example, if we are in an embedded environment, we load Derby's
