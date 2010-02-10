@@ -1,3 +1,6 @@
+-- This is now obsolete and sitting around temporarily for reference.
+-- The table creation is now being done in code.
+
 -- for server
 connect 'jdbc:derby://localhost:1527/metrics2DB;create=true';
 -- for embedded
@@ -12,19 +15,19 @@ CREATE TABLE JOOMP.MetricLevels
     levelname varchar(30) not null unique
 );
 -- These should be kept consistent with
--- net.sourceforge.metrics.core.Constants.java
+-- net.sourceforge.metrics.core.Constants.java/org.eclipse.jdt.core.IJavaElement
 INSERT INTO JOOMP.MetricLevels(levelid, levelname)
-       VALUES (1, 'Method');
+       VALUES (9, 'Method');
 INSERT INTO JOOMP.MetricLevels(levelid, levelname)
-       VALUES (2, 'Type');
+       VALUES (7, 'Type');
 INSERT INTO JOOMP.MetricLevels(levelid, levelname)
-       VALUES (3, 'Compilation Unit');
+       VALUES (5, 'Compilation Unit');
 INSERT INTO JOOMP.MetricLevels(levelid, levelname)
        VALUES (4, 'Package Fragment');
 INSERT INTO JOOMP.MetricLevels(levelid, levelname)
-       VALUES (5, 'Package Root');
+       VALUES (3, 'Package Root');
 INSERT INTO JOOMP.MetricLevels(levelid, levelname)
-       VALUES (6, 'Project');
+       VALUES (2, 'Project');
 
 
 -- metricname e.g. lack of cohesion; acronym e.g. LCOMHS
@@ -112,7 +115,7 @@ DROP TABLE JOOMP.SourceID;
 CREATE TABLE JOOMP.SourceID
 (
     sourceid int not null, 
-    handle varchar(200) not null primary key, 
+    handle varchar(400) not null primary key, 
     sourcename varchar(120) not null, 
     levelid int not null
 );
@@ -121,7 +124,7 @@ CREATE TABLE JOOMP.SourceID
 DROP TABLE JOOMP.MetricValues;
 CREATE TABLE JOOMP.MetricValues
 (
-    handle varchar(200) not null,
+    handle varchar(400) not null,
     metricacronym varchar(10) not null,
     value double not null,
     CONSTRAINT pk_metricval PRIMARY KEY (handle,metricacronym)
