@@ -988,7 +988,7 @@ public class TGPanel extends Panel {
 		try {
 			tgPanel.addNode(); // Add a starting node.
 		} catch (TGException tge) {
-			Log.logWarrning(tge.getMessage(), tge);
+			Log.logWarning(tge.getMessage(), tge);
 		}
 		tgPanel.setVisible(true);
 		new GLEditUI(tgPanel).activate();
