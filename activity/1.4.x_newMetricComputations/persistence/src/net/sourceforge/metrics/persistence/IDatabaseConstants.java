@@ -4,11 +4,14 @@ public interface IDatabaseConstants {
 	
 	// Database commands
 	
+	String AND = "AND ";
+	String AS = "AS ";
 	String CREATE = "CREATE TABLE ";
 	String DELETE = "DELETE FROM ";
 	String DROP = "DROP TABLE ";
 	String FROM = "FROM ";
 	String INSERT = "INSERT INTO ";
+	String OR = "OR ";
 	String SELECT = "SELECT ";
 	String VALUES = "VALUES ";
 	String WHERE = "WHERE ";
