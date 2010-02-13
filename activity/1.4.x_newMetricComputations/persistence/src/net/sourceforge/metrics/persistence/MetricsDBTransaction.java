@@ -84,15 +84,6 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 		String handle = element.getHandleIdentifier();
 		AbstractMetricSource root = Cache.singleton.get(handle);
 
-//		PreparedStatement deleteSourceIDsStatement =
-//			addDeleteSourceIDsPreparedStatement(connection, statements);
-//		PreparedStatement insertSourceIDsStatement =
-//			addInsertSourceIDsPreparedStatement(connection, statements);
-//		// Save all the identifier information for all elements, starting at
-//		// the root element
-//		saveIdentifierInfo(deleteSourceIDsStatement, insertSourceIDsStatement,
-//				handle);
-
 		String[] metricIDs = plugin.getMetricIds();
 		// TODO maybePrintCycles(root, pOut, monitor);
 		PreparedStatement deleteMetricValuesStatement =
@@ -131,61 +122,6 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 		statements.add(statement);
 		return statement;
 	}
-
-//	private PreparedStatement addInsertSourceIDsPreparedStatement(
-//			Connection connection, ArrayList<Statement> statements)
-//			throws SQLException {
-//		PreparedStatement statement = connection
-//				.prepareStatement("INSERT INTO JOOMP.SourceID values (?, ?, ?, ?)");
-//		statements.add(statement);
-//		return statement;
-//	}
-//
-//	private PreparedStatement addDeleteSourceIDsPreparedStatement(
-//			Connection connection, ArrayList<Statement> statements)
-//			throws SQLException {
-//		PreparedStatement statement = connection
-//				.prepareStatement("DELETE FROM JOOMP.SourceID WHERE handle = ?");
-//		statements.add(statement);
-//		return statement;
-//	}
-
-//	private void saveIdentifierInfo(PreparedStatement deleteStatement,
-//			PreparedStatement insertStatement, String parentHandle) {
-//		deleteIdentifierInfo(deleteStatement, parentHandle);
-//		AbstractMetricSource metricSource = Cache.singleton.get(parentHandle);
-//		insertIdentifierInfo(metricSource, insertStatement, parentHandle);
-//		List<String> childHandles = metricSource.getChildHandles();
-//		for (String childHandle : childHandles) {
-//			saveIdentifierInfo(deleteStatement, insertStatement, childHandle);
-//		}
-//	}
-
-//	private void insertIdentifierInfo(AbstractMetricSource metricSource,
-//			PreparedStatement insertStatement, String parentHandle) {
-//		try {
-//			String name = metricSource.getName();
-//			int level = metricSource.getLevel();
-//			// TODO uids
-//			insertStatement.setInt(1, 0); // uid
-//			insertStatement.setString(2, parentHandle);
-//			insertStatement.setString(3, name);
-//			insertStatement.setInt(4, level);
-//			insertStatement.executeUpdate();
-//		} catch (SQLException sqle) {
-//			Database.printSQLException(sqle);
-//		}
-//	}
-
-//	private void deleteIdentifierInfo(PreparedStatement deleteStatement,
-//			String parentHandle) {
-//		try {
-//			deleteStatement.setString(1, parentHandle);
-//			deleteStatement.executeUpdate();
-//		} catch (Exception e) {
-//			// Ignore - many times the delete will have nothing to delete
-//		}
-//	}
 
 	/**
 	 * Saves the metric values for the current element and all its subelements
@@ -447,16 +383,10 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 			 * Creating a statement object that we can use for running various
 			 * SQL statements commands against the database.
 			 */
-			statement = connection.createStatement(
-			// ResultSet.TYPE_FORWARD_ONLY,
-					// ResultSet.CONCUR_READ_ONLY,
-					// ResultSet.CLOSE_CURSORS_AT_COMMIT
-					);
+			statement = connection.createStatement();
 			statements.add(statement);
 			MetricsDBTransaction transaction = new MetricsDBTransaction();
-			transaction.dropTables(statement);
-			transaction.createTables(connection, statement);
-
+			transaction.initializeDatabase(connection);
 			resultSet = transaction.getMetricLevels(statement);
 			resultSet.close();
 			String sqlString = INSERT + METRIC_VALUES_TABLE + VALUES + "(?, ?, ?)";
