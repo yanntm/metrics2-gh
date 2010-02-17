@@ -308,25 +308,25 @@ public class Database
      * directory (user.dir) if derby.system.home is not set.
      */
      // TODO make consistent
-    public Connection prepareConnection() throws SQLException {
-        Properties props = new Properties(); // connection properties
-        // providing a user name and password is optional in the embedded
-        // and derbyclient frameworks
-//        props.put("user", user);
-//        props.put("password", password);
+	public Connection prepareConnection() throws SQLException {
+		Properties props = new Properties(); // connection properties
+		// providing a user name and password is optional in the embedded
+		// and derbyclient frameworks
+		// props.put("user", user);
+		// props.put("password", password);
 
-	Connection connection;
-	connection = DriverManager.getConnection(clientURL, props);
-//	connection = DriverManager.getConnection(protocol + databaseName
-//	        + ";create=true", props);
+		Connection connection;
+		connection = DriverManager.getConnection(clientURL, props);
+		// connection = DriverManager.getConnection(protocol + databaseName
+		// + ";create=true", props);
 
-	System.out.println("Connected to and created database " + databaseName);
+		System.out.println("Connected to and created database " + databaseName);
 
-	// We want to control transactions manually. Autocommit is on by
-	// default in JDBC.
-	//connection.setAutoCommit(false);
-	return connection;
-    }
+		// We want to control transactions manually. Autocommit is on by
+		// default in JDBC.
+		connection.setAutoCommit(false);
+		return connection;
+	}
 
     /**
      * Release all open resources to avoid unnecessary memory usage

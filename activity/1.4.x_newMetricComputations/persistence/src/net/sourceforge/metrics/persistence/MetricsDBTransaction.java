@@ -98,6 +98,7 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 			// MetricDescriptor md = plugin.getMetricDescriptor(names[i]);
 			saveMetricValues(deleteMetricValuesStatement,
 					insertMetricValuesStatement, metricIDs[i], root, handle);
+			connection.commit();
 			// monitor.worked(1);
 		}
 		// monitor.done();
@@ -197,6 +198,8 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 		executeAndIgnore(statement, DROP + METRIC_VALUES_TABLE);
 //		executeAndIgnore(statement, DROP + SOURCE_COMPOSED_OF_TABLE);
 //		executeAndIgnore(statement, DROP + SOURCE_ID_TABLE);
+		Connection connection = statement.getConnection();
+		connection.commit();
 	}
 
 	private void executeAndIgnore(Statement statement, String sqlString) {
@@ -214,6 +217,7 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 		createMetricLevelsTable(statement);
 		populateMetricLevelsTable(connection);
 		createMetricValuesTable(statement);
+		connection.commit();
 	}
 
 	private void populateMetricLevelsTable(Connection connection) {
