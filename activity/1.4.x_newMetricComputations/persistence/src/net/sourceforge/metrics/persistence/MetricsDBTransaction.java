@@ -94,6 +94,7 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 		// Save all the metric values for all elements, starting at
 		// the root element
 		for (int i = 0; i < metricIDs.length; i++) {
+			System.out.println(metricIDs[i]);
 			// monitor.subTask("Exporting: " + names[i]);
 			// MetricDescriptor md = plugin.getMetricDescriptor(names[i]);
 			saveMetricValues(deleteMetricValuesStatement,
@@ -298,7 +299,7 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 		String sqlString = CREATE + METRIC_ID_TABLE +
 		"(" + METRIC_ID_FIELD + METRIC_ID_FIELD_TYPE + ", " +
 		METRIC_NAME_FIELD + METRIC_NAME_FIELD_TYPE + ", " +
-		ACRONYM_FIELD + ACRONYM_FIELD_TYPE +
+		ACRONYM_FIELD + ACRONYM_FIELD_TYPE + NOT + NULL + PRIMARY_KEY +
 		")";
 		statement.executeUpdate(sqlString);
 	}
@@ -315,7 +316,8 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 		String sqlString = CREATE + METRIC_VALUES_TABLE +
 		"(" + HANDLE_FIELD + HANDLE_FIELD_TYPE + ", " +
 		ACRONYM_FIELD + ACRONYM_FIELD_TYPE + ", " +
-		VALUE_FIELD + VALUE_FIELD_TYPE +
+		VALUE_FIELD + VALUE_FIELD_TYPE + ", " +
+		CONSTRAINT + "pk_metricval " + PRIMARY_KEY + "(" + HANDLE_FIELD + ", " + ACRONYM_FIELD + ")" +
 		")";
 		statement.executeUpdate(sqlString);
 	}

@@ -7,15 +7,19 @@ public interface IDatabaseConstants {
 	String AND = "AND ";
 	String AS = "AS ";
 	String ASCENDING = "ASC ";
+	String CONSTRAINT = "CONSTRAINT ";
 	String CREATE = "CREATE TABLE ";
 	String DELETE = "DELETE FROM ";
 	String DESCENDING = "DESC ";
 	String DROP = "DROP TABLE ";
 	String FROM = "FROM ";
 	String INSERT = "INSERT INTO ";
+	String NOT = "NOT ";
+	String NULL = "NULL ";
 	String OR = "OR ";
 	String SELECT = "SELECT ";
 	String ORDER_BY = "ORDER BY ";
+	String PRIMARY_KEY = "PRIMARY KEY ";
 	String VALUES = "VALUES ";
 	String WHERE = "WHERE ";
 	
