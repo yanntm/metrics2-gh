@@ -145,6 +145,7 @@
          </range>
       </metric>
       -->
+      <!-- KAC
       <metric
             propagateSum="false"
             name="McCabe Cyclomatic Complexity"
@@ -207,6 +208,7 @@
             id="RMD"
             level="packageFragment">
       </metric>
+      -->
       <metric
             propagateSum="false"
             name="Depth of Inheritance Tree"
@@ -312,6 +314,7 @@
             id="SIX"
             level="type">
       </metric>
+      <!-- KAC
       <metric
             allowDisable="false"
             name="Number of Classes"
@@ -336,6 +339,7 @@
             id="NOP"
             level="packageFragmentRoot">
       </metric>
+      -->
 <!-- calculators -->
 <!--
       <calculator
@@ -344,6 +348,7 @@
             level="method">
       </calculator>
 -->
+      <!-- KAC
       <calculator
             name="McCabe Cyclomatic Complexity"
             calculatorClass="net.sourceforge.metrics.calculators.McCabe"
@@ -359,6 +364,7 @@
             calculatorClass="net.sourceforge.metrics.calculators.NestedBlockDepth"
             level="method">
       </calculator>
+      -->
       <calculator
             name="Inheritance Depth"
             calculatorClass="net.sourceforge.metrics.calculators.InheritanceDepth"
@@ -419,12 +425,15 @@
             calculatorClass="net.sourceforge.metrics.calculators.SpecializationIndex"
             level="type">
       </calculator>
+      <!-- KAC
       <calculator
             name="RMartinCouplings"
             calculatorClass="net.sourceforge.metrics.calculators.RMartinCouplings"
             level="packageFragment">
       </calculator>
+      -->
       <!-- G.B. -->
+      <!-- KAC
       <calculator
             level="compilationUnit"
             calculatorClass="net.sourceforge.metrics.calculators.TotalLinesOfCode"
@@ -443,6 +452,7 @@
             name="Method Lines of Code"
             id="MLOC"
             allowDisable="true"/>
+            -->
    </extension>
    <extension
          point="net.sourceforge.metrics.exporters">
