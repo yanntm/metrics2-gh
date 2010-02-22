@@ -44,6 +44,7 @@ public class MetricsActionGroup extends ActionGroup {
 	private ResumeAction resumeAction;
 	private PauseAction pauseAction;
 	private ExportAction exportAction;
+	private ToDatabaseAction toDatabaseAction;
 	private GraphAction graphAction;
 	private AbortAllAction abortAction;
 	private MetricsView metricsView;
@@ -62,6 +63,7 @@ public class MetricsActionGroup extends ActionGroup {
 		abortAction = new AbortAllAction();
 		pauseAction = new PauseAction();
 		resumeAction = new ResumeAction();
+		toDatabaseAction = new ToDatabaseAction();
 	}
 
 	@Override
@@ -77,6 +79,7 @@ public class MetricsActionGroup extends ActionGroup {
 		toolBar.add(pauseAction);
 		toolBar.add(abortAction);
 		toolBar.add(exportAction);
+		toolBar.add(toDatabaseAction);
 		toolBar.add(graphAction);
 	}
 
@@ -85,6 +88,7 @@ public class MetricsActionGroup extends ActionGroup {
 		menu.add(pauseAction);
 		menu.add(abortAction);
 		menu.add(exportAction);
+		menu.add(toDatabaseAction);
 		menu.add(graphAction);
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
@@ -126,6 +130,24 @@ public class MetricsActionGroup extends ActionGroup {
 		public void run() {
 			try {
 				getView().exportXML();
+			} catch (RuntimeException e) {
+				Log.logError("ExportAction::run", e);
+			}
+		}
+	}
+
+	private class ToDatabaseAction extends Action {
+		public ToDatabaseAction() {
+			super("&Export to DB...", MetricsPlugin.createImage("toDB.gif"));
+			setToolTipText("&Export to DB...");
+		}
+
+		/**
+		 * @see org.eclipse.jface.action.Action#run()
+		 */
+		@Override
+		public void run() {
+			try {
 				// TODO select exports desired
 				try {
 				    getView().exportToDB();
@@ -135,7 +157,7 @@ public class MetricsActionGroup extends ActionGroup {
 				}
 
 			} catch (RuntimeException e) {
-				Log.logError("ExportAction::run", e);
+				Log.logError("ToDatabaseAction::run", e);
 			}
 		}
 	}
@@ -216,6 +238,7 @@ public class MetricsActionGroup extends ActionGroup {
 		pauseAction.setEnabled(MetricsBuilder.canPause());
 		resumeAction.setEnabled(MetricsBuilder.canResume());
 		exportAction.setEnabled(true);
+		toDatabaseAction.setEnabled(true);
 		IJavaElement sel = metricsView.getSelection();
 		if ((sel != null) && ((sel.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) || sel.getElementType() == IJavaElement.JAVA_PROJECT)) {
 			graphAction.setEnabled(true);
@@ -230,6 +253,7 @@ public class MetricsActionGroup extends ActionGroup {
 		pauseAction.setEnabled(MetricsBuilder.canPause());
 		resumeAction.setEnabled(MetricsBuilder.canResume());
 		exportAction.setEnabled(false);
+		toDatabaseAction.setEnabled(false);
 		graphAction.setEnabled(false);
 	}
 
