@@ -408,7 +408,7 @@ public class CallData {
 		// Update the stored information about the methods of the class
 		for (IMethod method : methods) {
 			// Update the methodCalledByMap for typeMethods[i]
-			Set<IMethod> callers = getCallingMethods(type, method);
+			Set<IMethod> callers = getLocalCallingMethods(type, method);
 			methodCalledByMap.put(method, new HashSet<IMethod>(callers));
 
 			// Update the methodsCalledMap for method
@@ -447,7 +447,7 @@ public class CallData {
 		// Update the stored information about the fields of the class
 		for (IField attribute : attributes) {
 			// Update the fieldCalledByMap for attribute
-			Set<IMethod> callers = getCallingMethods(type, attribute);
+			Set<IMethod> callers = getLocalCallingMethods(type, attribute);
 			attributeAccessedByMap
 					.put(attribute, new HashSet<IMethod>(callers));
 
@@ -505,16 +505,16 @@ public class CallData {
 	 *            the field or method whose accessors are being determined
 	 * @return the collection of methods that access the indicated member
 	 */
-	protected Set<IMethod> getCallingMethods(IType type, IMember member) {
-		SearchPattern callingMethodPattern = SearchPattern.createPattern(
-				member, IJavaSearchConstants.REFERENCES);
-		IJavaSearchScope scope = SearchEngine
-				.createJavaSearchScope(new IJavaElement[] { type });
+	protected Set<IMethod> getLocalCallingMethods(IType type, IMember member) {
+		SearchPattern callingMethodPattern =
+			SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES);
+		IJavaSearchScope scope =
+			SearchEngine.createJavaSearchScope(new IJavaElement[] { type });
 		MethodCollector methodCollector = new MethodCollector();
 		SearchEngine searchEngine = new SearchEngine();
 		try {
-			SearchParticipant[] participants = new SearchParticipant[] { SearchEngine
-					.getDefaultSearchParticipant() };
+			SearchParticipant[] participants =
+				new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
 			searchEngine.search(callingMethodPattern, participants, scope,
 					methodCollector, null);
 		} catch (CoreException e) {
