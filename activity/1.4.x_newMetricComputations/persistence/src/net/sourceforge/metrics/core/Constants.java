@@ -30,17 +30,17 @@ import org.eclipse.jdt.core.IJavaElement;
 public interface Constants {
 
     /** project level source */
-    public final static int PROJECT = IJavaElement.JAVA_PROJECT; // formerly 6;
+    public final static int PROJECT = IJavaElement.JAVA_PROJECT; // now 2, formerly 6;
     /** source folder level source */
-    public final static int PACKAGEROOT = IJavaElement.PACKAGE_FRAGMENT_ROOT; // formerly 5;
+    public final static int PACKAGEROOT = IJavaElement.PACKAGE_FRAGMENT_ROOT; // now 3, formerly 5;
     /** package level source */
-    public final static int PACKAGEFRAGMENT = IJavaElement.PACKAGE_FRAGMENT; // formerly 4;
+    public final static int PACKAGEFRAGMENT = IJavaElement.PACKAGE_FRAGMENT; // 4;
     /** compilation unit level source */
-    public final static int COMPILATIONUNIT = IJavaElement.COMPILATION_UNIT; // formerly 3;
+    public final static int COMPILATIONUNIT = IJavaElement.COMPILATION_UNIT; // now 5, formerly 3;
     /** class level source */
-    public final static int TYPE = IJavaElement.TYPE; // formerly 2;
+    public final static int TYPE = IJavaElement.TYPE; // now 7, formerly 2;
     /** method level source */
-    public final static int METHOD = IJavaElement.METHOD; // formerly 1
+    public final static int METHOD = IJavaElement.METHOD; // now 9, formerly 1
 
     // basic metric ids
 
