@@ -500,10 +500,15 @@
             class="net.sourceforge.metrics.properties.MetricsPropertyPage"
             nameFilter="*"
             id="net.sourceforge.metrics.properties.MetricsPropertyPage">
+            <!-- KAC: the deprecated objectClass line works around a bug
+                 where the Metrics checkbox isn't available on the
+                 property page on some platforms.
             <enabledWhen>
             <instanceof
                   value="org.eclipse.jdt.core.IJavaProject"/>
             </enabledWhen>
+             -->
+            <objectClass value="org.eclipse.jdt.core.IJavaProject"/> 
       </page>
    </extension>
    <extension
