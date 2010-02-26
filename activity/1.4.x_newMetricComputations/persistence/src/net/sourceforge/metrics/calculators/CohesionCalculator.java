@@ -22,12 +22,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.sourceforge.metrics.core.Constants;
+import net.sourceforge.metrics.core.Log;
 import net.sourceforge.metrics.core.Metric;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 import net.sourceforge.metrics.core.sources.TypeMetrics;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -107,8 +109,15 @@ public abstract class CohesionCalculator extends Calculator implements
 	CallData callData = metrics.getCallData();
 	if (callData == null) {
 	    callData = new CallData();
-	    callData.collectCallData(metrics, prefs);
-	    metrics.setCallData(callData);
+	    try
+        {
+            callData.collectCallData(metrics, prefs);
+            metrics.setCallData(callData);
+        }
+        catch (JavaModelException e)
+        {
+            Log.logError("Unable to collect call data", e);
+        }
 	}
 	return callData;
     }

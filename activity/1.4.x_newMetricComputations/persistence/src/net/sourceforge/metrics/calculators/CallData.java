@@ -355,8 +355,9 @@ public class CallData {
 	 * 
 	 * @param source
 	 *            the class to analyze
+	 * @throws JavaModelException generally when the project can not be found
 	 */
-	public void collectCallData(TypeMetrics source, CohesionPreferences prefs) {
+	public void collectCallData(TypeMetrics source, CohesionPreferences prefs) throws JavaModelException {
 		if (prefs != null) {
 			countStaticAttributes = prefs.countStaticAttributes();
 			countStaticMethods = prefs.countStaticMethods();
@@ -372,15 +373,16 @@ public class CallData {
 	 * 
 	 * @param type
 	 *            the class to analyze
-	 */
-	public void collectCallData(IType type) {
+	 * @throws JavaModelException generally when the project can not be found
+     */
+	public void collectCallData(IType type) throws JavaModelException {
 		try {
 			collectMethodCallData(type);
 			collectFieldCallData(type);
 		} catch (JavaModelException e) {
 			Log.logError("collectCallData failed for " + type.getElementName()
 					+ ":\n", e);
-			e.printStackTrace();
+			throw e;
 		}
 	}
 
