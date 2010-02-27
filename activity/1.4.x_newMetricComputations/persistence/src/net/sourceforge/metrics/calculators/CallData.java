@@ -376,9 +376,15 @@ public class CallData {
 	 * @throws JavaModelException generally when the project can not be found
      */
 	public void collectCallData(IType type) throws JavaModelException {
+		IJavaSearchScope scope =
+			SearchEngine.createJavaSearchScope(new IJavaElement[] { type });
+		MethodCollector methodCollector = new MethodCollector();
+		SearchEngine searchEngine = new SearchEngine();
+		SearchParticipant[] participants =
+			new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
 		try {
-			collectMethodCallData(type);
-			collectFieldCallData(type);
+			collectMethodCallData(type, searchEngine, participants, scope, methodCollector);
+			collectFieldCallData(type, searchEngine, participants, scope, methodCollector);
 		} catch (JavaModelException e) {
 			Log.logError("collectCallData failed for " + type.getElementName()
 					+ ":\n", e);
@@ -394,7 +400,11 @@ public class CallData {
 	 * @param type
 	 *            the class to analyze
 	 */
-	private void collectMethodCallData(IType type)
+	private void collectMethodCallData(IType type,
+			SearchEngine searchEngine,
+			SearchParticipant[] participants,
+			IJavaSearchScope scope,
+			MethodCollector methodCollector)
 			throws JavaModelException {
 		IMethod[] typeMethods = type.getMethods();
 
@@ -410,7 +420,8 @@ public class CallData {
 		// Update the stored information about the methods of the class
 		for (IMethod method : methods) {
 			// Update the methodCalledByMap for typeMethods[i]
-			Set<IMethod> callers = getLocalCallingMethods(type, method);
+			Set<IMethod> callers =
+				getLocalCallingMethods(method, searchEngine, participants, scope, methodCollector);
 			methodCalledByMap.put(method, new HashSet<IMethod>(callers));
 
 			// Update the methodsCalledMap for method
@@ -433,7 +444,11 @@ public class CallData {
 	 * @param type
 	 *            the class to analyze
 	 */
-	private void collectFieldCallData(IType type)
+	private void collectFieldCallData(IType type,
+			SearchEngine searchEngine,
+			SearchParticipant[] participants,
+			IJavaSearchScope scope,
+			MethodCollector methodCollector)
 			throws JavaModelException {
 		IField[] typeFields = type.getFields();
 
@@ -449,7 +464,8 @@ public class CallData {
 		// Update the stored information about the fields of the class
 		for (IField attribute : attributes) {
 			// Update the fieldCalledByMap for attribute
-			Set<IMethod> callers = getLocalCallingMethods(type, attribute);
+			Set<IMethod> callers =
+				getLocalCallingMethods(attribute, searchEngine, participants, scope, methodCollector);
 			attributeAccessedByMap
 					.put(attribute, new HashSet<IMethod>(callers));
 
@@ -507,21 +523,20 @@ public class CallData {
 	 *            the field or method whose accessors are being determined
 	 * @return the collection of methods that access the indicated member
 	 */
-	protected Set<IMethod> getLocalCallingMethods(IType type, IMember member) {
-		SearchPattern callingMethodPattern =
-			SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES);
-		IJavaSearchScope scope =
-			SearchEngine.createJavaSearchScope(new IJavaElement[] { type });
-		MethodCollector methodCollector = new MethodCollector();
-		SearchEngine searchEngine = new SearchEngine();
+	protected Set<IMethod> getLocalCallingMethods(
+			IMember member,
+			SearchEngine searchEngine,
+			SearchParticipant[] participants,
+			IJavaSearchScope scope,
+			MethodCollector methodCollector) {
 		try {
-			SearchParticipant[] participants =
-				new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
+			SearchPattern callingMethodPattern =
+				SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES);
 			searchEngine.search(callingMethodPattern, participants, scope,
 					methodCollector, null);
 		} catch (CoreException e) {
 			Log.logError("getCallingMethods failed for "
-					+ type.getElementName() + "." + member.getElementName(), e);
+					+ member.getElementName(), e);
 		}
 		Set<IMethod> callers = methodCollector.getResults();
 		return callers;
