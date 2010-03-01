@@ -22,6 +22,7 @@ package net.sourceforge.metrics.ui;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.Set;
 
@@ -484,13 +485,20 @@ public class MetricsView extends ViewPart implements ISelectionListener, IMetric
 	}
 
     /**
-     * export the selected metrics to thr database
+     * export the selected metrics to the database
      * @throws InvocationTargetException 
      */
 	public void exportToDB() throws InvocationTargetException {
 		if (selection != null) {
 			MetricsDBTransaction transaction = new MetricsDBTransaction();
-			transaction.saveToDB(selection);
+			try {
+				transaction.saveToDB(selection);
+			} catch (SQLException e) {
+				MessageDialog.openWarning(getSite().getShell(),
+						"Database Access Failed",
+						"Writing of metric data to database failed: "
+								+ e.getMessage());
+			}
 		}
 	}
 

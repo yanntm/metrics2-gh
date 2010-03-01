@@ -28,10 +28,11 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 	 * @param element
 	 *            the highest level element to be saved, e.g. a project
 	 * @throws InvocationTargetException
+	 * @throws SQLException 
 	 */
 	public void saveToDB(IJavaElement element)
 	// , IProgressMonitor monitor)
-			throws InvocationTargetException {
+			throws InvocationTargetException, SQLException {
 		Database db = new Database();
 		db.loadDriver();
 		Connection connection = null;
@@ -72,6 +73,7 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 			db.shutDownEmbedded();
 		} catch (SQLException sqle) {
 			Database.printSQLException(sqle);
+			throw sqle;
 		} finally {
 			// release all open resources to avoid unnecessary memory usage
 			db.releaseResources(connection, statements, resultSet);
