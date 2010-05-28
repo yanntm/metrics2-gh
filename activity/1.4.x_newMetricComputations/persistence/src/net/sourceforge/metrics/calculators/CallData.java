@@ -397,8 +397,12 @@ public class CallData {
 	 * class. This information is stored in the methodCalledByMap and
 	 * methodsCalledMap.
 	 * 
-	 * @param type
-	 *            the class to analyze
+	 * @param type the class to analyze
+	 * @param searchEngine
+	 * @param participants
+	 * @param scope the elements being examined, e.g. this class or this package
+	 * @param methodCollector gathers the search results
+	 * @return the collection of methods that access the indicated member
 	 */
 	private void collectMethodCallData(IType type,
 			SearchEngine searchEngine,
@@ -421,7 +425,7 @@ public class CallData {
 		for (IMethod method : methods) {
 			// Update the methodCalledByMap for typeMethods[i]
 			Set<IMethod> callers =
-				getLocalCallingMethods(method, searchEngine, participants, scope, methodCollector);
+				getCallingMethods(method, searchEngine, participants, scope, methodCollector);
 			methodCalledByMap.put(method, new HashSet<IMethod>(callers));
 
 			// Update the methodsCalledMap for method
@@ -443,6 +447,10 @@ public class CallData {
 	 * 
 	 * @param type
 	 *            the class to analyze
+	 * @param searchEngine
+	 * @param participants
+	 * @param scope the elements being examined, e.g. this class or this package
+	 * @param methodCollector gathers the search results
 	 */
 	private void collectFieldCallData(IType type,
 			SearchEngine searchEngine,
@@ -465,7 +473,7 @@ public class CallData {
 		for (IField attribute : attributes) {
 			// Update the fieldCalledByMap for attribute
 			Set<IMethod> callers =
-				getLocalCallingMethods(attribute, searchEngine, participants, scope, methodCollector);
+				getCallingMethods(attribute, searchEngine, participants, scope, methodCollector);
 			attributeAccessedByMap
 					.put(attribute, new HashSet<IMethod>(callers));
 
@@ -511,19 +519,36 @@ public class CallData {
 			}
 		}
 	}
-
+	
 	/**
-	 * Collects the intraclass methods that access the specified member
-	 * 
-	 * @param source
-	 *            the code being examined
-	 * @param type
-	 *            the class being examined
-	 * @param member
-	 *            the field or method whose accessors are being determined
+	 * Collects the methods that access the specified member
+	 * @param member the field or method whose accessors are being determined
+	 * @param scope the elements being examined, e.g. this class or this package
 	 * @return the collection of methods that access the indicated member
 	 */
-	protected Set<IMethod> getLocalCallingMethods(
+	public Set<IMethod> getCallingMethods(
+			IMember member,
+			IJavaSearchScope scope) {
+		MethodCollector methodCollector = new MethodCollector();
+		SearchEngine searchEngine = new SearchEngine();
+		SearchParticipant[] participants =
+			new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
+		Set<IMethod> callers =
+			getCallingMethods(member, searchEngine, participants,
+					scope, methodCollector);
+		return callers;
+	}
+
+	/**
+	 * Collects the methods that access the specified member
+	 * @param member the field or method whose accessors are being determined
+	 * @param searchEngine
+	 * @param participants
+	 * @param scope the elements being examined, e.g. this class or this package
+	 * @param methodCollector gathers the search results
+	 * @return the collection of methods that access the indicated member
+	 */
+	protected Set<IMethod> getCallingMethods(
 			IMember member,
 			SearchEngine searchEngine,
 			SearchParticipant[] participants,
