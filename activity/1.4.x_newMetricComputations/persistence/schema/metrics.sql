@@ -109,6 +109,8 @@ INSERT INTO JOOMP.MetricID(metricid, metricname, acronym)
     VALUES (31, 'TLOC', 'TLOC');
 INSERT INTO JOOMP.MetricID(metricid, metricname, acronym)
     VALUES (32, 'LCOMCK', 'LCOMCK');
+INSERT INTO JOOMP.MetricID(metricid, metricname, acronym)
+    VALUES (33, 'CBO', 'CBO');
 
 -- sourcename e.g. MyClass or mySignature(int, double)
 DROP TABLE JOOMP.SourceID;

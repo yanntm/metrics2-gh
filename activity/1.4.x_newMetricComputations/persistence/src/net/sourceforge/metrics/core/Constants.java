@@ -95,13 +95,18 @@ public interface Constants {
     public static final String LCOMCK = "LCOMCK";
     /** "TCC" - Tight Class Cohesion */
     public final static String TCC = "TCC";
+    
+    /* Coupling Constants */
 
+    /** Coupling Between Objects (CBO) */
+    public final static String CBO = "CBO";
     /** "RMC" */
     public final static String RMC = "RMC";
-    /** "CA" */
+    /** Coupling - Afferent (CA) */
     public final static String CA = "CA";
-    /** "CE" */
+    /** Coupling - Efferent (CE) */
     public final static String CE = "CE";
+
     /** "RMI" */
     public final static String RMI = "RMI";
     /** "RMA" */

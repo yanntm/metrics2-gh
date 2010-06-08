@@ -284,6 +284,7 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 			insertMetricId(statement, i++, "LCOMHS", "LCOMHS");
 			insertMetricId(statement, i++, "LCOMCK", "LCOMCK");
 			insertMetricId(statement, i++, "TCC", "TCC");
+			insertMetricId(statement, i++, "CBO", "CBO");
 			insertMetricId(statement, i++, "RMC", "RMC");
 			insertMetricId(statement, i++, "CA", "CA");
 			insertMetricId(statement, i++, "CE", "CE");

@@ -175,6 +175,13 @@
                hint="use Extract-method to split the method up">
          </range>
       </metric>
+
+      <metric
+            propagateSum="false"
+            name="Coupling Between Objects"
+            id="CBO"
+            level="type">
+      </metric>
       <!-- KAC
       <metric
             propagateSum="false"
@@ -421,6 +428,11 @@
       <calculator
             name="SpecializationIndex"
             calculatorClass="net.sourceforge.metrics.calculators.SpecializationIndex"
+            level="type">
+      </calculator>
+      <calculator
+            name="Coupling Between Objects"
+            calculatorClass="net.sourceforge.metrics.calculators.CouplingCK"
             level="type">
       </calculator>
       <!-- KAC
