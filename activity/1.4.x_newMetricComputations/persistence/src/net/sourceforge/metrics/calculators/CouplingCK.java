@@ -76,11 +76,11 @@ public class CouplingCK extends Calculator {
 		}
 		TypeMetrics metrics = (TypeMetrics) source;
 		Set<String> clients = calculateClients(metrics);
-//		Set<String> servers = calculateServers(metrics);
+		Set<String> servers = calculateServers(metrics);
 //		
 //		// Clients now becomes all directly associated classes, excluding
 //		// the class itself
-//		clients.addAll(servers);
+		clients.addAll(servers);
 		clients.remove(source.getJavaElement().getHandleIdentifier());
 		Metric metric = new Metric(CBO, clients.size());
 		source.setValue(metric);
@@ -112,19 +112,6 @@ public class CouplingCK extends Calculator {
 	}
 
 	/**
-	 * Create a search scope consisting of this element's project.
-	 * @param element
-	 * @return the scope
-	 */
-	private IJavaSearchScope createProjectSearchScope(IJavaElement element)
-			throws JavaModelException {
-		IJavaProject project =
-			(IJavaProject) element.getAncestor(IJavaElement.JAVA_PROJECT);
-	    IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] {project});
-		return scope;
-	}
-
-	/**
 	 * Find all classes that this class accesses.
 	 * @param source
 	 * @return the classes that have methods or
@@ -133,14 +120,11 @@ public class CouplingCK extends Calculator {
 	private Set<String> calculateServers(TypeMetrics source) {
 		Set<String> servers = null;
 		IJavaElement typeElement = source.getJavaElement();
-		IJavaProject javaProject = typeElement.getJavaProject();
-		String projectName = javaProject.getElementName();
+//		IJavaProject javaProject = typeElement.getJavaProject();
+//		String projectName = javaProject.getElementName();
 		//TODO get this to work
-//		SearchPattern pattern = SearchPattern.createPattern("*",
-//				IJavaSearchConstants.CLASS, IJavaSearchConstants.REFERENCES,
-//				SearchPattern.R_PATTERN_MATCH);
 		SearchPattern pattern = SearchPattern.createPattern("*",
-				IJavaSearchConstants.FIELD, IJavaSearchConstants.REFERENCES,
+				IJavaSearchConstants.TYPE, IJavaSearchConstants.REFERENCES,
 				SearchPattern.R_PATTERN_MATCH);
 //		IJavaSearchScope scope = SearchEngine
 //				.createJavaSearchScope(new IJavaElement[] { typeElement });
@@ -156,6 +140,32 @@ public class CouplingCK extends Calculator {
 			Log.logError("Error calculating servers for CBO: ", e);
 		}
 		return servers;
+	}
+	
+	/* TODO incorporate Code from org.eclipse.jdt.internal.corext.callhierarchy Callees:
+CalleeMethodWrapper.MethodWrapper[] getCalls(IProgressMonitor)
+MethodWrapper[] MethodWrapper.getCalls(IProgressMonitor)
+CalleeMethodWrapper.findChildren
+generates a CalleeAnalyzerVisitor which is sent through the AST
+CompilationUnit? ASTNode?.accept0 (specialization of ASTNode?)
+
+IMember member;
+MethodCall methodCall= new MethodCall(member);
+MethodWrapper root= new CalleeMethodWrapper(null, methodCall);
+MethodWrapper[] wrappers = root.getCalls(null); // IProgressMonitor
+*/
+	
+	/**
+	 * Create a search scope consisting of this element's project.
+	 * @param element
+	 * @return the scope
+	 */
+	private IJavaSearchScope createProjectSearchScope(IJavaElement element)
+			throws JavaModelException {
+		IJavaProject project =
+			(IJavaProject) element.getAncestor(IJavaElement.JAVA_PROJECT);
+	    IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] {project});
+		return scope;
 	}
 
 	/**
