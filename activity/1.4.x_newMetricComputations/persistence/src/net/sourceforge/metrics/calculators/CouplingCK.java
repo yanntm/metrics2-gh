@@ -20,7 +20,9 @@
  */
 package net.sourceforge.metrics.calculators;
 
+//import java.util.HashMap;
 import java.util.HashSet;
+//import java.util.Map;
 import java.util.Set;
 
 import net.sourceforge.metrics.core.Log;
@@ -29,10 +31,13 @@ import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 import net.sourceforge.metrics.core.sources.TypeMetrics;
 
 import org.eclipse.core.runtime.CoreException;
+//import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+//import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+//import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -40,6 +45,10 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
+//import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
+//import org.eclipse.jdt.internal.corext.callhierarchy.CalleeAnalyzerVisitor;
+//import org.eclipse.jdt.internal.corext.callhierarchy.MethodCall;
+//import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
 /**
  * Calculates coupling between objects (CBO). "CBO for a class is a count of the
@@ -148,13 +157,35 @@ MethodWrapper[] MethodWrapper.getCalls(IProgressMonitor)
 CalleeMethodWrapper.findChildren
 generates a CalleeAnalyzerVisitor which is sent through the AST
 CompilationUnit? ASTNode?.accept0 (specialization of ASTNode?)
-
-IMember member;
-MethodCall methodCall= new MethodCall(member);
-MethodWrapper root= new CalleeMethodWrapper(null, methodCall);
-MethodWrapper[] wrappers = root.getCalls(null); // IProgressMonitor
 */
-	
+	/*
+	private Set<String> findCalledClases(TypeMetrics source) {
+		IMember member;
+		MethodCall methodCall = new MethodCall(member);
+		CalleeMethodWrapper root = new CalleeMethodWrapper(null, methodCall);
+		MethodWrapper[] wrappers = root.getCalls(null); // IProgressMonitor
+	}
+*/	
+	/**
+     * Find callees called from the current method.
+	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#findChildren(org.eclipse.core.runtime.IProgressMonitor)
+     */
+	/*
+    protected Map findChildren(IMember member) {
+		if (member.exists()) {
+			CompilationUnit cu= CallHierarchy.getCompilationUnitNode(member, true);
+
+			if (cu != null) {
+				CalleeAnalyzerVisitor visitor =
+					new CalleeAnalyzerVisitor(member, cu, progressMonitor);
+
+				cu.accept(visitor);
+				return visitor.getCallees();
+			}
+		}
+        return new HashMap(0);
+    }
+*/
 	/**
 	 * Create a search scope consisting of this element's project.
 	 * @param element
@@ -174,11 +205,13 @@ MethodWrapper[] wrappers = root.getCalls(null); // IProgressMonitor
 	 */
 	public static class ClientCollector extends SearchRequestor {
 
+		/** The set of handles of ITypes (the calling classes). */
 		private Set<String> results = null;
 
 		public ClientCollector(TypeMetrics source) {
 		}
 
+		/** @return The set of handles of ITypes (the calling classes). */
 		public Set<String> getResult() {
 			return results;
 		}
@@ -193,10 +226,8 @@ MethodWrapper[] wrappers = root.getCalls(null); // IProgressMonitor
 			results = new HashSet<String>();
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
+		/**
+		 * Adds the handle of the IType that contains this element to the results.
 		 * org.eclipse.jdt.core.search.SearchRequestor#acceptSearchMatch(org
 		 * .eclipse.jdt.core.search.SearchMatch)
 		 */
@@ -252,7 +283,10 @@ MethodWrapper[] wrappers = root.getCalls(null); // IProgressMonitor
 			IJavaElement enclosingElement = (IJavaElement) match.getElement();
 			if (enclosingElement != null) {
 				IJavaElement element = enclosingElement.getAncestor(IJavaElement.TYPE);
-				results.add(element.getHandleIdentifier());
+				
+				if (element != null) {
+					results.add(element.getHandleIdentifier());
+				}
 			}
 		}
 
