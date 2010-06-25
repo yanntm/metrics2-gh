@@ -20,9 +20,7 @@
  */
 package net.sourceforge.metrics.calculators;
 
-//import java.util.HashMap;
 import java.util.HashSet;
-//import java.util.Map;
 import java.util.Set;
 
 import net.sourceforge.metrics.core.Log;
@@ -31,13 +29,10 @@ import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 import net.sourceforge.metrics.core.sources.TypeMetrics;
 
 import org.eclipse.core.runtime.CoreException;
-//import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-//import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-//import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -45,10 +40,6 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
-//import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
-//import org.eclipse.jdt.internal.corext.callhierarchy.CalleeAnalyzerVisitor;
-//import org.eclipse.jdt.internal.corext.callhierarchy.MethodCall;
-//import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
 /**
  * Calculates coupling between objects (CBO). "CBO for a class is a count of the
@@ -62,6 +53,8 @@ import org.eclipse.jdt.core.search.SearchRequestor;
  * @author Keith Cassell
  */
 public class CouplingCK extends Calculator {
+	// TODO have user preference about which coupled objects should
+	// be counted
 
 	/**
 	 * @param name
@@ -86,9 +79,9 @@ public class CouplingCK extends Calculator {
 		TypeMetrics metrics = (TypeMetrics) source;
 		Set<String> clients = calculateClients(metrics);
 		Set<String> servers = calculateServers(metrics);
-//		
-//		// Clients now becomes all directly associated classes, excluding
-//		// the class itself
+		
+		// Clients now becomes all directly associated classes, excluding
+		// the class itself
 		clients.addAll(servers);
 		clients.remove(source.getJavaElement().getHandleIdentifier());
 		Metric metric = new Metric(CBO, clients.size());
@@ -128,22 +121,12 @@ public class CouplingCK extends Calculator {
 	 */
 	private Set<String> calculateServers(TypeMetrics source) {
 		Set<String> servers = null;
-		IJavaElement typeElement = source.getJavaElement();
-//		IJavaProject javaProject = typeElement.getJavaProject();
-//		String projectName = javaProject.getElementName();
-		//TODO get this to work
-		SearchPattern pattern = SearchPattern.createPattern("*",
-				IJavaSearchConstants.TYPE, IJavaSearchConstants.REFERENCES,
-				SearchPattern.R_PATTERN_MATCH);
-//		IJavaSearchScope scope = SearchEngine
-//				.createJavaSearchScope(new IJavaElement[] { typeElement });
+		IJavaElement callerElement = source.getJavaElement();
+
 		try {
-			IJavaSearchScope scope = createProjectSearchScope(typeElement);
 			SearchEngine searchEngine = new SearchEngine();
-			ServerCollector collector = new ServerCollector(source);
-			SearchParticipant[] participants = new SearchParticipant[] {
-					SearchEngine.getDefaultSearchParticipant() };
-			searchEngine.search(pattern, participants, scope, collector, null);
+			ServerCollector collector = new ServerCollector(callerElement);
+			searchEngine.searchDeclarationsOfReferencedTypes(callerElement, collector, null);
 			servers = collector.getResult();
 		} catch (CoreException e) {
 			Log.logError("Error calculating servers for CBO: ", e);
@@ -151,41 +134,6 @@ public class CouplingCK extends Calculator {
 		return servers;
 	}
 	
-	/* TODO incorporate Code from org.eclipse.jdt.internal.corext.callhierarchy Callees:
-CalleeMethodWrapper.MethodWrapper[] getCalls(IProgressMonitor)
-MethodWrapper[] MethodWrapper.getCalls(IProgressMonitor)
-CalleeMethodWrapper.findChildren
-generates a CalleeAnalyzerVisitor which is sent through the AST
-CompilationUnit? ASTNode?.accept0 (specialization of ASTNode?)
-*/
-	/*
-	private Set<String> findCalledClases(TypeMetrics source) {
-		IMember member;
-		MethodCall methodCall = new MethodCall(member);
-		CalleeMethodWrapper root = new CalleeMethodWrapper(null, methodCall);
-		MethodWrapper[] wrappers = root.getCalls(null); // IProgressMonitor
-	}
-*/	
-	/**
-     * Find callees called from the current method.
-	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#findChildren(org.eclipse.core.runtime.IProgressMonitor)
-     */
-	/*
-    protected Map findChildren(IMember member) {
-		if (member.exists()) {
-			CompilationUnit cu= CallHierarchy.getCompilationUnitNode(member, true);
-
-			if (cu != null) {
-				CalleeAnalyzerVisitor visitor =
-					new CalleeAnalyzerVisitor(member, cu, progressMonitor);
-
-				cu.accept(visitor);
-				return visitor.getCallees();
-			}
-		}
-        return new HashMap(0);
-    }
-*/
 	/**
 	 * Create a search scope consisting of this element's project.
 	 * @param element
@@ -237,6 +185,7 @@ CompilationUnit? ASTNode?.accept0 (specialization of ASTNode?)
 			if (enclosingElement != null) {
 				IJavaElement element = enclosingElement.getAncestor(IJavaElement.TYPE);
 				results.add(element.getHandleIdentifier());
+				// TODO inheritance check
 			}
 		}
 
@@ -246,12 +195,18 @@ CompilationUnit? ASTNode?.accept0 (specialization of ASTNode?)
 	public static class ServerCollector extends SearchRequestor
 	// implements IJavaSearchResultCollector
 	{
-
+		/** The element whose called classes are to be found. */
+		IJavaElement callerElement = null;
+		
+		/** The type element whose called classes are to be found. */
+		IType callerType = null;
+		
+		/** The handles of the classes that are depended on. */
 		Set<String> results = null;
-//		TypeMetrics source = null;
 
-		public ServerCollector(TypeMetrics source) {
-//			this.source = source;
+		public ServerCollector(IJavaElement callerElement) {
+			this.callerElement = callerElement;
+			callerType = (IType) callerElement.getAncestor(IJavaElement.TYPE);
 		}
 
 		/**
@@ -282,14 +237,25 @@ CompilationUnit? ASTNode?.accept0 (specialization of ASTNode?)
 		public void acceptSearchMatch(SearchMatch match) throws CoreException {
 			IJavaElement enclosingElement = (IJavaElement) match.getElement();
 			if (enclosingElement != null) {
-				IJavaElement element = enclosingElement.getAncestor(IJavaElement.TYPE);
-				
-				if (element != null) {
-					results.add(element.getHandleIdentifier());
+				IJavaElement typeElement =
+					enclosingElement.getAncestor(IJavaElement.TYPE);
+
+				if (typeElement != null) {
+					IJavaProject callerProject = callerElement.getJavaProject();
+					IJavaProject calleeProject = typeElement.getJavaProject();
+
+					if (callerProject != null
+							&& callerProject.equals(calleeProject)) {
+//TODO					> > I want to find an IType element that represents the superclass of some
+//						> > IType element.
+//
+//						> Try IType#newSupertypeHierarchy().
+						results.add(typeElement.getHandleIdentifier());
+					}
 				}
 			}
 		}
 
-	}
+	}	// class ServerCollector
 
 }
