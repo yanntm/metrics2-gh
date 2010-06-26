@@ -176,13 +176,13 @@
          </range>
       </metric>
 
-      <!-- KAC
       <metric
             propagateSum="false"
             name="Coupling Between Objects"
             id="CBO"
             level="type">
       </metric>
+      <!-- KAC
       <metric
             propagateSum="false"
             name="Afferent Coupling"
@@ -430,12 +430,12 @@
             calculatorClass="net.sourceforge.metrics.calculators.SpecializationIndex"
             level="type">
       </calculator>
-      <!-- KAC
       <calculator
             name="Coupling Between Objects"
             calculatorClass="net.sourceforge.metrics.calculators.CouplingCK"
             level="type">
       </calculator>
+      <!-- KAC
       <calculator
             name="RMartinCouplings"
             calculatorClass="net.sourceforge.metrics.calculators.RMartinCouplings"
