@@ -1,6 +1,4 @@
 /*
- * Copyright (c) 2003 Frank Sauer. All rights reserved.
- *
  * Licenced under CPL 1.0 (Common Public License Version 1.0).
  * The licence is available at http://www.eclipse.org/legal/cpl-v10.html.
  *
@@ -43,32 +41,39 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 
 /**
  * Calculates coupling between objects (CBO). "CBO for a class is a count of the
- * number of noninheritance related couples with other classes." Two classes are
- * considered to be coupled when "methods of one use methods or instance
- * variables of another."  This class makes the assumption that CBO will be
- * calculated only between classes in the same project.
+ * number of other classes to which it is coupled."  "...two classes are coupled
+ * when methods declared in one class use methods or instance variables defined
+ * by the other class."  This implementation of CBO considers inheritance
+ * to be a form of coupling.
+ * It is not possible to know all possible externally defined clients of a
+ * class, so this implementation of CBO only considers those clients of a class
+ * that exist within the same project.
  * 
- * @see CHIDAMBER, S., AND KEMERER, C. Towards a metrics suite for object
- *      oriented design. Proceedings OOPSLA '91 (1991).
+ * @see CHIDAMBER, S., AND KEMERER, C.,  "A metrics suite for object
+ *      oriented design",  IEEE Transactions on Software Engineering
+ *      Vol 20 #6, 1994.
  * @author Keith Cassell
  */
 public class CouplingCK extends Calculator {
 	// TODO have user preference about which coupled objects should
-	// be counted
+	// be counted, e.g. inheritance or not, external clients or not
 
-	/**
-	 * @param name
-	 */
 	public CouplingCK() {
 		super(CBO);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.sourceforge.metrics.core.ICalculator#calculate(net.sourceforge.metrics
-	 * .core.sources.AbstractMetricSource)
+	/**
+	 * Calculates coupling between objects (CBO). "CBO for a class is a count of
+	 * the number of other classes to which it is coupled."  "...two classes are
+	 * coupled when methods declared in one class use methods or instance
+	 * variables defined by the other class." This implementation of CBO
+	 * considers inheritance to be a form of coupling. It is not possible to
+	 * know all possible externally defined clients of a class, so this
+	 * implementation of CBO only considers those clients of a class that exist
+	 * within the same project.
+	 * @param source
+	 * @see net.sourceforge.metrics.core.ICalculator#calculate(net.sourceforge.metrics
+	 *      .core.sources.AbstractMetricSource)
 	 */
 	@Override
 	public void calculate(AbstractMetricSource source)
@@ -77,20 +82,21 @@ public class CouplingCK extends Calculator {
 			throw new InvalidSourceException("CBO only works on Types/Classes");
 		}
 		TypeMetrics metrics = (TypeMetrics) source;
-		Set<String> clients = calculateClients(metrics);
+		Set<String> coupledClasses = calculateClients(metrics);
 		Set<String> servers = calculateServers(metrics);
 		
-		// Clients now becomes all directly associated classes, excluding
+		// CoupledClasses now becomes all directly associated classes, excluding
 		// the class itself
-		clients.addAll(servers);
-		clients.remove(source.getJavaElement().getHandleIdentifier());
-		Metric metric = new Metric(CBO, clients.size());
+		coupledClasses.addAll(servers);
+		coupledClasses.remove(source.getJavaElement().getHandleIdentifier());
+		Metric metric = new Metric(CBO, coupledClasses.size());
 		source.setValue(metric);
 	}
 
 	/**
-	 * Find all classes that access methods or fields in this class.
-	 * @param source
+	 * Find all classes that access methods or fields in this class
+	 * from within the same project.
+	 * @param source metrics for a particular IType
 	 * @return the classes that have methods that reference methods or
 	 * fields in this class
 	 */
@@ -115,7 +121,7 @@ public class CouplingCK extends Calculator {
 
 	/**
 	 * Find all classes that this class accesses.
-	 * @param source
+	 * @param source metrics for a particular IType
 	 * @return the classes that have methods or
 	 * fields accessed by this class
 	 */
@@ -148,8 +154,8 @@ public class CouplingCK extends Calculator {
 	}
 
 	/**
-	 * Uses the jdt searchengine to collect all classes outside this package
-	 * that depend on things inside this package'
+	 * Uses the JDT SearchEngine to collect all ITypes
+	 * that directly depend on members in the specified IType
 	 */
 	public static class ClientCollector extends SearchRequestor {
 
@@ -164,9 +170,8 @@ public class CouplingCK extends Calculator {
 			return results;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
+		/**
+		 * Sets up an empty collection to contain the results
 		 * @see org.eclipse.jdt.core.search.SearchRequestor#beginReporting()
 		 */
 		@Override
@@ -176,22 +181,27 @@ public class CouplingCK extends Calculator {
 
 		/**
 		 * Adds the handle of the IType that contains this element to the results.
-		 * org.eclipse.jdt.core.search.SearchRequestor#acceptSearchMatch(org
+		 * @see org.eclipse.jdt.core.search.SearchRequestor#acceptSearchMatch(org
 		 * .eclipse.jdt.core.search.SearchMatch)
 		 */
 		@Override
 		public void acceptSearchMatch(SearchMatch match) throws CoreException {
 			IJavaElement enclosingElement = (IJavaElement) match.getElement();
 			if (enclosingElement != null) {
-				IJavaElement element = enclosingElement.getAncestor(IJavaElement.TYPE);
-				results.add(element.getHandleIdentifier());
-				// TODO inheritance check
+				IJavaElement element =
+					enclosingElement.getAncestor(IJavaElement.TYPE);
+				if (element != null) {
+					results.add(element.getHandleIdentifier());
+				}
 			}
 		}
 
 	}	// class ClientCollector
 	
 
+	/**
+	 * Collects all ITypes that the specified element directly depends on.
+	 */
 	public static class ServerCollector extends SearchRequestor
 	// implements IJavaSearchResultCollector
 	{
@@ -209,16 +219,13 @@ public class CouplingCK extends Calculator {
 			callerType = (IType) callerElement.getAncestor(IJavaElement.TYPE);
 		}
 
-		/**
-		 * @return
-		 */
+		/** @return The set of handles of ITypes (the called classes). */
 		public Set<String> getResult() {
 			return results;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
+		/**
+		 * Sets up an empty collection to contain the results
 		 * @see org.eclipse.jdt.core.search.SearchRequestor#beginReporting()
 		 */
 		@Override
@@ -226,11 +233,9 @@ public class CouplingCK extends Calculator {
 			results = new HashSet<String>();
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.eclipse.jdt.core.search.SearchRequestor#acceptSearchMatch(org
+		/**
+		 * Adds the handle of the IType that contains this element to the results.
+		 * @see org.eclipse.jdt.core.search.SearchRequestor#acceptSearchMatch(org
 		 * .eclipse.jdt.core.search.SearchMatch)
 		 */
 		@Override
@@ -246,10 +251,8 @@ public class CouplingCK extends Calculator {
 
 					if (callerProject != null
 							&& callerProject.equals(calleeProject)) {
-//TODO					> > I want to find an IType element that represents the superclass of some
-//						> > IType element.
-//
-//						> Try IType#newSupertypeHierarchy().
+//TODO to find an IType element that is a superclass of some
+// IType element, use IType#newSupertypeHierarchy().
 						results.add(typeElement.getHandleIdentifier());
 					}
 				}
