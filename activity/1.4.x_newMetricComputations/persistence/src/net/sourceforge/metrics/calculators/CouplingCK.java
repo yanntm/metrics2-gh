@@ -132,7 +132,8 @@ public class CouplingCK extends Calculator {
 		try {
 			SearchEngine searchEngine = new SearchEngine();
 			ServerCollector collector = new ServerCollector(callerElement);
-			searchEngine.searchDeclarationsOfReferencedTypes(callerElement, collector, null);
+			searchEngine.searchDeclarationsOfReferencedTypes(
+					callerElement, collector, null);
 			servers = collector.getResult();
 		} catch (CoreException e) {
 			Log.logError("Error calculating servers for CBO: ", e);
@@ -149,7 +150,8 @@ public class CouplingCK extends Calculator {
 			throws JavaModelException {
 		IJavaProject project =
 			(IJavaProject) element.getAncestor(IJavaElement.JAVA_PROJECT);
-	    IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] {project});
+	    IJavaSearchScope scope =
+	    	SearchEngine.createJavaSearchScope(new IJavaElement[] {project});
 		return scope;
 	}
 
@@ -211,12 +213,16 @@ public class CouplingCK extends Calculator {
 		/** The type element whose called classes are to be found. */
 		IType callerType = null;
 		
+		/** The project of the IType. */
+		IJavaProject callerProject = null;
+
 		/** The handles of the classes that are depended on. */
 		Set<String> results = null;
 
 		public ServerCollector(IJavaElement callerElement) {
 			this.callerElement = callerElement;
 			callerType = (IType) callerElement.getAncestor(IJavaElement.TYPE);
+			callerProject = callerElement.getJavaProject();
 		}
 
 		/** @return The set of handles of ITypes (the called classes). */
@@ -246,7 +252,6 @@ public class CouplingCK extends Calculator {
 					enclosingElement.getAncestor(IJavaElement.TYPE);
 
 				if (typeElement != null) {
-					IJavaProject callerProject = callerElement.getJavaProject();
 					IJavaProject calleeProject = typeElement.getJavaProject();
 
 					if (callerProject != null
