@@ -256,6 +256,7 @@ public class MetricsFirstExporter implements IExporter, Constants {
 		return comps;
 	}
 
+	@SuppressWarnings("unchecked")
 	private Class<? extends AbstractMetricSource>[] filters = new Class[] { PackageFragmentMetrics.class, TypeMetrics.class, MethodMetrics.class };
 
 	private boolean printValues(String id, AbstractMetricSource element, XMLPrintStream pOut, NumberFormat nf) {

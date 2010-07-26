@@ -26,11 +26,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
+import java.util.Map.Entry;
 
 import net.sourceforge.metrics.core.sources.Cache;
 import net.sourceforge.metrics.propagators.Propagator;
@@ -65,7 +67,7 @@ public class MetricsPlugin extends AbstractUIPlugin implements IPropertyChangeLi
 	private ResourceBundle resourceBundle;
 
 	private Map<String, List<ICalculator>> calculators = new HashMap<String, List<ICalculator>>();
-	private Map<String, MetricDescriptor> metrics = new HashMap<String, MetricDescriptor>();
+	private Map<String, MetricDescriptor> metrics = new LinkedHashMap<String, MetricDescriptor>();
 	private Map<String, ExportDescriptor> exporters = new HashMap<String, ExportDescriptor>();
 	private ListenerList listeners = new ListenerList(ListenerList.IDENTITY);
 
@@ -257,11 +259,6 @@ public class MetricsPlugin extends AbstractUIPlugin implements IPropertyChangeLi
 		return exporters.get(className);
 	}
 
-	public IExporter getCurrentExporter() {
-		String format = getPreferenceStore().getString("METRICS.xmlformat");
-		return createExporter(format);
-	}
-
 	public boolean showProjectOnCompletion() {
 		return getPreferenceStore().getBoolean("METRICS.showProject");
 	}
@@ -279,9 +276,9 @@ public class MetricsPlugin extends AbstractUIPlugin implements IPropertyChangeLi
 	 */
 	private void initDisplayOrderPreference() {
 		StringBuffer list = new StringBuffer();
-		for (Object element : metrics.keySet()) {
-			String id = (String) element;
-			String desc = (metrics.get(id)).getName();
+		for (Entry<String, MetricDescriptor> entry : metrics.entrySet()) {
+			String id = entry.getKey();
+			String desc = entry.getValue().getName();
 			list.append(id).append(" - ").append(desc).append(',');
 		}
 		String def = list.substring(0, list.length() - 1);
@@ -326,6 +323,11 @@ public class MetricsPlugin extends AbstractUIPlugin implements IPropertyChangeLi
 				metricsDependencies.put(require, existing);
 			}
 		}
+	}
+
+	public IExporter getCurrentExporter() {
+		String format = getPreferenceStore().getString("METRICS.xmlformat");
+		return createExporter(format);
 	}
 
 	private void installCalculator(IConfigurationElement nextCalculator) {
