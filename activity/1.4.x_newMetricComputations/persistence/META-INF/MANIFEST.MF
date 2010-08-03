@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: metrics Plug-in
 Bundle-SymbolicName: net.sourceforge.metrics; singleton:=true
-Bundle-Version: 1.3.8.20100720
+Bundle-Version: 2.0.0.qualifier
 Bundle-Activator: net.sourceforge.metrics.core.MetricsPlugin
 Bundle-Vendor: Keith Cassell
 Bundle-Localization: plugin
