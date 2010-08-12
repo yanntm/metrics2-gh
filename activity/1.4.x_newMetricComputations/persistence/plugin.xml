@@ -295,6 +295,12 @@
             level="type">
       </metric>
       <metric
+            propagateSum="false"
+            name="Cohesion - JAC"
+            id="JAC"
+            level="type">
+      </metric>
+      <metric
             name="Number of Attributes"
             id="NOF"
             level="type">
@@ -408,6 +414,11 @@
       <calculator
             name="Cohesion - DCI"
             calculatorClass="net.sourceforge.metrics.calculators.CohesionDCI"
+            level="type">
+      </calculator>
+      <calculator
+            name="Cohesion - JAC"
+            calculatorClass="net.sourceforge.metrics.calculators.CohesionJAC"
             level="type">
       </calculator>
       <calculator

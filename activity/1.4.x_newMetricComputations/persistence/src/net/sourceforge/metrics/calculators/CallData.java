@@ -243,6 +243,111 @@ public class CallData {
 			return rMatrix;
 		}
 
+	    /**
+	     * Builds the matrix indicating methods that are directly connected, i.e,
+	     * methods that either directly or indirectly access at least one common
+	     * attribute.
+	     * @param callData contains information about which
+	     *   methods access which members
+	     * @param methodsToEval the members for which connectivity information
+	     * is desired.  (Methods like constructors, toString, etc. may not be
+	     * included in this list.)
+	     * @return the matrix indicating methods that are directly connected
+	     */
+		public static ConnectivityMatrix buildDirectlyConnectedMatrix(
+				CallData callData, List<Integer> methodsToEval) {
+			ConnectivityMatrix reachabilityMatrix = callData
+					.getReachabilityMatrix();
+			List<IMember> headers = getMatrixHeaders(reachabilityMatrix,
+					methodsToEval);
+			ConnectivityMatrix directlyConnectedMatrix = new ConnectivityMatrix(
+					headers);
+
+			for (int i = 0; i < methodsToEval.size(); i++) {
+				Integer methodIndexI = methodsToEval.get(i);
+				Set<Integer> iFields = getMembersAccessedBy(methodIndexI,
+						reachabilityMatrix);
+
+				if (iFields != null) {
+					for (int j = i + 1; j < methodsToEval.size(); j++) {
+						Integer methodIndexJ = methodsToEval.get(j);
+						Set<Integer> jFields = getMembersAccessedBy(
+								methodIndexJ, reachabilityMatrix);
+						markDirectlyConnectedMethods(directlyConnectedMatrix,
+								i, iFields, j, jFields);
+					} // for j
+				} // if iFields != null
+			} // for i
+			return directlyConnectedMatrix;
+		}
+
+	    /**
+	     * Return the methods that will serve as headers for the matrix.
+	     * @param connectityMatrix the matrix containing
+	     * the source information for headers
+	     * @param methodsToEval the indices of the methods to evaluate in
+	     *    the connectivity matrix
+	     * @return the methods to evaluate
+	     */
+	    private static List<IMember> getMatrixHeaders(
+		    ConnectivityMatrix connectityMatrix,
+		    List<Integer> methodsToEval) {
+		List<IMember> reachabilityHeaders = connectityMatrix.getHeaders();
+		ArrayList<IMember> headers = new ArrayList<IMember>();
+		for (int i = 0; i < methodsToEval.size(); i++) {
+		    Integer method = methodsToEval.get(i);
+		    IMember member = reachabilityHeaders.get(method);
+		    headers.add(member);
+		}
+		return headers;
+	    }
+	    
+	    /**
+	     * Add an entry to the matrix if both methods access some common member
+	     * @param directlyConnectedMatrix the matrix to modify
+	     * @param i the index for method i
+	     * @param iMembers the members accessed by method i
+	     * @param j the index for method j
+	     * @param jMembers the members accessed by method j
+	     */
+	    private static void markDirectlyConnectedMethods(
+		    ConnectivityMatrix directlyConnectedMatrix, int i,
+		    Set<Integer> iMembers, int j, Set<Integer> jMembers) {
+		// Determine whether there are commonly accessed members
+		if (jMembers != null) {
+		    HashSet<Integer> intersection = new HashSet<Integer>(jMembers);
+		    intersection.retainAll(iMembers);
+
+		    // Mark connected if the methods access some of the
+		    // same members. This is nondirectional, so we
+		    // mark the matrix in two places
+		    if (intersection.size() != 0) {
+			directlyConnectedMatrix.matrix[i][j] = ConnectivityMatrix.CONNECTED;
+			directlyConnectedMatrix.matrix[j][i] = ConnectivityMatrix.CONNECTED;
+		    }
+		} // if jFields != null
+	    }
+	    
+	    /**
+	     * Collects the members reachable from the indicated method.
+	     * @param methodIndex the index of a method in the reachability matrix
+	     * in the reachability matrix
+	     * @param reachabilityMatrix
+	     * @return the indices of the members accessed by the method
+	     */
+	    private static Set<Integer> getMembersAccessedBy(
+		    int methodIndex,
+		    ConnectivityMatrix reachabilityMatrix) {
+		HashSet<Integer> memberIndices = new HashSet<Integer>();
+		for (int i = 0; i < reachabilityMatrix.matrix.length; i++) {
+		    if (reachabilityMatrix.matrix[methodIndex][i] ==
+		            CallData.ConnectivityMatrix.CONNECTED) {
+			memberIndices.add(i);
+		    }
+		}
+		return memberIndices;
+	    }
+	    
 		/**
 		 * Gets the index corresponding to the supplied member.
 		 * 
@@ -303,26 +408,30 @@ public class CallData {
 	 * The methods directly called by a method. The key is the calling method.
 	 * The value is the set of methods that it calls.
 	 */
-	protected HashMap<IMethod, HashSet<IMethod>> methodsCalledMap = new HashMap<IMethod, HashSet<IMethod>>();
+	protected HashMap<IMethod, HashSet<IMethod>> methodsCalledMap =
+		new HashMap<IMethod, HashSet<IMethod>>();
 
 	/**
 	 * The attributes directly accessed by a method. The key is the calling
 	 * method. The value is the set of attributes that it accesses.
 	 */
-	protected HashMap<IMethod, HashSet<IField>> attributesAccessedMap = new HashMap<IMethod, HashSet<IField>>();
+	protected HashMap<IMethod, HashSet<IField>> attributesAccessedMap =
+		new HashMap<IMethod, HashSet<IField>>();
 
 	/**
 	 * The direct callers of a method. The key is a method that gets called by
 	 * some method. The value is the set of methods that directly call it.
 	 */
-	protected HashMap<IMethod, HashSet<IMethod>> methodCalledByMap = new HashMap<IMethod, HashSet<IMethod>>();
+	protected HashMap<IMethod, HashSet<IMethod>> methodCalledByMap =
+		new HashMap<IMethod, HashSet<IMethod>>();
 
 	/**
 	 * The direct accessors of an attribute (field). The key is an attribute
 	 * that gets accessed by some method. The value is the set of methods that
 	 * directly access it.
 	 */
-	protected HashMap<IField, HashSet<IMethod>> attributeAccessedByMap = new HashMap<IField, HashSet<IMethod>>();
+	protected HashMap<IField, HashSet<IMethod>> attributeAccessedByMap =
+		new HashMap<IField, HashSet<IMethod>>();
 
 	/**
 	 * Keeps track of the direct connections between methods and other methods
@@ -335,6 +444,12 @@ public class CallData {
 	 * and attributes.
 	 */
 	protected ConnectivityMatrix reachabilityMatrix = null;
+	
+	/**
+	 * Keeps track of the direct connections between methods and other methods
+	 * and attributes for the Badri cohesion metrics (DCD, DCI).
+	 */
+	protected ConnectivityMatrix badriDirectlyConnectedMatrix = null;
 
 	/**
 	 * Flag to determine whether information about static attributes should be
@@ -819,6 +934,19 @@ public class CallData {
 					.buildReachabilityMatrix(adjacencyMatrix);
 		}
 		return reachabilityMatrix;
+	}
+
+	/**
+	 * Return the badriDirectlyConnected matrix, constructing it if necessary.
+	 * @return the badriDirectlyConnected matrix
+	 */
+	public ConnectivityMatrix getBadriDirectlyConnectedMatrix(
+			List<Integer> methodsToEval) {
+		if (badriDirectlyConnectedMatrix == null) {
+			badriDirectlyConnectedMatrix = ConnectivityMatrix
+					.buildDirectlyConnectedMatrix(this, methodsToEval);
+		}
+		return badriDirectlyConnectedMatrix;
 	}
 
 }

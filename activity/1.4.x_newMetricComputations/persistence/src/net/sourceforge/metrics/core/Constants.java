@@ -23,7 +23,8 @@ package net.sourceforge.metrics.core;
 import org.eclipse.jdt.core.IJavaElement;
 
 /**
- * static constants used in many places
+ * static constants used in many places.  Some tie together portions of plugin.xml
+ * with code.
  * 
  * @author Frank Sauer
  */
@@ -85,6 +86,8 @@ public interface Constants {
     public final static String DCD = "DCD";
     /** "DCI" - Degree of Cohesion (Indirect)*/
     public final static String DCI = "DCI";
+    /** "JAC" - Java Aware Cohesion */
+    public final static String JAC = "JAC";
     /** "LCC" - Loose Class Cohesion */
     public final static String LCC = "LCC";
     /** "LCOM" - Lack Of Cohesion of Methods */

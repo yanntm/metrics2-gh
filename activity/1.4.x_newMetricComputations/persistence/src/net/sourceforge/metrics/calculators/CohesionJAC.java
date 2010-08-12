@@ -24,54 +24,64 @@ import net.sourceforge.metrics.calculators.CallData.ConnectivityMatrix;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 
 /**
- * Calculates cohesion based on Badri and Badri's Degree of Cohesion in a class
- * (Indirect) DCI metric. DCI measures the proportion of connected methods to
- * the maximum possible number of connected methods.
+ * JAC - Java Aware Cohesion This is similar to Badri and Badri's Degree of
+ * Cohesion in a class (Indirect) DCI metric, but takes advantage of some Java
+ * specific information.
  * 
- * In the 2004 paper, classes with fewer than two methods were considered as
- * special classes and excluded from the measurements, as were abstract classes.
- * Overloaded methods within the same class were treated as one method.
- * Moreover, all special methods (constructor, destructor) were removed.
+ * excluded from the measurements: ? abstract classes. constructor
  * 
  * This class modifies the original DCI in the following ways: (1) classes with
  * fewer than two methods receive a value of 1.0 (max. cohesion) (2) Overloaded
  * methods within the same class are treated as separate methods.
  * 
- * With DCI, large numbers indicate more cohesive classes.
+ * With JAC, large numbers indicate more cohesive classes.
  * 
  * BADRI, L., AND BADRI, M. A proposal of a new class cohesion criterion: An
  * empirical study. Journal of Object Technology 3, 4 (2004).
  * 
  * @author Keith Cassell
  */
-public class CohesionDCI extends CohesionCalculator {
-	public CohesionDCI() {
-		super(DCI);
+public class CohesionJAC extends CohesionCalculator {
+	public CohesionJAC() {
+		super(JAC);
 	}
 
 	/**
-	 * Calculates Degree of Cohesion (Indirect) of a Class (DCI).
+	 * Calculates Cohesion of a Java Class (JAC).
 	 * 
 	 * @param source
 	 *            the class being evaluated
 	 */
 	public void calculate(AbstractMetricSource source)
 			throws InvalidSourceException {
-		CallData callData = getCallDataFromSource(source);
-		List<Integer> methodsToEval = CohesionDCD
-				.getEvaluableMethodReachabilityIndices(callData);
-		int n = methodsToEval.size();
-		double npc = n * (n - 1) / 2;
-		double value = 0;
+//		CallData callData = getCallDataFromSource(source);
+//		List<Integer> methodsToEval =
+//				getEvaluableMethodReachabilityIndices(callData);
+//		int n = methodsToEval.size();
+//		double npc = n * (n - 1) / 2;
+//		double value = 0;
+//
+//		// Avoid dividing by zero
+//		if (npc != 0) {
+//			int nic = calculateNIC(callData, methodsToEval);
+//			value = nic / npc;
+//		} else {
+//			value = 1.0;
+//		}
+//		setResult(source, value);
+		setResult(source, 0.666);
+	}
 
-		// Avoid dividing by zero
-		if (npc != 0) {
-			int nic = calculateNIC(callData, methodsToEval);
-			value = nic / npc;
-		} else {
-			value = 1.0;
-		}
-		setResult(source, value);
+    /**
+     * This method returns the methods that are public and not constructors.
+     * @param callData call data containing method information
+     * @return the public non-constructor methods
+     * @see CohesionDCD#getEvaluableMethodReachabilityIndices(CallData)
+     */
+	private List<Integer> getEvaluableMethodReachabilityIndices(
+			CallData callData) {
+		// TODO remove constructors, toString, ...
+		return null;
 	}
 
 	/**
@@ -87,13 +97,13 @@ public class CohesionDCI extends CohesionCalculator {
 	 */
 	private int calculateNIC(CallData callData, List<Integer> methodsToEval) {
 		int nic = 0;
-		ConnectivityMatrix directMatrix =
-			callData.getBadriDirectlyConnectedMatrix(methodsToEval);
+		ConnectivityMatrix directMatrix = ConnectivityMatrix
+				.buildDirectlyConnectedMatrix(callData, methodsToEval);
 		ConnectivityMatrix indirectMatrix = ConnectivityMatrix
 				.buildReachabilityMatrix(directMatrix);
-		int size = indirectMatrix.matrix.length;
-		for (int i = 0; i < size; i++) {
-			for (int j = i + 1; j < size; j++) {
+
+		for (int i = 0; i < indirectMatrix.matrix.length; i++) {
+			for (int j = i + 1; j < indirectMatrix.matrix.length; j++) {
 				if (indirectMatrix.matrix[i][j] == ConnectivityMatrix.CONNECTED) {
 					nic++;
 				}
