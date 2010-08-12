@@ -26,6 +26,7 @@ import net.sourceforge.metrics.core.Log;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -84,13 +85,13 @@ public class CohesionJAC extends CohesionCalculator {
      * @return the public non-constructor methods
      * @see CohesionDCD#getEvaluableMethodReachabilityIndices(CallData)
      */
-	public static List<Integer> getEvaluableMethodReachabilityIndices(
+	public static List<Integer> getEvaluableReachabilityIndices(
 			CallData callData) {
 		ArrayList<Integer> methodsToEval = new ArrayList<Integer>();
 		ConnectivityMatrix reachabilityMatrix = callData
 				.getReachabilityMatrix();
 
-		// Remove from consideration constructors, Object's methods,
+		// Remove methods from consideration: constructors, Object's methods,
 		for (IMethod method : callData.getMethods()) {
 			try {
 				int flags = method.getFlags();
@@ -103,6 +104,21 @@ public class CohesionJAC extends CohesionCalculator {
 				}
 			} catch (JavaModelException e) {
 				Log.logError("Unable to get information on " + method, e);
+			}
+		}
+
+		// Remove methods from consideration: constructors, Object's methods,
+		for (IField field : callData.getAttributes()) {
+			try {
+				int flags = field.getFlags();
+				if (true //TODO !Logger && !serialVerUid
+						//&& (Flags.isPublic(flags))
+						) {
+					int index = reachabilityMatrix.getIndex(field);
+					methodsToEval.add(index);
+				}
+			} catch (JavaModelException e) {
+				Log.logError("Unable to get information on " + field, e);
 			}
 		}
 		return methodsToEval;
