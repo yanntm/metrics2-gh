@@ -18,10 +18,16 @@
  */
 package net.sourceforge.metrics.calculators;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import net.sourceforge.metrics.calculators.CallData.ConnectivityMatrix;
+import net.sourceforge.metrics.core.Log;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
+
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaModelException;
 
 /**
  * JAC - Java Aware Cohesion This is similar to Badri and Badri's Degree of
@@ -78,10 +84,28 @@ public class CohesionJAC extends CohesionCalculator {
      * @return the public non-constructor methods
      * @see CohesionDCD#getEvaluableMethodReachabilityIndices(CallData)
      */
-	private List<Integer> getEvaluableMethodReachabilityIndices(
+	public static List<Integer> getEvaluableMethodReachabilityIndices(
 			CallData callData) {
-		// TODO remove constructors, toString, ...
-		return null;
+		ArrayList<Integer> methodsToEval = new ArrayList<Integer>();
+		ConnectivityMatrix reachabilityMatrix = callData
+				.getReachabilityMatrix();
+
+		// Remove from consideration constructors, Object's methods,
+		for (IMethod method : callData.getMethods()) {
+			try {
+				int flags = method.getFlags();
+				if (!method.isConstructor()
+						&& !isObjectMethod(method)
+						&& (Flags.isPublic(flags)) // TODO all non-private?
+						) {
+					int index = reachabilityMatrix.getIndex(method);
+					methodsToEval.add(index);
+				}
+			} catch (JavaModelException e) {
+				Log.logError("Unable to get information on " + method, e);
+			}
+		}
+		return methodsToEval;
 	}
 
 	/**
@@ -110,6 +134,25 @@ public class CohesionJAC extends CohesionCalculator {
 			}
 		}
 		return nic;
+	}
+
+	/**
+	 * Determines whether the supplied handle matches one of the methods
+	 * defined on Object that can be overridden (clone, equals, hashCode,
+	 * toString).
+	 * @param sig the Eclipse handle
+	 * @return true if an Object method; false otherwise
+	 * @throws JavaModelException 
+	 */
+	private static boolean isObjectMethod(IMethod method) throws JavaModelException {
+		// method.isSimilar(superMethod)
+		String sig = method.getSignature();
+		boolean result =
+			sig.endsWith("~hashCode")
+			|| sig.endsWith("~equals~QObject;")
+			|| sig.endsWith("~clone")
+			|| sig.endsWith("~toString");
+		return result;
 	}
 
 }
