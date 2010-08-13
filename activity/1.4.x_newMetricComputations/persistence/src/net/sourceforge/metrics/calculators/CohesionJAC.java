@@ -27,8 +27,10 @@ import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 
 /**
  * JAC - Java Aware Cohesion This is similar to Badri and Badri's Degree of
@@ -49,8 +51,17 @@ import org.eclipse.jdt.core.JavaModelException;
  * @author Keith Cassell
  */
 public class CohesionJAC extends CohesionCalculator {
+	
+	//private IType loggerType = null;
+	private static String loggerSignature = null;
+
 	public CohesionJAC() {
 		super(JAC);
+		
+		if (loggerSignature == null) {
+			loggerSignature =
+				Signature.createTypeSignature("java.util.logging.Logger", false);
+		}
 	}
 
 	/**
@@ -61,22 +72,21 @@ public class CohesionJAC extends CohesionCalculator {
 	 */
 	public void calculate(AbstractMetricSource source)
 			throws InvalidSourceException {
-//		CallData callData = getCallDataFromSource(source);
-//		List<Integer> methodsToEval =
-//				getEvaluableMethodReachabilityIndices(callData);
-//		int n = methodsToEval.size();
-//		double npc = n * (n - 1) / 2;
-//		double value = 0;
-//
-//		// Avoid dividing by zero
-//		if (npc != 0) {
-//			int nic = calculateNIC(callData, methodsToEval);
-//			value = nic / npc;
-//		} else {
-//			value = 1.0;
-//		}
-//		setResult(source, value);
-		setResult(source, 0.666);
+		CallData callData = getCallDataFromSource(source);
+		List<Integer> methodsToEval =
+				getEvaluableReachabilityIndices(callData);
+		int n = methodsToEval.size();
+		double npc = n * (n - 1) / 2;
+		double value = 0;
+
+		// Avoid dividing by zero
+		if (npc != 0) {
+			int nic = calculateNIC(callData, methodsToEval);
+			value = nic / npc;
+		} else {
+			value = 1.0;
+		}
+		setResult(source, value);
 	}
 
     /**
@@ -85,11 +95,12 @@ public class CohesionJAC extends CohesionCalculator {
      * @return the public non-constructor methods
      * @see CohesionDCD#getEvaluableMethodReachabilityIndices(CallData)
      */
-	public static List<Integer> getEvaluableReachabilityIndices(
+	public List<Integer> getEvaluableReachabilityIndices(
 			CallData callData) {
 		ArrayList<Integer> methodsToEval = new ArrayList<Integer>();
 		ConnectivityMatrix reachabilityMatrix = callData
 				.getReachabilityMatrix();
+		//TODO make configurable which methods, fields get removed
 
 		// Remove methods from consideration: constructors, Object's methods,
 		for (IMethod method : callData.getMethods()) {
@@ -107,18 +118,12 @@ public class CohesionJAC extends CohesionCalculator {
 			}
 		}
 
-		// Remove methods from consideration: constructors, Object's methods,
+		// Remove from consideration: serialVersionUID, loggers
 		for (IField field : callData.getAttributes()) {
-			try {
-				int flags = field.getFlags();
-				if (true //TODO !Logger && !serialVerUid
-						//&& (Flags.isPublic(flags))
-						) {
-					int index = reachabilityMatrix.getIndex(field);
-					methodsToEval.add(index);
-				}
-			} catch (JavaModelException e) {
-				Log.logError("Unable to get information on " + field, e);
+			String fieldName = field.getElementName();
+			if (!isLogger(field) && !"serialVersionUID".equals(fieldName)) {
+				int index = reachabilityMatrix.getIndex(field);
+				methodsToEval.add(index);
 			}
 		}
 		return methodsToEval;
@@ -170,5 +175,23 @@ public class CohesionJAC extends CohesionCalculator {
 			|| sig.endsWith("~toString");
 		return result;
 	}
+
+	/**
+	 * Determines whether this field is a logger
+	 * @param field
+	 * @return true if a logger, false otherwise
+	 */
+	private boolean isLogger(IField field) {
+		boolean isLogger =  false;
+		try {
+			String typeSignature = field.getTypeSignature();
+			isLogger = (loggerSignature != null)
+				&& loggerSignature.equals(typeSignature);
+		} catch (JavaModelException e) {
+			Log.logError("isLogger() failure: ", e);
+		}
+		return isLogger;
+	}
+
 
 }
