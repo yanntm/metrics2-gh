@@ -27,7 +27,6 @@ import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -107,8 +106,11 @@ public class CohesionJAC extends CohesionCalculator {
 			try {
 				int flags = method.getFlags();
 				if (!method.isConstructor()
+						&& !Flags.isAbstract(flags)
+						//&& !Flags.isStatic(flags)
+						//&& !Flags.isDeprecated(flags)
+						//&& Flags.isPublic(flags)
 						&& !isObjectMethod(method)
-						&& (Flags.isPublic(flags)) // TODO all non-private?
 						) {
 					int index = reachabilityMatrix.getIndex(method);
 					methodsToEval.add(index);
