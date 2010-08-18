@@ -108,7 +108,7 @@ public class CohesionJAC extends CohesionCalculator {
 				if (!method.isConstructor()
 						&& !Flags.isAbstract(flags)
 						//&& !Flags.isStatic(flags)
-						//&& !Flags.isDeprecated(flags)
+						&& !Flags.isDeprecated(flags)
 						//&& Flags.isPublic(flags)
 						&& !isObjectMethod(method)
 						) {
