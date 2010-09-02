@@ -89,9 +89,9 @@
             id="net.sourceforge.metrics.norm">
       </page>
       <page
-            name="LCOM*"
+            name="Cohesion"
             category="net.sourceforge.metrics.ui.MetricsPreferencePage"
-            class="net.sourceforge.metrics.ui.preferences.LCOMPreferencePage"
+            class="net.sourceforge.metrics.ui.preferences.CohesionPreferencePage"
             id="net.sourceforge.metrics.lcom">
       </page>
       <page

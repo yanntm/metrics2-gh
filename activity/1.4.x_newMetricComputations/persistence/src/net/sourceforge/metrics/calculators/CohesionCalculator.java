@@ -26,6 +26,7 @@ import net.sourceforge.metrics.core.Log;
 import net.sourceforge.metrics.core.Metric;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 import net.sourceforge.metrics.core.sources.TypeMetrics;
+import net.sourceforge.metrics.ui.preferences.CohesionPreferencePage;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IMethod;
@@ -196,18 +197,57 @@ public abstract class CohesionCalculator extends Calculator implements
 	 * they get updated when they change.
 	 */
 	public static class CohesionPreferences implements IPropertyChangeListener {
+
 		// TODO Options to (possibly) implement
 		/*
-		 * "A subclass inherits methods and instance variables from its
-		 * superclass. We have several options for evaluating cohesion of a
-		 * subclass. We can (1) include all inherited components in the subclass
-		 * in our evaluation, (2) include only methods and instance variables
-		 * defined in the subclass, or (3) include inherited instance variables
-		 * but not inherited methods. The current default is (2)."
+		 * By default, all methods and attributes declared in the local class
+		 * are used in the cohesion calculation, but none that are inherited
+		 * from superclasses. Members defined in inner classes are also ignored
+		 * by default. The options below allow the user to change the default
+		 * behavior. "NYI" indicates "Not Yet Implemented".
 		 */
 
-		private boolean countStaticMethods;
-		private boolean countStaticAttributes;
+		/** NYI - Indicates whether abstract methods should be considered. */
+		protected boolean countAbstractMethods = false;
+
+		/** NYI - Indicates whether constructors should be considered. */
+		protected boolean countConstructors = false;
+
+		/** NYI - Indicates whether deprecated methods should be considered. */
+		protected boolean countDeprecatedMethods = false;
+
+		/** NYI - Indicates whether inherited attributes should be included. */
+		protected boolean countInheritedAttributes = false;
+
+		/** NYI - Indicates whether inherited methods should be included. */
+		protected boolean countInheritedMethods = false;
+
+		/** NYI - Indicates whether logger fields should be included. */
+		protected boolean countLoggers = false;
+
+		/** NYI - Indicates whether methods declared by the Object Class
+		 * (toString, etc.) should be considered. */
+		protected boolean countObjectsMethods = false;
+
+		/** Indicates whether static attributes should be considered. */
+		protected boolean countStaticAttributes = false;
+
+		/** Indicates whether static methods should be considered. */
+		protected boolean countStaticMethods = false;
+		
+		/**
+		 * NYI - Indicates whether members of inner classes should be treated the same as
+		 * members of the outer class.
+		 */
+		protected boolean countInners = false;
+
+		/**
+		 * NYI - Synchronization implies a common connection to an object. If
+		 * this field is "true", then all methods declared synchronized will be
+		 * considered to be linked (as though they all accessed a common local
+		 * field - the instance).
+		 */
+		protected boolean linkSynchronizedMethods = false;
 
 		public CohesionPreferences() {
 			init();
@@ -216,10 +256,28 @@ public abstract class CohesionCalculator extends Calculator implements
 
 		protected void init() {
 			IPreferenceStore preferences = getPreferences();
-			countStaticMethods = preferences.getBoolean(
-					"LCOM.StaticMethods");
+			countAbstractMethods = preferences.getBoolean(
+					CohesionPreferencePage.COHESION_COUNT_ABSTRACT_METHODS);
+			countConstructors = preferences.getBoolean(
+					CohesionPreferencePage.COHESION_COUNT_CONSTRUCTORS);
+			countDeprecatedMethods = preferences.getBoolean(
+					CohesionPreferencePage.COHESION_COUNT_DEPRECATED_METHODS);
+			countInheritedAttributes = preferences.getBoolean(
+					CohesionPreferencePage.COHESION_COUNT_INHERITED_ATTRIBUTES);
+			countInheritedMethods = preferences.getBoolean(
+					CohesionPreferencePage.COHESION_COUNT_INHERITED_METHODS);
+			countInners = preferences.getBoolean(
+					CohesionPreferencePage.COHESION_COUNT_INNERS);
+			countLoggers = preferences.getBoolean(
+					CohesionPreferencePage.COHESION_COUNT_LOGGERS);
+			countObjectsMethods = preferences.getBoolean(
+					CohesionPreferencePage.COHESION_COUNT_OBJECTS_METHODS);
 			countStaticAttributes = preferences.getBoolean(
-					"LCOM.StaticAttributes");
+					CohesionPreferencePage.COHESION_COUNT_STATIC_ATTRIBUTES);
+			countStaticMethods = preferences.getBoolean(
+					CohesionPreferencePage.COHESION_COUNT_STATIC_METHODS);
+			linkSynchronizedMethods = preferences.getBoolean(
+					CohesionPreferencePage.COHESION_LINK_SYNCHRONIZED_METHODS);
 		}
 
 		public boolean countStaticMethods() {
