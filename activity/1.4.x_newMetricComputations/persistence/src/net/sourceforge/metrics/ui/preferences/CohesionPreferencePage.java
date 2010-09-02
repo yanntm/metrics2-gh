@@ -40,6 +40,14 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 public class CohesionPreferencePage extends FieldEditorPreferencePage
 implements IWorkbenchPreferencePage {
 
+	/** If this is "true", the original metric definitions are
+	 * used; otherwise, the user has the options of deciding
+	 * which members are considered in the calculations by setting
+	 * the other preferences.
+	 */
+	public static final String USE_ORIGINAL_DEFINITIONS =
+		"Cohesion.UseOriginals";
+
 	public static final String COUNT_ABSTRACT_METHODS =
 		"Cohesion.AbstractMethods";
 	public static final String COUNT_CONSTRUCTORS =
@@ -75,6 +83,7 @@ implements IWorkbenchPreferencePage {
 
 	public void init(IWorkbench workbench) {
 		IPreferenceStore preferenceStore = getPreferenceStore();
+		preferenceStore.setDefault(USE_ORIGINAL_DEFINITIONS, true);
 		preferenceStore.setDefault(COUNT_ABSTRACT_METHODS, true);
 		preferenceStore.setDefault(COUNT_CONSTRUCTORS, false);
 		preferenceStore.setDefault(COUNT_DEPRECATED_METHODS, true);
@@ -94,6 +103,11 @@ implements IWorkbenchPreferencePage {
 	public void createFieldEditors() {
 		Composite parent = getFieldEditorParent();
 // TODO uncomment these when functionality is in place.
+		BooleanFieldEditor originalDefinitionEditor =
+			new BooleanFieldEditor(USE_ORIGINAL_DEFINITIONS,
+					"Use original definitions", parent);
+//		if (originalDefinitionEditor.getPreferenceStore())
+		addField(originalDefinitionEditor);
 //		addField(new BooleanFieldEditor(COUNT_ABSTRACT_METHODS,
 //				"Abstract methods", parent));
 //		addField(new BooleanFieldEditor(COUNT_CONSTRUCTORS,
