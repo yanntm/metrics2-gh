@@ -257,27 +257,25 @@ public abstract class CohesionCalculator extends Calculator implements
 		protected void init() {
 			IPreferenceStore preferences = getPreferences();
 			countAbstractMethods = preferences.getBoolean(
-					CohesionPreferencePage.COHESION_COUNT_ABSTRACT_METHODS);
+					CohesionPreferencePage.COUNT_ABSTRACT_METHODS);
 			countConstructors = preferences.getBoolean(
-					CohesionPreferencePage.COHESION_COUNT_CONSTRUCTORS);
+					CohesionPreferencePage.COUNT_CONSTRUCTORS);
 			countDeprecatedMethods = preferences.getBoolean(
-					CohesionPreferencePage.COHESION_COUNT_DEPRECATED_METHODS);
+					CohesionPreferencePage.COUNT_DEPRECATED_METHODS);
 			countInheritedAttributes = preferences.getBoolean(
-					CohesionPreferencePage.COHESION_COUNT_INHERITED_ATTRIBUTES);
+					CohesionPreferencePage.COUNT_INHERITED_ATTRIBUTES);
 			countInheritedMethods = preferences.getBoolean(
-					CohesionPreferencePage.COHESION_COUNT_INHERITED_METHODS);
+					CohesionPreferencePage.COUNT_INHERITED_METHODS);
 			countInners = preferences.getBoolean(
-					CohesionPreferencePage.COHESION_COUNT_INNERS);
+					CohesionPreferencePage.COUNT_INNERS);
 			countLoggers = preferences.getBoolean(
-					CohesionPreferencePage.COHESION_COUNT_LOGGERS);
+					CohesionPreferencePage.COUNT_LOGGERS);
 			countObjectsMethods = preferences.getBoolean(
-					CohesionPreferencePage.COHESION_COUNT_OBJECTS_METHODS);
+					CohesionPreferencePage.COUNT_OBJECTS_METHODS);
 			countStaticAttributes = preferences.getBoolean(
-					CohesionPreferencePage.COHESION_COUNT_STATIC_ATTRIBUTES);
+					CohesionPreferencePage.COUNT_STATIC_ATTRIBUTES);
 			countStaticMethods = preferences.getBoolean(
-					CohesionPreferencePage.COHESION_COUNT_STATIC_METHODS);
-			linkSynchronizedMethods = preferences.getBoolean(
-					CohesionPreferencePage.COHESION_LINK_SYNCHRONIZED_METHODS);
+					CohesionPreferencePage.COUNT_STATIC_METHODS);
 		}
 
 		public boolean countStaticMethods() {

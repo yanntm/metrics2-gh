@@ -178,8 +178,8 @@ public class LackOfCohesion extends Calculator implements Constants {
 
 		protected void init() {
 			IPreferenceStore preferences = getPreferences();
-			countStaticMethods = preferences.getBoolean(CohesionPreferencePage.COHESION_COUNT_STATIC_METHODS);
-			countStaticAttributes = preferences.getBoolean(CohesionPreferencePage.COHESION_COUNT_STATIC_ATTRIBUTES);
+			countStaticMethods = preferences.getBoolean(CohesionPreferencePage.COUNT_STATIC_METHODS);
+			countStaticAttributes = preferences.getBoolean(CohesionPreferencePage.COUNT_STATIC_ATTRIBUTES);
 		}
 
 		public boolean countStaticMethods() {

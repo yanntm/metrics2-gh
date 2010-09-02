@@ -40,28 +40,26 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 public class CohesionPreferencePage extends FieldEditorPreferencePage
 implements IWorkbenchPreferencePage {
 
-	public static final String COHESION_COUNT_ABSTRACT_METHODS =
-		"LCOM.AbstractMethods";
-	public static final String COHESION_COUNT_CONSTRUCTORS =
-		"LCOM.Constructors";
-	public static final String COHESION_COUNT_DEPRECATED_METHODS =
-		"LCOM.Deprecated";
-	public static final String COHESION_COUNT_INHERITED_ATTRIBUTES =
-		"LCOM.InheritedAttributes";
-	public static final String COHESION_COUNT_INHERITED_METHODS =
-		"LCOM.InheritedMethods";
-	public static final String COHESION_COUNT_INNERS =
-		"LCOM.Inners";
-	public static final String COHESION_COUNT_LOGGERS =
-		"LCOM.Loggers";
-	public static final String COHESION_COUNT_OBJECTS_METHODS =
-		"LCOM.ObjectsMethods";
-	public static final String COHESION_COUNT_STATIC_ATTRIBUTES =
-		"LCOM.StaticAttributes";
-	public static final String COHESION_COUNT_STATIC_METHODS =
-		"LCOM.StaticMethods";
-	public static final String COHESION_LINK_SYNCHRONIZED_METHODS =
-		"LCOM.Synchronized";
+	public static final String COUNT_ABSTRACT_METHODS =
+		"Cohesion.AbstractMethods";
+	public static final String COUNT_CONSTRUCTORS =
+		"Cohesion.Constructors";
+	public static final String COUNT_DEPRECATED_METHODS =
+		"Cohesion.Deprecated";
+	public static final String COUNT_INHERITED_ATTRIBUTES =
+		"Cohesion.InheritedAttributes";
+	public static final String COUNT_INHERITED_METHODS =
+		"Cohesion.InheritedMethods";
+	public static final String COUNT_INNERS =
+		"Cohesion.Inners";
+	public static final String COUNT_LOGGERS =
+		"Cohesion.Loggers";
+	public static final String COUNT_OBJECTS_METHODS =
+		"Cohesion.ObjectsMethods";
+	public static final String COUNT_STATIC_ATTRIBUTES =
+		"Cohesion.StaticAttributes";
+	public static final String COUNT_STATIC_METHODS =
+		"Cohesion.StaticMethods";
 
 	/**
 	 * The constructor.
@@ -77,17 +75,16 @@ implements IWorkbenchPreferencePage {
 
 	public void init(IWorkbench workbench) {
 		IPreferenceStore preferenceStore = getPreferenceStore();
-		preferenceStore.setDefault(COHESION_COUNT_ABSTRACT_METHODS, true);
-		preferenceStore.setDefault(COHESION_COUNT_CONSTRUCTORS, false);
-		preferenceStore.setDefault(COHESION_COUNT_DEPRECATED_METHODS, true);
-		preferenceStore.setDefault(COHESION_COUNT_INHERITED_ATTRIBUTES, false);
-		preferenceStore.setDefault(COHESION_COUNT_INHERITED_METHODS, false);
-		preferenceStore.setDefault(COHESION_COUNT_INNERS, false);
-		preferenceStore.setDefault(COHESION_COUNT_LOGGERS, true);
-		preferenceStore.setDefault(COHESION_COUNT_OBJECTS_METHODS, true);
-		preferenceStore.setDefault(COHESION_COUNT_STATIC_ATTRIBUTES, false);
-		preferenceStore.setDefault(COHESION_COUNT_STATIC_METHODS, false);
-		preferenceStore.setDefault(COHESION_LINK_SYNCHRONIZED_METHODS, false);
+		preferenceStore.setDefault(COUNT_ABSTRACT_METHODS, true);
+		preferenceStore.setDefault(COUNT_CONSTRUCTORS, false);
+		preferenceStore.setDefault(COUNT_DEPRECATED_METHODS, true);
+		preferenceStore.setDefault(COUNT_INHERITED_ATTRIBUTES, false);
+		preferenceStore.setDefault(COUNT_INHERITED_METHODS, false);
+		preferenceStore.setDefault(COUNT_INNERS, false);
+		preferenceStore.setDefault(COUNT_LOGGERS, true);
+		preferenceStore.setDefault(COUNT_OBJECTS_METHODS, true);
+		preferenceStore.setDefault(COUNT_STATIC_ATTRIBUTES, false);
+		preferenceStore.setDefault(COUNT_STATIC_METHODS, false);
 	}
 
 	/**
@@ -96,30 +93,27 @@ implements IWorkbenchPreferencePage {
 	@Override
 	public void createFieldEditors() {
 		Composite parent = getFieldEditorParent();
-		
-		addField(new BooleanFieldEditor(COHESION_COUNT_ABSTRACT_METHODS,
-				"Abstract methods", parent));
-		addField(new BooleanFieldEditor(COHESION_COUNT_CONSTRUCTORS,
-				"Constructors", parent));
-		addField(new BooleanFieldEditor(COHESION_COUNT_DEPRECATED_METHODS,
-				"Deprecated methods", parent));
-		addField(new BooleanFieldEditor(COHESION_COUNT_INHERITED_ATTRIBUTES,
-				"Inherited attributes", parent));
-		addField(new BooleanFieldEditor(COHESION_COUNT_INHERITED_METHODS,
-				"Inherited methods", parent));
-		addField(new BooleanFieldEditor(COHESION_COUNT_INNERS,
-				"Inner class methods", parent));
-		addField(new BooleanFieldEditor(COHESION_COUNT_LOGGERS, "Loggers",
-				parent));
-		addField(new BooleanFieldEditor(COHESION_COUNT_OBJECTS_METHODS,
-				"Methods from Object", parent));
-		addField(new BooleanFieldEditor(COHESION_COUNT_STATIC_ATTRIBUTES,
+// TODO uncomment these when functionality is in place.
+//		addField(new BooleanFieldEditor(COUNT_ABSTRACT_METHODS,
+//				"Abstract methods", parent));
+//		addField(new BooleanFieldEditor(COUNT_CONSTRUCTORS,
+//				"Constructors", parent));
+//		addField(new BooleanFieldEditor(COUNT_DEPRECATED_METHODS,
+//				"Deprecated methods", parent));
+//		addField(new BooleanFieldEditor(COUNT_INHERITED_ATTRIBUTES,
+//				"Inherited attributes", parent));
+//		addField(new BooleanFieldEditor(COUNT_INHERITED_METHODS,
+//				"Inherited methods", parent));
+//		addField(new BooleanFieldEditor(COUNT_INNERS,
+//				"Inner class methods", parent));
+//		addField(new BooleanFieldEditor(COUNT_LOGGERS, "Loggers",
+//				parent));
+//		addField(new BooleanFieldEditor(COUNT_OBJECTS_METHODS,
+//				"Methods from Object", parent));
+		addField(new BooleanFieldEditor(COUNT_STATIC_ATTRIBUTES,
 				"Static attributes", parent));
-		addField(new BooleanFieldEditor(COHESION_COUNT_STATIC_METHODS,
+		addField(new BooleanFieldEditor(COUNT_STATIC_METHODS,
 				"Static methods", parent));
-		addField(new BooleanFieldEditor(COHESION_LINK_SYNCHRONIZED_METHODS,
-				"Link synchronized methods", parent));
-
 	}
 
 }
