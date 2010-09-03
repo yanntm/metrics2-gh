@@ -90,7 +90,7 @@ public class LCOMHS extends CohesionCalculator {
 		Iterator<HashSet<IMethod>> valueIterator = values.iterator();
 		
 		while (valueIterator.hasNext()) {
-		    Set<IMethod> methods = (Set<IMethod>) valueIterator.next();
+		    Set<IMethod> methods = valueIterator.next();
 		    sum += methods.size();
 		}
 		double avg = (double) sum / (double) numAttributes;

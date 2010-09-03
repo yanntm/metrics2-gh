@@ -38,7 +38,7 @@ public abstract class AbstractLinesOfCode extends Calculator {
 				String l_sourceTxt = getSource(a_source);
 				a_source.setValue(new Metric(name, calculateNumberOfLines(l_sourceTxt)));
 			} catch (JavaModelException l_jme) {
-				Log.logWarrning("Error in AbstractLinesOfCode", l_jme);
+				Log.logWarning("Error in AbstractLinesOfCode", l_jme);
 			}
 		} else {
 			Log.logMessage("Error in AbstractLinesOfCode: no AstNode associated with Level(" + a_source.getLevel() + ")");

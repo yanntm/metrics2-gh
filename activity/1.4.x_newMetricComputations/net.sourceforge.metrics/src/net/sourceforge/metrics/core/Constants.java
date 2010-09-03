@@ -20,25 +20,28 @@
  */
 package net.sourceforge.metrics.core;
 
+import org.eclipse.jdt.core.IJavaElement;
+
 /**
- * static constants used in many places
+ * static constants used in many places.  Some tie together portions of plugin.xml
+ * with code.
  * 
  * @author Frank Sauer
  */
 public interface Constants {
 
     /** project level source */
-    public final static int PROJECT = 6;
+    public final static int PROJECT = IJavaElement.JAVA_PROJECT; // now 2, formerly 6;
     /** source folder level source */
-    public final static int PACKAGEROOT = 5;
+    public final static int PACKAGEROOT = IJavaElement.PACKAGE_FRAGMENT_ROOT; // now 3, formerly 5;
     /** package level source */
-    public final static int PACKAGEFRAGMENT = 4;
+    public final static int PACKAGEFRAGMENT = IJavaElement.PACKAGE_FRAGMENT; // 4;
     /** compilation unit level source */
-    public final static int COMPILATIONUNIT = 3;
+    public final static int COMPILATIONUNIT = IJavaElement.COMPILATION_UNIT; // now 5, formerly 3;
     /** class level source */
-    public final static int TYPE = 2;
+    public final static int TYPE = IJavaElement.TYPE; // now 7, formerly 2;
     /** method level source */
-    public final static int METHOD = 1;
+    public final static int METHOD = IJavaElement.METHOD; // now 9, formerly 1
 
     // basic metric ids
 
@@ -83,6 +86,8 @@ public interface Constants {
     public final static String DCD = "DCD";
     /** "DCI" - Degree of Cohesion (Indirect)*/
     public final static String DCI = "DCI";
+    /** "JAC" - Java Aware Cohesion */
+    public final static String JAC = "JAC";
     /** "LCC" - Loose Class Cohesion */
     public final static String LCC = "LCC";
     /** "LCOM" - Lack Of Cohesion of Methods */
@@ -93,13 +98,18 @@ public interface Constants {
     public static final String LCOMCK = "LCOMCK";
     /** "TCC" - Tight Class Cohesion */
     public final static String TCC = "TCC";
+    
+    /* Coupling Constants */
 
+    /** Coupling Between Objects (CBO) */
+    public final static String CBO = "CBO";
     /** "RMC" */
     public final static String RMC = "RMC";
-    /** "CA" */
+    /** Coupling - Afferent (CA) */
     public final static String CA = "CA";
-    /** "CE" */
+    /** Coupling - Efferent (CE) */
     public final static String CE = "CE";
+
     /** "RMI" */
     public final static String RMI = "RMI";
     /** "RMA" */

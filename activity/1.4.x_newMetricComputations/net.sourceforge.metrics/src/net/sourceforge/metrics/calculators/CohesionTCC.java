@@ -137,13 +137,13 @@ public class CohesionTCC extends CohesionCalculator
 	    getAttributeIndices(callData, reachabilityMatrix);
 	
 	for (int i = 0; i < methodsToEval.size(); i++) {
-	    int iIndex = methodsToEval.get(i);
+	    int iIndex = methodsToEval.get(i).intValue();
 	    Set<Integer> iFields =
 		getAttributesAccessedBy(iIndex, attributeIndices, reachabilityMatrix);
 
 	    if (iFields != null) {
 		for (int j = i + 1; j < methodsToEval.size(); j++) {
-		    int jIndex = methodsToEval.get(j);
+		    int jIndex = methodsToEval.get(j).intValue();
 		    Set<Integer> jFields =
 			getAttributesAccessedBy(
 				jIndex, attributeIndices, reachabilityMatrix);
@@ -184,7 +184,7 @@ public class CohesionTCC extends CohesionCalculator
 	ArrayList<IMember> headers = new ArrayList<IMember>();
 	for (int i = 0; i < methodsToEval.size(); i++) {
 	    Integer method = methodsToEval.get(i);
-	    IMember member = reachabilityHeaders.get(method);
+	    IMember member = reachabilityHeaders.get(method.intValue());
 	    headers.add(member);
 	}
 	return headers;
@@ -203,7 +203,7 @@ public class CohesionTCC extends CohesionCalculator
 	    ConnectivityMatrix reachabilityMatrix) {
 	HashSet<Integer> iFields = new HashSet<Integer>();
 	for (Integer aIndex: attributeIndices) {
-	    if (reachabilityMatrix.matrix[methodIndex][aIndex] ==
+	    if (reachabilityMatrix.matrix[methodIndex][aIndex.intValue()] ==
 	            CallData.ConnectivityMatrix.CONNECTED) {
 		iFields.add(aIndex);
 	    }
@@ -225,7 +225,7 @@ public class CohesionTCC extends CohesionCalculator
 	Set<IField> attributes = callData.getAttributes();
 	for (IField field : attributes) {
 	    int index = matrix.getIndex(field);
-	    indices.add(index);
+	    indices.add(Integer.valueOf(index));
 	}
 	return indices;
     }
@@ -248,7 +248,7 @@ public class CohesionTCC extends CohesionCalculator
 		if (!method.isConstructor()
 			&& (!Flags.isPrivate(flags))) {
 		    int index = reachabilityMatrix.getIndex(method);
-		    methodsToEval.add(index);
+		    methodsToEval.add(Integer.valueOf(index));
 		}
 	    } catch (JavaModelException e) {
 		Log.logError("Unable to get information on " + method, e);

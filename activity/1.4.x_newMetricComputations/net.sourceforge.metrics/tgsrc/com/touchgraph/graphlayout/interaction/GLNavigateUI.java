@@ -142,7 +142,7 @@ public class GLNavigateUI extends TGUserInterface {
 					try {
 						tgPanel.setLocale(mouseOverN, localityScroll.getLocalityRadius());
 					} catch (TGException ex) {
-						Log.logWarrning("Error setting locale", ex);
+						Log.logWarning("Error setting locale", ex);
 						ex.printStackTrace();
 					}
 				}

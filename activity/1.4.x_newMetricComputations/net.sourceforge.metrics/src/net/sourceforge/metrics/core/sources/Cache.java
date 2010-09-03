@@ -126,7 +126,7 @@ public class Cache {
 			String handle = source.getHandle();
 			getHashtableForHandle(handle).put(handle, source);
 			getKeysForHandle(handle).add(handle);
-			if (source.getLevel() >= Constants.PACKAGEFRAGMENT) {
+			if (source.getLevel() <= Constants.PACKAGEFRAGMENT) {
 				recman.commit();
 			}
 		} catch (Throwable e) {

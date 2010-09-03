@@ -29,6 +29,7 @@ import net.sourceforge.metrics.core.Constants;
 import net.sourceforge.metrics.core.Log;
 import net.sourceforge.metrics.core.Metric;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
+import net.sourceforge.metrics.ui.preferences.CohesionPreferencePage;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
@@ -39,6 +40,7 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
@@ -47,6 +49,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
  * methods are considered is configurable from preferences.
  * 
  * @author Frank Sauer
+ * @deprecated use LCOMHS
  */
 public class LackOfCohesion extends Calculator implements Constants {
 
@@ -174,8 +177,9 @@ public class LackOfCohesion extends Calculator implements Constants {
 		}
 
 		protected void init() {
-			countStaticMethods = getPreferences().getBoolean("LCOM.StaticMethods");
-			countStaticAttributes = getPreferences().getBoolean("LCOM.StaticAttributes");
+			IPreferenceStore preferences = getPreferences();
+			countStaticMethods = preferences.getBoolean(CohesionPreferencePage.COUNT_STATIC_METHODS);
+			countStaticAttributes = preferences.getBoolean(CohesionPreferencePage.COUNT_STATIC_ATTRIBUTES);
 		}
 
 		public boolean countStaticMethods() {
