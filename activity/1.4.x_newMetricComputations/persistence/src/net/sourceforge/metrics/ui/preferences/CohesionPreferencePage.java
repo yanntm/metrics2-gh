@@ -48,26 +48,29 @@ implements IWorkbenchPreferencePage {
 	public static final String USE_ORIGINAL_DEFINITIONS =
 		"Cohesion.UseOriginals";
 
+	/** The beginning of all cohesion preference strings. */
+	public static final String COHESION_PREFIX = "Cohesion";
+	
 	public static final String COUNT_ABSTRACT_METHODS =
-		"Cohesion.AbstractMethods";
+		COHESION_PREFIX + ".AbstractMethods";
 	public static final String COUNT_CONSTRUCTORS =
-		"Cohesion.Constructors";
+		COHESION_PREFIX + ".Constructors";
 	public static final String COUNT_DEPRECATED_METHODS =
-		"Cohesion.Deprecated";
+		COHESION_PREFIX + ".Deprecated";
 	public static final String COUNT_INHERITED_ATTRIBUTES =
-		"Cohesion.InheritedAttributes";
+		COHESION_PREFIX + ".InheritedAttributes";
 	public static final String COUNT_INHERITED_METHODS =
-		"Cohesion.InheritedMethods";
+		COHESION_PREFIX + ".InheritedMethods";
 	public static final String COUNT_INNERS =
-		"Cohesion.Inners";
+		COHESION_PREFIX + ".Inners";
 	public static final String COUNT_LOGGERS =
-		"Cohesion.Loggers";
+		COHESION_PREFIX + ".Loggers";
 	public static final String COUNT_OBJECTS_METHODS =
-		"Cohesion.ObjectsMethods";
+		COHESION_PREFIX + ".ObjectsMethods";
 	public static final String COUNT_STATIC_ATTRIBUTES =
-		"Cohesion.StaticAttributes";
+		COHESION_PREFIX + ".StaticAttributes";
 	public static final String COUNT_STATIC_METHODS =
-		"Cohesion.StaticMethods";
+		COHESION_PREFIX + ".StaticMethods";
 
 	/**
 	 * The constructor.
@@ -102,12 +105,14 @@ implements IWorkbenchPreferencePage {
 	@Override
 	public void createFieldEditors() {
 		Composite parent = getFieldEditorParent();
-// TODO uncomment these when functionality is in place.
-		BooleanFieldEditor originalDefinitionEditor =
-			new BooleanFieldEditor(USE_ORIGINAL_DEFINITIONS,
-					"Use original definitions", parent);
+// TODO KAC uncomment these when functionality is in place.
+//		BooleanFieldEditor originalDefinitionEditor =
+//			new BooleanFieldEditor(USE_ORIGINAL_DEFINITIONS,
+//					"Use original definitions", parent);
+		// TODO figure out how to show/hide editors based on
+		// the value stored in the originalDefinitionEditor
 //		if (originalDefinitionEditor.getPreferenceStore())
-		addField(originalDefinitionEditor);
+//		addField(originalDefinitionEditor);
 //		addField(new BooleanFieldEditor(COUNT_ABSTRACT_METHODS,
 //				"Abstract methods", parent));
 //		addField(new BooleanFieldEditor(COUNT_CONSTRUCTORS,

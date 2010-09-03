@@ -52,15 +52,10 @@ import org.eclipse.jdt.core.Signature;
 public class CohesionJAC extends CohesionCalculator {
 	
 	//private IType loggerType = null;
-	private static String loggerSignature = null;
 
 	public CohesionJAC() {
 		super(JAC);
 		
-		if (loggerSignature == null) {
-			loggerSignature =
-				Signature.createTypeSignature("java.util.logging.Logger", false);
-		}
 	}
 
 	/**
@@ -110,7 +105,7 @@ public class CohesionJAC extends CohesionCalculator {
 						//&& !Flags.isStatic(flags)
 						&& !Flags.isDeprecated(flags)
 						//&& Flags.isPublic(flags)
-						&& !isObjectMethod(method)
+						&& !CallData.isObjectMethod(method)
 						) {
 					int index = reachabilityMatrix.getIndex(method);
 					methodsToEval.add(index);
@@ -123,7 +118,7 @@ public class CohesionJAC extends CohesionCalculator {
 		// Remove from consideration: serialVersionUID, loggers
 		for (IField field : callData.getAttributes()) {
 			String fieldName = field.getElementName();
-			if (!isLogger(field) && !"serialVersionUID".equals(fieldName)) {
+			if (!CallData.isLogger(field) && !"serialVersionUID".equals(fieldName)) {
 				int index = reachabilityMatrix.getIndex(field);
 				methodsToEval.add(index);
 			}
@@ -159,41 +154,6 @@ public class CohesionJAC extends CohesionCalculator {
 		return nic;
 	}
 
-	/**
-	 * Determines whether the supplied handle matches one of the methods
-	 * defined on Object that can be overridden (clone, equals, hashCode,
-	 * toString).
-	 * @param sig the Eclipse handle
-	 * @return true if an Object method; false otherwise
-	 * @throws JavaModelException 
-	 */
-	private static boolean isObjectMethod(IMethod method) throws JavaModelException {
-		// method.isSimilar(superMethod)
-		String sig = method.getSignature();
-		boolean result =
-			sig.endsWith("~hashCode")
-			|| sig.endsWith("~equals~QObject;")
-			|| sig.endsWith("~clone")
-			|| sig.endsWith("~toString");
-		return result;
-	}
-
-	/**
-	 * Determines whether this field is a logger
-	 * @param field
-	 * @return true if a logger, false otherwise
-	 */
-	private boolean isLogger(IField field) {
-		boolean isLogger =  false;
-		try {
-			String typeSignature = field.getTypeSignature();
-			isLogger = (loggerSignature != null)
-				&& loggerSignature.equals(typeSignature);
-		} catch (JavaModelException e) {
-			Log.logError("isLogger() failure: ", e);
-		}
-		return isLogger;
-	}
 
 
 }

@@ -398,6 +398,9 @@ public class CallData {
 
 	} // class ConnectivityMatrix
 
+	/** The Eclipse signature for the Java logger. */
+	private static String loggerSignature = null;
+
 	/** The set of known attributes (fields). */
 	protected HashSet<IField> attributes = new HashSet<IField>();
 
@@ -451,18 +454,47 @@ public class CallData {
 	 */
 	protected ConnectivityMatrix badriDirectlyConnectedMatrix = null;
 
-	/**
-	 * Flag to determine whether information about static attributes should be
-	 * kept.
-	 */
-	protected static boolean countStaticAttributes = true;
+	/** If this is "true", the original metric definitions are
+	 * used; otherwise, the user has the options of deciding
+	 * which members are considered in the calculations by setting
+	 * the other preferences.  */
+	protected boolean useOriginalDefinitions = true;
 
-	/**
-	 * Flag to determine whether information about static methods should be
-	 * kept.
-	 */
-	protected static boolean countStaticMethods = true;
+	/** NYI - Indicates whether abstract methods should be considered. */
+	protected boolean countAbstractMethods = false;
 
+	/** NYI - Indicates whether constructors should be considered. */
+	protected boolean countConstructors = false;
+
+	/** NYI - Indicates whether deprecated methods should be considered. */
+	protected boolean countDeprecatedMethods = false;
+
+	/** NYI - Indicates whether inherited attributes should be included. */
+	protected boolean countInheritedAttributes = false;
+
+	/** NYI - Indicates whether inherited methods should be included. */
+	protected boolean countInheritedMethods = false;
+
+	/** NYI - Indicates whether logger fields should be included. */
+	protected boolean countLoggers = false;
+
+	/** NYI - Indicates whether methods declared by the Object Class
+	 * (toString, etc.) should be considered. */
+	protected boolean countObjectsMethods = false;
+
+	/** Indicates whether static attributes should be considered. */
+	protected boolean countStaticAttributes = true;
+
+	/** Indicates whether static methods should be considered. */
+	protected boolean countStaticMethods = true;
+	
+	/**
+	 * NYI - Indicates whether members of inner classes should be treated the same as
+	 * members of the outer class.
+	 */
+	protected boolean countInners = false;
+
+	
 	/**
 	 * Gathers call information about the given class and stores the information
 	 * about the members, attributes (fields), and call relationships between
@@ -472,13 +504,34 @@ public class CallData {
 	 *            the class to analyze
 	 * @throws JavaModelException generally when the project can not be found
 	 */
-	public void collectCallData(TypeMetrics source, CohesionPreferences prefs) throws JavaModelException {
-		if (prefs != null) {
-			countStaticAttributes = prefs.countStaticAttributes();
-			countStaticMethods = prefs.countStaticMethods();
+	public void collectCallData(TypeMetrics source, CohesionPreferences prefs)
+	throws JavaModelException {
+		// Initialize the logger signature once only
+		if (loggerSignature == null) {
+			loggerSignature =
+				Signature.createTypeSignature("java.util.logging.Logger", false);
 		}
+		
+		setPreferences(prefs);
 		IType type = (IType) source.getJavaElement();
 		collectCallData(type);
+	}
+
+	private void setPreferences(CohesionPreferences prefs) {
+		// Retrieve and cache the preferences
+		if (prefs != null) {
+			useOriginalDefinitions = prefs.getUseOriginalDefinitions();
+			countAbstractMethods = prefs.getCountAbstractMethods();
+			countConstructors = prefs.getCountConstructors();
+			countDeprecatedMethods = prefs.getCountDeprecatedMethods();
+			countInheritedAttributes = prefs.getCountInheritedAttributes();
+			countInheritedMethods = prefs.getCountInheritedMethods();
+			countInners = prefs.getCountInners();
+			countLoggers = prefs.getCountLoggers();
+			countObjectsMethods = prefs.getCountObjectsMethods();
+			countStaticAttributes = prefs.getCountStaticAttributes();
+			countStaticMethods = prefs.getCountStaticMethods();
+		}
 	}
 
 	/**
@@ -530,8 +583,7 @@ public class CallData {
 		// Add the method to the methods field
 		// unless it is static and the user has specified no statics
 		for (int i = 0; i < typeMethods.length; i++) {
-			int flags = typeMethods[i].getFlags();
-			if (countStaticMethods || !Flags.isStatic(flags)) {
+			if (acceptMethod(typeMethods[i])) {
 				methods.add(typeMethods[i]);
 			}
 		}
@@ -553,6 +605,32 @@ public class CallData {
 				methodsCalledMap.put(caller, calleesL);
 			}
 		}
+	}
+
+	/**
+	 * Decides whether to accept a method for use in the cohesion calculations
+	 * based on the user preferences.
+	 * @param method the method to check
+	 * @return true if method is to be used; false otherwise.
+	 * @throws JavaModelException
+	 */
+	private boolean acceptMethod(IMethod method) throws JavaModelException {
+		boolean accept = useOriginalDefinitions;
+		
+		if (!useOriginalDefinitions) {
+			int flags = method.getFlags();
+			accept =
+				(countAbstractMethods || !Flags.isAbstract(flags))
+				&& (countConstructors || !method.isConstructor())
+				&& (countDeprecatedMethods || !Flags.isDeprecated(flags))
+				// TODO more filters
+				// && countInheritedMethods
+				// && countInners
+				//&& Flags.isPublic(flags)
+				&& (countObjectsMethods || !CallData.isObjectMethod(method))
+				&& (countStaticMethods || !Flags.isStatic(flags));
+			}
+		return accept;
 	}
 
 	/**
@@ -743,7 +821,7 @@ public class CallData {
 	 * @author Frank Sauer
 	 * 
 	 */
-	public static class MethodCollector extends SearchRequestor {
+	private class MethodCollector extends SearchRequestor {
 		protected Set<IMethod> results = null;
 
 		public MethodCollector() {
@@ -947,6 +1025,42 @@ public class CallData {
 					.buildDirectlyConnectedMatrix(this, methodsToEval);
 		}
 		return badriDirectlyConnectedMatrix;
+	}
+
+	/**
+	 * Determines whether the supplied handle matches one of the methods
+	 * defined on Object that can be overridden (clone, equals, hashCode,
+	 * toString).
+	 * @param sig the Eclipse handle
+	 * @return true if an Object method; false otherwise
+	 * @throws JavaModelException 
+	 */
+	public static boolean isObjectMethod(IMethod method) throws JavaModelException {
+		// method.isSimilar(superMethod)
+		String sig = method.getSignature();
+		boolean result =
+			sig.endsWith("~hashCode")
+			|| sig.endsWith("~equals~QObject;")
+			|| sig.endsWith("~clone")
+			|| sig.endsWith("~toString");
+		return result;
+	}
+
+	/**
+	 * Determines whether this field is a logger
+	 * @param field
+	 * @return true if a logger, false otherwise
+	 */
+	public static boolean isLogger(IField field) {
+		boolean isLogger =  false;
+		try {
+			String typeSignature = field.getTypeSignature();
+			isLogger = (loggerSignature != null)
+				&& loggerSignature.equals(typeSignature);
+		} catch (JavaModelException e) {
+			Log.logError("isLogger() failure: ", e);
+		}
+		return isLogger;
 	}
 
 }

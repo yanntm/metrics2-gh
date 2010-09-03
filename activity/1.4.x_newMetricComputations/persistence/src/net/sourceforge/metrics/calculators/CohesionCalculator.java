@@ -207,6 +207,12 @@ public abstract class CohesionCalculator extends Calculator implements
 		 * behavior. "NYI" indicates "Not Yet Implemented".
 		 */
 
+		/** If this is "true", the original metric definitions are
+		 * used; otherwise, the user has the options of deciding
+		 * which members are considered in the calculations by setting
+		 * the other preferences.  */
+		protected boolean useOriginalDefinitions = true;
+
 		/** NYI - Indicates whether abstract methods should be considered. */
 		protected boolean countAbstractMethods = false;
 
@@ -230,24 +236,16 @@ public abstract class CohesionCalculator extends Calculator implements
 		protected boolean countObjectsMethods = false;
 
 		/** Indicates whether static attributes should be considered. */
-		protected boolean countStaticAttributes = false;
+		protected boolean countStaticAttributes = true;
 
 		/** Indicates whether static methods should be considered. */
-		protected boolean countStaticMethods = false;
+		protected boolean countStaticMethods = true;
 		
 		/**
 		 * NYI - Indicates whether members of inner classes should be treated the same as
 		 * members of the outer class.
 		 */
 		protected boolean countInners = false;
-
-		/**
-		 * NYI - Synchronization implies a common connection to an object. If
-		 * this field is "true", then all methods declared synchronized will be
-		 * considered to be linked (as though they all accessed a common local
-		 * field - the instance).
-		 */
-		protected boolean linkSynchronizedMethods = false;
 
 		public CohesionPreferences() {
 			init();
@@ -278,11 +276,47 @@ public abstract class CohesionCalculator extends Calculator implements
 					CohesionPreferencePage.COUNT_STATIC_METHODS);
 		}
 
-		public boolean countStaticMethods() {
+		public boolean getUseOriginalDefinitions() {
+			return useOriginalDefinitions;
+		}
+
+		public boolean getCountAbstractMethods() {
+			return countAbstractMethods;
+		}
+
+		public boolean getCountConstructors() {
+			return countConstructors;
+		}
+
+		public boolean getCountDeprecatedMethods() {
+			return countDeprecatedMethods;
+		}
+
+		public boolean getCountInheritedAttributes() {
+			return countInheritedAttributes;
+		}
+
+		public boolean getCountInheritedMethods() {
+			return countInheritedMethods;
+		}
+
+		public boolean getCountLoggers() {
+			return countLoggers;
+		}
+
+		public boolean getCountObjectsMethods() {
+			return countObjectsMethods;
+		}
+
+		public boolean getCountInners() {
+			return countInners;
+		}
+
+		public boolean getCountStaticMethods() {
 			return countStaticMethods;
 		}
 
-		public boolean countStaticAttributes() {
+		public boolean getCountStaticAttributes() {
 			return countStaticAttributes;
 		}
 
@@ -290,7 +324,8 @@ public abstract class CohesionCalculator extends Calculator implements
 		 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 		 */
 		public void propertyChange(PropertyChangeEvent event) {
-			if (event.getProperty().startsWith("LCOM")) {
+			String property = event.getProperty();
+			if (property.startsWith(CohesionPreferencePage.COHESION_PREFIX)) {
 				init();
 			}
 		}
