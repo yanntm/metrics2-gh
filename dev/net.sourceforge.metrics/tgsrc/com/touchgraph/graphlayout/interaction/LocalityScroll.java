@@ -119,7 +119,7 @@ public class LocalityScroll implements GraphListener {
 				try {
 					tgPanel.setLocale(select, getLocalityRadius());
 				} catch (TGException ex) {
-					Log.logWarrning("Error setting locale", ex);
+					Log.logWarning("Error setting locale", ex);
 					ex.printStackTrace();
 				}
 			}

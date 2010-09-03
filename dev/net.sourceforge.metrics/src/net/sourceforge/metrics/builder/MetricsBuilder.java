@@ -221,7 +221,9 @@ public class MetricsBuilder extends IncrementalProjectBuilder {
 	}
 
 	/**
-	 * Contains the result of the resource to IJavaElement translation/filtering and knows how to process it in the context of a full build as well as an incremental build
+	 * Contains the result of the resource to IJavaElement translation/filtering
+	 * and knows how to process it in the context of a full build as well as an
+	 * incremental build
 	 * 
 	 * @author Frank Sauer
 	 */
@@ -241,8 +243,10 @@ public class MetricsBuilder extends IncrementalProjectBuilder {
 		}
 
 		/**
-		 * Push one, two or three ChangedCommand objects onto the stack. One is the normal case. Two if this result holds a source folder with a default package. Three if this result holds a project with no source folders and a default
-		 * package (BUG #766261)
+		 * Push one, two or three ChangedCommand objects onto the stack. One is
+		 * the normal case. Two if this result holds a source folder with a
+		 * default package. Three if this result holds a project with no source
+		 * folders and a default package (BUG #766261)
 		 * 
 		 * @param stack
 		 */

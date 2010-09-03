@@ -516,6 +516,8 @@ public abstract class AbstractMetricSource implements Constants, Serializable {
 				throw m;
 			} catch (Throwable e) {
 				Log.logError("Error running calculators for " + getJavaElement().getHandleIdentifier(), e);
+				//TODO remove line
+				e.printStackTrace();
 			}
 		}
 	}
@@ -579,5 +581,14 @@ public abstract class AbstractMetricSource implements Constants, Serializable {
 	public int hashCode() {
 		return getHandle().hashCode();
 	}
+
+    @Override
+	public String toString() {
+    	IJavaElement element = getJavaElement();
+    	String name = element.getElementName();
+    	String result = name + ": " + getValues();
+		return result;
+}
+
 
 }

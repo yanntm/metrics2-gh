@@ -66,6 +66,8 @@ public class MetricsPlugin extends AbstractUIPlugin implements IPropertyChangeLi
 	// Resource bundle.
 	private ResourceBundle resourceBundle;
 
+	/** The key is the level name; the value is the list of metric calculators
+	 * for that level.	 */
 	private Map<String, List<ICalculator>> calculators = new HashMap<String, List<ICalculator>>();
 	private Map<String, MetricDescriptor> metrics = new LinkedHashMap<String, MetricDescriptor>();
 	private Map<String, ExportDescriptor> exporters = new HashMap<String, ExportDescriptor>();

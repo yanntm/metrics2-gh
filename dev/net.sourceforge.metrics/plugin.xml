@@ -89,9 +89,9 @@
             id="net.sourceforge.metrics.norm">
       </page>
       <page
-            name="LCOM*"
+            name="Cohesion"
             category="net.sourceforge.metrics.ui.MetricsPreferencePage"
-            class="net.sourceforge.metrics.ui.preferences.LCOMPreferencePage"
+            class="net.sourceforge.metrics.ui.preferences.CohesionPreferencePage"
             id="net.sourceforge.metrics.lcom">
       </page>
       <page
@@ -175,6 +175,14 @@
                hint="use Extract-method to split the method up">
          </range>
       </metric>
+
+      <metric
+            propagateSum="false"
+            name="Coupling Between Objects"
+            id="CBO"
+            level="type">
+      </metric>
+      <!-- KAC
       <metric
             propagateSum="false"
             name="Afferent Coupling"
@@ -207,6 +215,7 @@
             id="RMD"
             level="packageFragment">
       </metric>
+      -->
       <metric
             propagateSum="false"
             name="Depth of Inheritance Tree"
@@ -250,6 +259,48 @@
             level="type">
       </metric>
       <metric
+            propagateSum="false"
+            name="Lack of Cohesion of Methods - CK"
+            id="LCOMCK"
+            level="type">
+      </metric>
+      <metric
+            propagateSum="false"
+            name="Lack of Cohesion of Methods - HS"
+            id="LCOMHS"
+            level="type">
+      </metric>
+      <metric
+            propagateSum="false"
+            name="Cohesion - TCC"
+            id="TCC"
+            level="type">
+      </metric>
+      <metric
+            propagateSum="false"
+            name="Cohesion - LCC"
+            id="LCC"
+            level="type">
+      </metric>
+      <metric
+            propagateSum="false"
+            name="Cohesion - DCD"
+            id="DCD"
+            level="type">
+      </metric>
+      <metric
+            propagateSum="false"
+            name="Cohesion - DCI"
+            id="DCI"
+            level="type">
+      </metric>
+      <metric
+            propagateSum="false"
+            name="Cohesion - JAC"
+            id="JAC"
+            level="type">
+      </metric>
+      <metric
             name="Number of Attributes"
             id="NOF"
             level="type">
@@ -276,6 +327,7 @@
             id="SIX"
             level="type">
       </metric>
+      <!-- KAC
       <metric
             allowDisable="false"
             name="Number of Classes"
@@ -300,6 +352,7 @@
             id="NOP"
             level="packageFragmentRoot">
       </metric>
+      -->
 <!-- calculators -->
 <!--
       <calculator
@@ -334,6 +387,41 @@
             level="type">
       </calculator>
       <calculator
+            name="Lack of Cohesion of Methods - CK"
+            calculatorClass="net.sourceforge.metrics.calculators.LCOMCK"
+            level="type">
+      </calculator>
+      <calculator
+            name="Lack of Cohesion of Methods - HS"
+            calculatorClass="net.sourceforge.metrics.calculators.LCOMHS"
+            level="type">
+      </calculator>
+      <calculator
+            name="Cohesion - TCC"
+            calculatorClass="net.sourceforge.metrics.calculators.CohesionTCC"
+            level="type">
+      </calculator>
+      <calculator
+            name="Cohesion - LCC"
+            calculatorClass="net.sourceforge.metrics.calculators.CohesionLCC"
+            level="type">
+      </calculator>
+      <calculator
+            name="Cohesion - DCD"
+            calculatorClass="net.sourceforge.metrics.calculators.CohesionDCD"
+            level="type">
+      </calculator>
+      <calculator
+            name="Cohesion - DCI"
+            calculatorClass="net.sourceforge.metrics.calculators.CohesionDCI"
+            level="type">
+      </calculator>
+      <calculator
+            name="Cohesion - JAC"
+            calculatorClass="net.sourceforge.metrics.calculators.CohesionJAC"
+            level="type">
+      </calculator>
+      <calculator
             name="Number of Overridden Methods"
             calculatorClass="net.sourceforge.metrics.calculators.Norm"
             level="type">
@@ -354,11 +442,19 @@
             level="type">
       </calculator>
       <calculator
+            name="Coupling Between Objects"
+            calculatorClass="net.sourceforge.metrics.calculators.CouplingCK"
+            level="type">
+      </calculator>
+      <!-- KAC
+      <calculator
             name="RMartinCouplings"
             calculatorClass="net.sourceforge.metrics.calculators.RMartinCouplings"
             level="packageFragment">
       </calculator>
+      -->
       <!-- G.B. -->
+      <!-- KAC
       <calculator
             level="compilationUnit"
             calculatorClass="net.sourceforge.metrics.calculators.TotalLinesOfCode"
@@ -377,6 +473,7 @@
             name="Method Lines of Code"
             id="MLOC"
             allowDisable="true"/>
+            -->
    </extension>
    <extension
          point="net.sourceforge.metrics.exporters">
@@ -424,10 +521,15 @@
             class="net.sourceforge.metrics.properties.MetricsPropertyPage"
             nameFilter="*"
             id="net.sourceforge.metrics.properties.MetricsPropertyPage">
+            <!-- KAC: the deprecated objectClass line works around a bug
+                 where the Metrics checkbox isn't available on the
+                 property page on some platforms.
             <enabledWhen>
             <instanceof
                   value="org.eclipse.jdt.core.IJavaProject"/>
             </enabledWhen>
+             -->
+            <objectClass value="org.eclipse.jdt.core.IJavaProject"/> 
       </page>
    </extension>
    <extension

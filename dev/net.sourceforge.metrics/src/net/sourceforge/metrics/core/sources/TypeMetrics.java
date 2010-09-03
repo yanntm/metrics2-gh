@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.sourceforge.metrics.calculators.CallData;
 import net.sourceforge.metrics.core.ICalculator;
 import net.sourceforge.metrics.core.Log;
 import net.sourceforge.metrics.core.Metric;
@@ -63,13 +64,17 @@ public class TypeMetrics extends AbstractMetricSource {
 	// AnonymousClassDeclaration
 	transient private ITypeHierarchy hierarchy = null;
 
+    /** Information about the members accessed by the methods of the class. */
+    protected transient CallData callData = null;
+
 	public TypeMetrics() {
 		super();
 	}
 
 	public TypeMetrics(ASTNode t) {
 		if (t == null) {
-			throw new IllegalArgumentException("Must have a valid TypeDeclaration!");
+	    throw new IllegalArgumentException(
+		    "Must have a valid TypeDeclaration!");
 		}
 		astNode = t;
 	}
@@ -77,12 +82,17 @@ public class TypeMetrics extends AbstractMetricSource {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @seenet.sourceforge.metrics.core.sources.AbstractMetricSource# initializeNewInstance (net.sourceforge.metrics.core.sources.AbstractMetricSource, org.eclipse.jdt.core.IJavaElement)
+     * @seenet.sourceforge.metrics.core.sources.AbstractMetricSource#
+     * initializeNewInstance
+     * (net.sourceforge.metrics.core.sources.AbstractMetricSource,
+     * org.eclipse.jdt.core.IJavaElement)
 	 */
 	@Override
-	public void initializeNewInstance(AbstractMetricSource newSource, IJavaElement element, Map<String, ? extends ASTNode> data) {
+    public void initializeNewInstance(AbstractMetricSource newSource,
+	    IJavaElement element, Map<String, ? extends ASTNode> data) {
 		if (newSource instanceof MethodMetrics) {
-			((MethodMetrics) newSource).setAstNode((MethodDeclaration) data.get("method"));
+	    ((MethodMetrics) newSource).setAstNode((MethodDeclaration) data
+		    .get("method"));
 		} else if (newSource instanceof TypeMetrics) {
 			((TypeMetrics) newSource).setAstNode(data.get("type"));
 		}
@@ -91,15 +101,22 @@ public class TypeMetrics extends AbstractMetricSource {
 
 	@Override
 	protected void initializeChildren(AbstractMetricSource parentMetric) {
-		initializeTypeChildren(astNode, parentMetric, this, (IType) getJavaElement());
+	initializeTypeChildren(astNode, parentMetric, this,
+		(IType) getJavaElement());
 	}
 
-	protected static void initializeTypeChildren(ASTNode astNode, AbstractMetricSource parentMetric, TypeMetrics a_TypeMetrics, IType enclosingType) {
-		initializeTypeChildrenMethodPart(astNode, parentMetric, a_TypeMetrics, enclosingType);
-		initializeTypeChildrenTypePart(astNode, parentMetric, a_TypeMetrics, enclosingType);
+    protected static void initializeTypeChildren(ASTNode astNode,
+	    AbstractMetricSource parentMetric, TypeMetrics a_TypeMetrics,
+	    IType enclosingType) {
+	initializeTypeChildrenMethodPart(astNode, parentMetric, a_TypeMetrics,
+		enclosingType);
+	initializeTypeChildrenTypePart(astNode, parentMetric, a_TypeMetrics,
+		enclosingType);
 	}
 
-	protected static void initializeTypeChildrenTypePart(ASTNode astNode, AbstractMetricSource parentMetric, TypeMetrics a_TypeMetrics, IType enclosingType) {
+    protected static void initializeTypeChildrenTypePart(ASTNode astNode,
+	    AbstractMetricSource parentMetric, TypeMetrics a_TypeMetrics,
+	    IType enclosingType) {
 		ASTNode[] subTypes = findSubTypes(astNode);
 		if (subTypes != null) {
 			int interfaces = 0;
@@ -109,25 +126,32 @@ public class TypeMetrics extends AbstractMetricSource {
 				}
 				IType type;
 				try {
-					type = (IType) a_TypeMetrics.getCompilationUnit().getElementAt(node.getStartPosition());
+		    type = (IType) a_TypeMetrics.getCompilationUnit()
+			    .getElementAt(node.getStartPosition());
 					Map<String, ASTNode> data = new HashMap<String, ASTNode>();
 					data.put("type", node);
-					TypeMetrics tm = (TypeMetrics) Dispatcher.calculateAbstractMetricSource(type, parentMetric, data);
+		    TypeMetrics tm = (TypeMetrics) Dispatcher
+			    .calculateAbstractMetricSource(type, parentMetric,
+				    data);
 					parentMetric.addChild(tm);
 					Metric subNumOfInterface = tm.getValue(NUM_INTERFACES);
-					interfaces += subNumOfInterface == null ? 0 : subNumOfInterface.intValue();
+		    interfaces += subNumOfInterface == null ? 0
+			    : subNumOfInterface.intValue();
 					if (type.isInterface()) {
 						interfaces++;
 					}
 				} catch (JavaModelException e) {
-					Log.logError("Could not get IJavaElement hierarchy for " + node, e);
+		    Log.logError("Could not get IJavaElement hierarchy for "
+			    + node, e);
 				}
 			}
 			a_TypeMetrics.setValue(new Metric(NUM_INTERFACES,interfaces));
 		}
 	}
 
-	protected static void initializeTypeChildrenMethodPart(ASTNode astNode, AbstractMetricSource parentMetric, TypeMetrics a_TypeMetrics, IType enclosingType) {
+    protected static void initializeTypeChildrenMethodPart(ASTNode astNode,
+	    AbstractMetricSource parentMetric, TypeMetrics a_TypeMetrics,
+	    IType enclosingType) {
 		MethodDeclaration[] methods = null;
 		if (astNode instanceof TypeDeclaration) {
 			TypeDeclaration typeDeclarationNode = (TypeDeclaration) astNode;
@@ -147,7 +171,9 @@ public class TypeMetrics extends AbstractMetricSource {
 				IMethod method = findMethod(lastMethod, enclosingType);
 				Map<String, ASTNode> data = new HashMap<String, ASTNode>();
 				data.put("method", lastMethod);
-				MethodMetrics mm = (MethodMetrics) Dispatcher.calculateAbstractMetricSource(method, a_TypeMetrics, data);
+		MethodMetrics mm = (MethodMetrics) Dispatcher
+			.calculateAbstractMetricSource(method, a_TypeMetrics,
+				data);
 				a_TypeMetrics.addChild(mm);
 			}
 		}
@@ -202,7 +228,8 @@ public class TypeMetrics extends AbstractMetricSource {
 		return subTypes;
 	}
 
-	private static MethodDeclaration[] getMethods(AnonymousClassDeclaration anonymousClassDeclaration) {
+    private static MethodDeclaration[] getMethods(
+	    AnonymousClassDeclaration anonymousClassDeclaration) {
 		List<?> bd = anonymousClassDeclaration.bodyDeclarations();
 		int methodCount = 0;
 		for (Iterator<?> it = bd.listIterator(); it.hasNext();) {
@@ -221,7 +248,8 @@ public class TypeMetrics extends AbstractMetricSource {
 		return methods;
 	}
 
-	private static MethodDeclaration[] getMethods(EnumDeclaration enumDeclaration) {
+    private static MethodDeclaration[] getMethods(
+	    EnumDeclaration enumDeclaration) {
 		List<?> bd = enumDeclaration.bodyDeclarations();
 		int methodCount = 0;
 		for (Iterator<?> it = bd.listIterator(); it.hasNext();) {
@@ -240,22 +268,40 @@ public class TypeMetrics extends AbstractMetricSource {
 		return methods;
 	}
 
-	private static MethodDeclaration[] getMethods(TypeDeclaration typeDeclarationNode) {
+    private static MethodDeclaration[] getMethods(
+	    TypeDeclaration typeDeclarationNode) {
 		return typeDeclarationNode.getMethods();
 	}
+
+    /**
+     * @return the callData
+     */
+    public CallData getCallData() {
+	return callData;
+    }
+
+    /**
+     * @param callData
+     *            the callData to set
+     */
+    public void setCallData(CallData callData) {
+	this.callData = callData;
+    }
 
 	private static IMethod findMethod(MethodDeclaration m, IType type) {
 		List<?> parms = m.parameters();
 		String[] argtypes = new String[parms.size()];
 		int index = 0;
 		for (Iterator<?> i = parms.iterator(); i.hasNext(); index++) {
-			SingleVariableDeclaration l_varDeclaration = (SingleVariableDeclaration) i.next();
+	    SingleVariableDeclaration l_varDeclaration = (SingleVariableDeclaration) i
+		    .next();
 			String svd = l_varDeclaration.getType().toString();
 			argtypes[index] = Signature.createTypeSignature(svd, false);
 		}
 		IMethod im = type.getMethod(m.getName().getIdentifier(), argtypes);
 		if (im == null) {
-			Log.logError("No method found for " + m.getName().getIdentifier() + " (" + argtypes + ")", null);
+	    Log.logError("No method found for " + m.getName().getIdentifier()
+		    + " (" + argtypes + ")", null);
 		}
 		return im;
 	}
@@ -277,9 +323,11 @@ public class TypeMetrics extends AbstractMetricSource {
 		if (hierarchy == null) {
 			IType iType = (IType) getJavaElement();
 			try {
-				hierarchy = iType.newTypeHierarchy((IJavaProject) iType.getAncestor(IJavaElement.JAVA_PROJECT), null);
+		hierarchy = iType.newTypeHierarchy((IJavaProject) iType
+			.getAncestor(IJavaElement.JAVA_PROJECT), null);
 			} catch (Throwable e) {
-				Log.logError("Could not get type hierarchy for " + getHandle(), e);
+		Log.logError("Could not get type hierarchy for " + getHandle(),
+			e);
 			}
 		}
 		return hierarchy;
@@ -324,7 +372,8 @@ public class TypeMetrics extends AbstractMetricSource {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.sourceforge.metrics.core.sources.AbstractMetricSource#getExporter()
+     * @see
+     * net.sourceforge.metrics.core.sources.AbstractMetricSource#getExporter()
 	 */
 	@Override
 	public IXMLExporter getExporter() {

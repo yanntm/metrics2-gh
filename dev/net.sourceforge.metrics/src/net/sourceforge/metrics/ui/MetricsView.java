@@ -22,6 +22,7 @@ package net.sourceforge.metrics.ui;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,6 +34,7 @@ import net.sourceforge.metrics.core.MetricsPlugin;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 import net.sourceforge.metrics.core.sources.Dispatcher;
 import net.sourceforge.metrics.core.sources.IGraphContributor;
+import net.sourceforge.metrics.persistence.MetricsDBTransaction;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -478,6 +480,24 @@ public class MetricsView extends ViewPart implements ISelectionListener, IMetric
 				} else {
 					MessageDialog.openWarning(activeShell, "Warning", "Sorry, exporter is not available");
 				}
+			}
+		}
+	}
+
+    /**
+     * export the selected metrics to the database
+     * @throws InvocationTargetException 
+     */
+	public void exportToDB() throws InvocationTargetException {
+		if (selection != null) {
+			MetricsDBTransaction transaction = new MetricsDBTransaction();
+			try {
+				transaction.saveToDB(selection);
+			} catch (SQLException e) {
+				MessageDialog.openWarning(getSite().getShell(),
+						"Database Access Failed",
+						"Writing of metric data to database failed: "
+								+ e.getMessage());
 			}
 		}
 	}
