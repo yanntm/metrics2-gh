@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -401,6 +402,9 @@ public class CallData {
 	/** The Eclipse signature for the Java logger. */
 	private static String loggerSignature = null;
 
+	/** The type whose data we're collecting. */
+	protected IType type = null;
+	
 	/** The set of known attributes (fields). */
 	protected HashSet<IField> attributes = new HashSet<IField>();
 
@@ -460,13 +464,13 @@ public class CallData {
 	 * the other preferences.  */
 	protected boolean useOriginalDefinitions = true;
 
-	/** NYI - Indicates whether abstract methods should be considered. */
+	/** Indicates whether abstract methods should be considered. */
 	protected boolean countAbstractMethods = false;
 
-	/** NYI - Indicates whether constructors should be considered. */
+	/** Indicates whether constructors should be considered. */
 	protected boolean countConstructors = false;
 
-	/** NYI - Indicates whether deprecated methods should be considered. */
+	/** Indicates whether deprecated methods should be considered. */
 	protected boolean countDeprecatedMethods = false;
 
 	/** NYI - Indicates whether inherited attributes should be included. */
@@ -478,9 +482,13 @@ public class CallData {
 	/** NYI - Indicates whether logger fields should be included. */
 	protected boolean countLoggers = false;
 
-	/** NYI - Indicates whether methods declared by the Object Class
+	/** Indicates whether methods declared by the Object Class
 	 * (toString, etc.) should be considered. */
 	protected boolean countObjectsMethods = false;
+
+	/** Indicates whether only public methods should be considered
+	 * in relationships with the attributes. */
+	protected boolean countPublicMethodsOnly = false;
 
 	/** Indicates whether static attributes should be considered. */
 	protected boolean countStaticAttributes = true;
@@ -529,6 +537,7 @@ public class CallData {
 			countInners = prefs.getCountInners();
 			countLoggers = prefs.getCountLoggers();
 			countObjectsMethods = prefs.getCountObjectsMethods();
+			countPublicMethodsOnly = prefs.getCountPublicMethodsOnly();
 			countStaticAttributes = prefs.getCountStaticAttributes();
 			countStaticMethods = prefs.getCountStaticMethods();
 		}
@@ -544,6 +553,7 @@ public class CallData {
 	 * @throws JavaModelException generally when the project can not be found
      */
 	public void collectCallData(IType type) throws JavaModelException {
+		this.type = type;
 		IJavaSearchScope scope =
 			SearchEngine.createJavaSearchScope(new IJavaElement[] { type });
 		MethodCollector methodCollector = new MethodCollector();
@@ -610,6 +620,11 @@ public class CallData {
 	/**
 	 * Decides whether to accept a method for use in the cohesion calculations
 	 * based on the user preferences.
+	 * NOTE:  Some methods can be filtered out at collection time, others
+	 * must be filtered out at calculation time.  For example, a user may
+	 * desire to base the cohesion scores on public methods; however, we
+	 * still need to collect the non-public methods here, because they may
+	 * connect the public methods to the attributes.
 	 * @param method the method to check
 	 * @return true if method is to be used; false otherwise.
 	 * @throws JavaModelException
@@ -624,9 +639,8 @@ public class CallData {
 				&& (countConstructors || !method.isConstructor())
 				&& (countDeprecatedMethods || !Flags.isDeprecated(flags))
 				// TODO more filters
-				// && countInheritedMethods
+				&& (countInheritedMethods || !isInherited(method))
 				// && countInners
-				//&& Flags.isPublic(flags)
 				&& (countObjectsMethods || !CallData.isObjectMethod(method))
 				&& (countStaticMethods || !Flags.isStatic(flags));
 			}
@@ -656,8 +670,7 @@ public class CallData {
 		// Add the attribute to the attributes field
 		// unless it is static and the user has specified no statics
 		for (int i = 0; i < typeFields.length; i++) {
-			int flags = typeFields[i].getFlags();
-			if (countStaticAttributes || !Flags.isStatic(flags)) {
+			if (acceptField(typeFields[i])) {
 				attributes.add(typeFields[i]);
 			}
 		}
@@ -680,6 +693,27 @@ public class CallData {
 				attributesAccessedMap.put(caller, calleesL);
 			}
 		}
+	}
+
+	/**
+	 * Decides whether to accept a field for use in the cohesion calculations
+	 * based on the user preferences.
+	 * @param field the field to check
+	 * @return true if field is to be used; false otherwise.
+	 * @throws JavaModelException
+	 */
+	private boolean acceptField(IField field) throws JavaModelException {
+		boolean accept = useOriginalDefinitions;
+		
+		if (!useOriginalDefinitions) {
+			int flags = field.getFlags();
+			accept =
+				(countInheritedAttributes || !isInherited(field))
+				// TODO countInners
+				&& (countLoggers || !isLogger(field))
+				&& (countStaticAttributes || !Flags.isStatic(flags));
+		}
+		return accept;
 	}
 
 	/**
@@ -852,8 +886,7 @@ public class CallData {
 
 			if (matchingElement instanceof IMethod) {
 				IMethod method = (IMethod) matchingElement;
-				int flags = method.getFlags();
-				if (countStaticMethods || !Flags.isStatic(flags)) {
+				if (acceptMethod(method)) {
 					results.add(method);
 				}
 			}
@@ -1047,7 +1080,28 @@ public class CallData {
 	}
 
 	/**
-	 * Determines whether this field is a logger
+	 * @param member the method or attribute whose status we're checking
+	 * @return true if the member was declared on a supertype; false otherwise
+	 * @throws JavaModelException
+	 */
+	private boolean isInherited(IMember member)
+	throws JavaModelException {
+		// TODO determine whether this will be true for members
+		// defined locally but declared in a superclass
+		IType declaringType = member.getDeclaringType();
+		ITypeHierarchy typeHierarchy = type.newSupertypeHierarchy(null);
+		IType[] supertypes = typeHierarchy.getAllSupertypes(type);
+		boolean hasSuper = false;
+		int i = 0;
+		while (!hasSuper && i < supertypes.length) {
+			hasSuper = declaringType.equals(supertypes[i]);
+			i++;
+		}
+		return hasSuper;
+	}
+	
+	/**
+	 * Determines whether this field is a (java.util) logger
 	 * @param field
 	 * @return true if a logger, false otherwise
 	 */

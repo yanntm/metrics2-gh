@@ -235,6 +235,10 @@ public abstract class CohesionCalculator extends Calculator implements
 		 * (toString, etc.) should be considered. */
 		protected boolean countObjectsMethods = false;
 
+		/** NYI - Indicates whether only public methods should be considered
+		 * in relationships with the attributes. */
+		protected boolean countPublicMethodsOnly = false;
+
 		/** Indicates whether static attributes should be considered. */
 		protected boolean countStaticAttributes = true;
 
@@ -270,6 +274,8 @@ public abstract class CohesionCalculator extends Calculator implements
 					CohesionPreferencePage.COUNT_LOGGERS);
 			countObjectsMethods = preferences.getBoolean(
 					CohesionPreferencePage.COUNT_OBJECTS_METHODS);
+			countPublicMethodsOnly = preferences.getBoolean(
+					CohesionPreferencePage.COUNT_PUBLIC_METHODS_ONLY);
 			countStaticAttributes = preferences.getBoolean(
 					CohesionPreferencePage.COUNT_STATIC_ATTRIBUTES);
 			countStaticMethods = preferences.getBoolean(
@@ -306,6 +312,10 @@ public abstract class CohesionCalculator extends Calculator implements
 
 		public boolean getCountObjectsMethods() {
 			return countObjectsMethods;
+		}
+
+		public boolean getCountPublicMethodsOnly() {
+			return countPublicMethodsOnly;
 		}
 
 		public boolean getCountInners() {
