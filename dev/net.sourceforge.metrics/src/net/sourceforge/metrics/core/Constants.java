@@ -86,8 +86,6 @@ public interface Constants {
     public final static String DCD = "DCD";
     /** "DCI" - Degree of Cohesion (Indirect)*/
     public final static String DCI = "DCI";
-    /** "JAC" - Java Aware Cohesion */
-    public final static String JAC = "JAC";
     /** "LCC" - Loose Class Cohesion */
     public final static String LCC = "LCC";
     /** "LCOM" - Lack Of Cohesion of Methods */
