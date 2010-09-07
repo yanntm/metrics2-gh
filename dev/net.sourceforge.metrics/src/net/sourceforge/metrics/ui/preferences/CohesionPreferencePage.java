@@ -67,10 +67,13 @@ implements IWorkbenchPreferencePage {
 		COHESION_PREFIX + ".Loggers";
 	public static final String COUNT_OBJECTS_METHODS =
 		COHESION_PREFIX + ".ObjectsMethods";
+	public static final String COUNT_PUBLIC_METHODS_ONLY =
+		COHESION_PREFIX + ".PublicMethodsOnly";
 	public static final String COUNT_STATIC_ATTRIBUTES =
 		COHESION_PREFIX + ".StaticAttributes";
 	public static final String COUNT_STATIC_METHODS =
 		COHESION_PREFIX + ".StaticMethods";
+
 
 	/**
 	 * The constructor.
@@ -95,6 +98,7 @@ implements IWorkbenchPreferencePage {
 		preferenceStore.setDefault(COUNT_INNERS, false);
 		preferenceStore.setDefault(COUNT_LOGGERS, true);
 		preferenceStore.setDefault(COUNT_OBJECTS_METHODS, true);
+		preferenceStore.setDefault(COUNT_PUBLIC_METHODS_ONLY, false);
 		preferenceStore.setDefault(COUNT_STATIC_ATTRIBUTES, false);
 		preferenceStore.setDefault(COUNT_STATIC_METHODS, false);
 	}
