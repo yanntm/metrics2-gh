@@ -260,44 +260,38 @@
       </metric>
       <metric
             propagateSum="false"
-            name="Lack of Cohesion of Methods - CK"
+            name="Lack of Cohesion of Methods - Chidamber Kemmerer"
             id="LCOMCK"
             level="type">
       </metric>
       <metric
             propagateSum="false"
-            name="Lack of Cohesion of Methods - HS"
+            name="Lack of Cohesion of Methods - Henderson-Sellers"
             id="LCOMHS"
             level="type">
       </metric>
       <metric
             propagateSum="false"
-            name="Cohesion - TCC"
+            name="Cohesion - Tight Cohesion of a Class"
             id="TCC"
             level="type">
       </metric>
       <metric
             propagateSum="false"
-            name="Cohesion - LCC"
+            name="Cohesion - Loose Cohesion of a Class"
             id="LCC"
             level="type">
       </metric>
       <metric
             propagateSum="false"
-            name="Cohesion - DCD"
+            name="Cohesion - Degree of Cohesion Direct"
             id="DCD"
             level="type">
       </metric>
       <metric
             propagateSum="false"
-            name="Cohesion - DCI"
+            name="Cohesion - Degree of Cohesion Indirect"
             id="DCI"
-            level="type">
-      </metric>
-      <metric
-            propagateSum="false"
-            name="Cohesion - JAC"
-            id="JAC"
             level="type">
       </metric>
       <metric
@@ -397,28 +391,23 @@
             level="type">
       </calculator>
       <calculator
-            name="Cohesion - TCC"
+            name="Cohesion - Tight Cohesion of a Class"
             calculatorClass="net.sourceforge.metrics.calculators.CohesionTCC"
             level="type">
       </calculator>
       <calculator
-            name="Cohesion - LCC"
+            name="Cohesion - Loose Cohesion of a Class"
             calculatorClass="net.sourceforge.metrics.calculators.CohesionLCC"
             level="type">
       </calculator>
       <calculator
-            name="Cohesion - DCD"
+            name="Cohesion - Degree of Cohesion Direct"
             calculatorClass="net.sourceforge.metrics.calculators.CohesionDCD"
             level="type">
       </calculator>
       <calculator
-            name="Cohesion - DCI"
+            name="Cohesion - Degree of Cohesion Indirect"
             calculatorClass="net.sourceforge.metrics.calculators.CohesionDCI"
-            level="type">
-      </calculator>
-      <calculator
-            name="Cohesion - JAC"
-            calculatorClass="net.sourceforge.metrics.calculators.CohesionJAC"
             level="type">
       </calculator>
       <calculator
