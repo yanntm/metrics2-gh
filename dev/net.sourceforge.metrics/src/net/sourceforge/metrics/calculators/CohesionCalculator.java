@@ -194,18 +194,15 @@ public abstract class CohesionCalculator extends Calculator implements
 
 	/**
 	 * Statically cache preference values, yet register for change events so
-	 * they get updated when they change.
+	 * they get updated when they change. By default, all methods and attributes
+	 * declared in the local class are used in the cohesion calculation, but
+	 * none that are inherited from superclasses. Members defined in inner
+	 * classes are also ignored by default. The fields below allow the user to
+	 * change the default behavior. "NYI" indicates "Not Yet Implemented".
 	 */
 	public static class CohesionPreferences implements IPropertyChangeListener {
 
 		// TODO Options to (possibly) implement
-		/*
-		 * By default, all methods and attributes declared in the local class
-		 * are used in the cohesion calculation, but none that are inherited
-		 * from superclasses. Members defined in inner classes are also ignored
-		 * by default. The options below allow the user to change the default
-		 * behavior. "NYI" indicates "Not Yet Implemented".
-		 */
 
 		/** If this is "true", the original metric definitions are
 		 * used; otherwise, the user has the options of deciding

@@ -471,7 +471,7 @@ public class CallData {
 	protected boolean countConstructors = false;
 
 	/** Indicates whether deprecated methods should be considered. */
-	protected boolean countDeprecatedMethods = false;
+	protected boolean countDeprecatedMethods = true;
 
 	/** NYI - Indicates whether inherited attributes should be included. */
 	protected boolean countInheritedAttributes = false;
@@ -479,12 +479,12 @@ public class CallData {
 	/** NYI - Indicates whether inherited methods should be included. */
 	protected boolean countInheritedMethods = false;
 
-	/** NYI - Indicates whether logger fields should be included. */
-	protected boolean countLoggers = false;
+	/** Indicates whether logger fields should be included. */
+	protected boolean countLoggers = true;
 
 	/** Indicates whether methods declared by the Object Class
 	 * (toString, etc.) should be considered. */
-	protected boolean countObjectsMethods = false;
+	protected boolean countObjectsMethods = true;
 
 	/** Indicates whether only public methods should be considered
 	 * in relationships with the attributes. */
@@ -498,8 +498,7 @@ public class CallData {
 	
 	/**
 	 * NYI - Indicates whether members of inner classes should be treated the same as
-	 * members of the outer class.
-	 */
+	 * members of the outer class. */
 	protected boolean countInners = false;
 
 	
@@ -639,7 +638,7 @@ public class CallData {
 				&& (countConstructors || !method.isConstructor())
 				&& (countDeprecatedMethods || !Flags.isDeprecated(flags))
 				// TODO more filters
-				&& (countInheritedMethods || !isInherited(method))
+				// && (countInheritedMethods || !isInherited(method))
 				// && countInners
 				&& (countObjectsMethods || !CallData.isObjectMethod(method))
 				&& (countStaticMethods || !Flags.isStatic(flags));
@@ -708,9 +707,9 @@ public class CallData {
 		if (!useOriginalDefinitions) {
 			int flags = field.getFlags();
 			accept =
-				(countInheritedAttributes || !isInherited(field))
+				// (countInheritedAttributes || !isInherited(field))
 				// TODO countInners
-				&& (countLoggers || !isLogger(field))
+				(countLoggers || !isLogger(field))
 				&& (countStaticAttributes || !Flags.isStatic(flags));
 		}
 		return accept;

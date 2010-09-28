@@ -110,29 +110,29 @@ implements IWorkbenchPreferencePage {
 	public void createFieldEditors() {
 		Composite parent = getFieldEditorParent();
 // TODO KAC uncomment these when functionality is in place.
-//		BooleanFieldEditor originalDefinitionEditor =
-//			new BooleanFieldEditor(USE_ORIGINAL_DEFINITIONS,
-//					"Use original definitions", parent);
+		BooleanFieldEditor originalDefinitionEditor =
+			new BooleanFieldEditor(USE_ORIGINAL_DEFINITIONS,
+					"Use original definitions (overrides other settings)", parent);
 		// TODO figure out how to show/hide editors based on
 		// the value stored in the originalDefinitionEditor
-//		if (originalDefinitionEditor.getPreferenceStore())
-//		addField(originalDefinitionEditor);
-//		addField(new BooleanFieldEditor(COUNT_ABSTRACT_METHODS,
-//				"Abstract methods", parent));
-//		addField(new BooleanFieldEditor(COUNT_CONSTRUCTORS,
-//				"Constructors", parent));
-//		addField(new BooleanFieldEditor(COUNT_DEPRECATED_METHODS,
-//				"Deprecated methods", parent));
+//		if (originalDefinitionEditor.getPreferenceStore() != null)
+		addField(originalDefinitionEditor);
+		addField(new BooleanFieldEditor(COUNT_ABSTRACT_METHODS,
+				"Abstract methods", parent));
+		addField(new BooleanFieldEditor(COUNT_CONSTRUCTORS,
+				"Constructors", parent));
+		addField(new BooleanFieldEditor(COUNT_DEPRECATED_METHODS,
+				"Deprecated methods", parent));
 //		addField(new BooleanFieldEditor(COUNT_INHERITED_ATTRIBUTES,
 //				"Inherited attributes", parent));
 //		addField(new BooleanFieldEditor(COUNT_INHERITED_METHODS,
 //				"Inherited methods", parent));
 //		addField(new BooleanFieldEditor(COUNT_INNERS,
 //				"Inner class methods", parent));
-//		addField(new BooleanFieldEditor(COUNT_LOGGERS, "Loggers",
-//				parent));
-//		addField(new BooleanFieldEditor(COUNT_OBJECTS_METHODS,
-//				"Methods from Object", parent));
+		addField(new BooleanFieldEditor(COUNT_LOGGERS, "Loggers",
+				parent));
+		addField(new BooleanFieldEditor(COUNT_OBJECTS_METHODS,
+				"Methods from Object", parent));
 		addField(new BooleanFieldEditor(COUNT_STATIC_ATTRIBUTES,
 				"Static attributes", parent));
 		addField(new BooleanFieldEditor(COUNT_STATIC_METHODS,
