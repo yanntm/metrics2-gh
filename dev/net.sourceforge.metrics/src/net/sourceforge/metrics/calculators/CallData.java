@@ -515,8 +515,9 @@ public class CallData {
 	throws JavaModelException {
 		// Initialize the logger signature once only
 		if (loggerSignature == null) {
-			loggerSignature =
+			String loggerTypeSignature =
 				Signature.createTypeSignature("java.util.logging.Logger", false);
+			loggerSignature = Signature.getSignatureSimpleName(loggerTypeSignature);
 		}
 		
 		setPreferences(prefs);
@@ -1069,7 +1070,7 @@ public class CallData {
 	 */
 	public static boolean isObjectMethod(IMethod method) throws JavaModelException {
 		// method.isSimilar(superMethod)
-		String sig = method.getSignature();
+		String sig = method.getHandleIdentifier();
 		boolean result =
 			sig.endsWith("~hashCode")
 			|| sig.endsWith("~equals~QObject;")
@@ -1108,8 +1109,9 @@ public class CallData {
 		boolean isLogger =  false;
 		try {
 			String typeSignature = field.getTypeSignature();
+			String simpleName = Signature.getSignatureSimpleName(typeSignature);
 			isLogger = (loggerSignature != null)
-				&& loggerSignature.equals(typeSignature);
+				&& loggerSignature.equals(simpleName);
 		} catch (JavaModelException e) {
 			Log.logError("isLogger() failure: ", e);
 		}

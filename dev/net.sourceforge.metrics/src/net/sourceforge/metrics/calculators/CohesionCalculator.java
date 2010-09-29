@@ -210,13 +210,13 @@ public abstract class CohesionCalculator extends Calculator implements
 		 * the other preferences.  */
 		protected boolean useOriginalDefinitions = true;
 
-		/** NYI - Indicates whether abstract methods should be considered. */
+		/** Indicates whether abstract methods should be considered. */
 		protected boolean countAbstractMethods = false;
 
-		/** NYI - Indicates whether constructors should be considered. */
+		/** Indicates whether constructors should be considered. */
 		protected boolean countConstructors = false;
 
-		/** NYI - Indicates whether deprecated methods should be considered. */
+		/** Indicates whether deprecated methods should be considered. */
 		protected boolean countDeprecatedMethods = false;
 
 		/** NYI - Indicates whether inherited attributes should be included. */
@@ -225,14 +225,14 @@ public abstract class CohesionCalculator extends Calculator implements
 		/** NYI - Indicates whether inherited methods should be included. */
 		protected boolean countInheritedMethods = false;
 
-		/** NYI - Indicates whether logger fields should be included. */
+		/** Indicates whether logger fields should be included. */
 		protected boolean countLoggers = false;
 
-		/** NYI - Indicates whether methods declared by the Object Class
+		/** Indicates whether methods declared by the Object Class
 		 * (toString, etc.) should be considered. */
 		protected boolean countObjectsMethods = false;
 
-		/** NYI - Indicates whether only public methods should be considered
+		/** Indicates whether only public methods should be considered
 		 * in relationships with the attributes. */
 		protected boolean countPublicMethodsOnly = false;
 
@@ -277,6 +277,8 @@ public abstract class CohesionCalculator extends Calculator implements
 					CohesionPreferencePage.COUNT_STATIC_ATTRIBUTES);
 			countStaticMethods = preferences.getBoolean(
 					CohesionPreferencePage.COUNT_STATIC_METHODS);
+			useOriginalDefinitions = preferences.getBoolean(
+					CohesionPreferencePage.USE_ORIGINAL_DEFINITIONS);
 		}
 
 		public boolean getUseOriginalDefinitions() {
@@ -344,20 +346,19 @@ public abstract class CohesionCalculator extends Calculator implements
 		 */
 		@Override
 		public String toString() {
-			return "CohesionPreferences [countStaticAttributes="
-					+ countStaticAttributes + ", countStaticMethods="
-					+ countStaticMethods + "]";
+			return "CohesionPreferences [countAbstractMethods=\t"
+					+ countAbstractMethods + "\n countConstructors=\t"
+					+ countConstructors + "\n countDeprecatedMethods=\t"
+					+ countDeprecatedMethods + "\n countInheritedAttributes=\t"
+					+ countInheritedAttributes + "\n countInheritedMethods=\t"
+					+ countInheritedMethods + "\n countInners=\t" + countInners
+					+ "\n countLoggers=\t" + countLoggers + "\n countObjectsMethods=\t"
+					+ countObjectsMethods + "\n countPublicMethodsOnly=\t"
+					+ countPublicMethodsOnly + "\n countStaticAttributes=\t"
+					+ countStaticAttributes + "\n countStaticMethods=\t"
+					+ countStaticMethods + "\n useOriginalDefinitions=\t"
+					+ useOriginalDefinitions + "]";
 		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "CohesionCalculator [name=" + name + ", prefs = " + prefs + "]";
 	}
 
 }
