@@ -145,40 +145,59 @@ public class CallData {
 		 * at [row] is a method that directly accesses the member at [column],
 		 * and 0 otherwise.
 		 * 
-		 * @param attributeAccessedByMap
-		 *            lists the methods that access an attribute
-		 * @param methodCalledByMap
-		 *            lists the methods that access a method
+		 * If connectInterfaceMethods is true, it will also mark as connected
+		 * those methods that are required from the same interface.
+		 * 
+		 * @param callData the data from which to build the matrix 
 		 * @return the adjacency matrix
 		 */
-		public static ConnectivityMatrix buildAdjacencyMatrix(
-				HashMap<IField, HashSet<IMethod>> attributeAccessedByMap,
-				HashMap<IMethod, HashSet<IMethod>> methodCalledByMap) {
+		private static ConnectivityMatrix buildAdjacencyMatrix(
+				CallData callData) {
+			Map<IField, HashSet<IMethod>> attributeAccessedByMap =
+				callData.getAttributeAccessedByMap();
+			Map<IMethod, HashSet<IMethod>> methodCalledByMap =
+				callData.getMethodCalledByMap();
 			Set<IField> attributeKeySet = attributeAccessedByMap.keySet();
 			ArrayList<IMember> headers = new ArrayList<IMember>(attributeKeySet);
 			Set<IMethod> methodKeySet = methodCalledByMap.keySet();
 			headers.addAll(methodKeySet);
 			ConnectivityMatrix matrix = new ConnectivityMatrix(headers);
 
-			matrix.populateAdjacencies(attributeAccessedByMap,
-					methodCalledByMap);
+			matrix.populateAdjacencies(callData);
 			return matrix;
 		}
 
 		/**
 		 * Populates the matrix using data from the maps
+		 * The element at [row, column] is 1 if the member
+		 * at [row] is a method that directly accesses the member at [column],
+		 * and 0 otherwise.
 		 * 
-		 * @param attributeAccessedByMap
-		 *            info about the methods that access attributes
-		 * @param methodCalledByMap
-		 *            info about the methods that call other methods
+		 * If connectInterfaceMethods is true, it will also mark as connected
+		 * those methods that are required from the same interface.
+		 * @param callData the class's call data
 		 */
-		private void populateAdjacencies(
-				Map<IField, HashSet<IMethod>> attributeAccessedByMap,
-				Map<IMethod, HashSet<IMethod>> methodCalledByMap) {
-			Set<Entry<IField, HashSet<IMethod>>> attributeEntrySet = attributeAccessedByMap
-					.entrySet();
+		private void populateAdjacencies(CallData callData) {
+			markAccessedAttributesConnected(callData);
+			markCalledMethodsConnected(callData);
+			
+			if (!callData.useOriginalDefinitions && callData.connectInterfaceMethods) {
+				markInterfaceMethodsConnected(callData);
+			}
+		}
 
+		/**
+		 * Connect methods with the attributes they access by putting an
+		 * entry in the matrix.
+		 * @param callData the class's call data
+		 */
+		private void markAccessedAttributesConnected(CallData callData) {
+			Map<IField, HashSet<IMethod>> attributeAccessedByMap =
+				callData.getAttributeAccessedByMap();
+			Set<Entry<IField, HashSet<IMethod>>> attributeEntrySet =
+				attributeAccessedByMap.entrySet();
+
+			// Connect methods with the attributes they access
 			for (Entry<IField, HashSet<IMethod>> entry : attributeEntrySet) {
 				HashSet<IMethod> callers = entry.getValue();
 				IField field = entry.getKey();
@@ -194,6 +213,16 @@ public class CallData {
 					}
 				}
 			}
+		}
+
+		/**
+		 * Connect methods with the methods they call by putting an
+		 * entry in the matrix.
+		 * @param callData the class's call data
+		 */
+		private void markCalledMethodsConnected(CallData callData) {
+			Map<IMethod, HashSet<IMethod>> methodCalledByMap =
+				callData.getMethodCalledByMap();
 			Set<Entry<IMethod, HashSet<IMethod>>> methodEntrySet = methodCalledByMap
 					.entrySet();
 
@@ -210,6 +239,44 @@ public class CallData {
 						}
 					}
 				}
+			}	// for - connect methods
+		}
+
+		/**
+		 * Mark as connected methods that are from the same interface by putting an
+		 * entry in the matrix.
+		 * @param callData the class's call data
+		 */
+		private void markInterfaceMethodsConnected(CallData callData) {
+			Set<IMethod> methodSet = callData.getMethods();
+			ArrayList<IMethod> methodList = new ArrayList<IMethod>(methodSet);
+			try {
+				IType[] interfaces = callData.getInterfaces();
+
+				if (interfaces.length > 0) {
+					int arraySize = methodList.size();
+					for (int i = 0; i < arraySize - 1; i++) {
+						IMethod iMethod = methodList.get(i);
+						IType iType = getDeclaringInterface(iMethod, interfaces);
+
+						if ((iType != null) && iType.isInterface()) {
+							for (int j = i + 1; j < arraySize; j++) {
+								IMethod jMethod = methodList.get(j);
+								IType jType = getDeclaringInterface(jMethod,
+										interfaces);
+								if (iType.equals(jType)) {
+									int iIndex = getIndex(iMethod);
+									int jIndex = getIndex(jMethod);
+									matrix[iIndex][jIndex] = CONNECTED;
+									matrix[jIndex][iIndex] = CONNECTED;
+								}
+							}
+						}
+					}
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 
@@ -247,7 +314,7 @@ public class CallData {
 	    /**
 	     * Builds the matrix indicating methods that are directly connected, i.e,
 	     * methods that either directly or indirectly access at least one common
-	     * attribute.
+	     * member.
 	     * @param callData contains information about which
 	     *   methods access which members
 	     * @param methodsToEval the members for which connectivity information
@@ -323,8 +390,8 @@ public class CallData {
 		    // same members. This is nondirectional, so we
 		    // mark the matrix in two places
 		    if (intersection.size() != 0) {
-			directlyConnectedMatrix.matrix[i][j] = ConnectivityMatrix.CONNECTED;
-			directlyConnectedMatrix.matrix[j][i] = ConnectivityMatrix.CONNECTED;
+		    	directlyConnectedMatrix.matrix[i][j] = ConnectivityMatrix.CONNECTED;
+		    	directlyConnectedMatrix.matrix[j][i] = ConnectivityMatrix.CONNECTED;
 		    }
 		} // if jFields != null
 	    }
@@ -812,6 +879,28 @@ public class CallData {
 	}
 	
 	/**
+	 * Find the interface that defines the method, if any.
+	 * @param method the method we're searching on
+	 * @param interfaces the interfaces to consider
+	 * @return the interface with a matching method or null if none exist
+	 * @throws JavaModelException
+	 */
+	private static IType getDeclaringInterface(IMethod method, IType[] interfaces)
+	throws JavaModelException {
+		IType ifc = null;
+		
+		for (int i = 0; ((i < interfaces.length) && (ifc == null)); i++) {
+			IMethod[] methods = interfaces[i].getMethods();
+			for (IMethod ifcMethod : methods) {
+				if (method.isSimilar(ifcMethod)) {
+					ifc = interfaces[i];
+				}
+			}
+		}
+		return ifc;
+	}
+
+	/**
 	 * Gets a human readable version of the method signature.
 	 */
 	protected String getSignature(IMethod method) throws JavaModelException {
@@ -1044,8 +1133,7 @@ public class CallData {
 	 */
 	public ConnectivityMatrix getAdjacencyMatrix() {
 		if (adjacencyMatrix == null) {
-			adjacencyMatrix = ConnectivityMatrix.buildAdjacencyMatrix(
-					attributeAccessedByMap, methodCalledByMap);
+			adjacencyMatrix = ConnectivityMatrix.buildAdjacencyMatrix(this);
 		}
 		return adjacencyMatrix;
 	}
