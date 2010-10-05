@@ -49,7 +49,7 @@ implements IWorkbenchPreferencePage {
 	 * the other preferences.
 	 */
 	public static final String USE_ORIGINAL_DEFINITIONS =
-		COHESION_PREFIX + "UseOriginals";
+		COHESION_PREFIX + ".UseOriginals";
 
 	public static final String CONNECT_INTERFACE_METHODS =
 		COHESION_PREFIX + ".ConnectInterfaceMethods";
@@ -114,7 +114,7 @@ implements IWorkbenchPreferencePage {
 // TODO KAC uncomment these when functionality is in place.
 		BooleanFieldEditor originalDefinitionEditor =
 			new BooleanFieldEditor(USE_ORIGINAL_DEFINITIONS,
-					"Use original definitions (overrides other settings)", parent);
+					"Use original definitions (overrides the settings below)", parent);
 		// TODO figure out how to show/hide editors based on
 		// the value stored in the originalDefinitionEditor
 //		if (originalDefinitionEditor.getPreferenceStore() != null)
@@ -122,25 +122,25 @@ implements IWorkbenchPreferencePage {
 		addField(new BooleanFieldEditor(CONNECT_INTERFACE_METHODS,
 				"Connect interface methods", parent));
 		addField(new BooleanFieldEditor(COUNT_ABSTRACT_METHODS,
-				"Abstract methods", parent));
+				"Include abstract methods", parent));
 		addField(new BooleanFieldEditor(COUNT_CONSTRUCTORS,
-				"Constructors", parent));
+				"Include constructors", parent));
 		addField(new BooleanFieldEditor(COUNT_DEPRECATED_METHODS,
-				"Deprecated methods", parent));
+				"Include deprecated methods", parent));
 //		addField(new BooleanFieldEditor(COUNT_INHERITED_ATTRIBUTES,
-//				"Inherited attributes", parent));
+//				"Include inherited attributes", parent));
 //		addField(new BooleanFieldEditor(COUNT_INHERITED_METHODS,
-//				"Inherited methods", parent));
+//				"Include inherited methods", parent));
 //		addField(new BooleanFieldEditor(COUNT_INNERS,
-//				"Inner class methods", parent));
-		addField(new BooleanFieldEditor(COUNT_LOGGERS, "Loggers",
+//				"Include inner class methods", parent));
+		addField(new BooleanFieldEditor(COUNT_LOGGERS, "Include loggers",
 				parent));
 		addField(new BooleanFieldEditor(COUNT_OBJECTS_METHODS,
-				"Methods from Object", parent));
+				"Include methods from Object", parent));
 		addField(new BooleanFieldEditor(COUNT_STATIC_ATTRIBUTES,
-				"Static attributes", parent));
+				"Include static attributes", parent));
 		addField(new BooleanFieldEditor(COUNT_STATIC_METHODS,
-				"Static methods", parent));
+				"Include static methods", parent));
 	}
 
 }
