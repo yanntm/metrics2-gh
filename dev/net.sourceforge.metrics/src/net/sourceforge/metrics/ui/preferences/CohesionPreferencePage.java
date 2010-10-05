@@ -26,6 +26,7 @@ import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -75,6 +76,8 @@ implements IWorkbenchPreferencePage {
 		COHESION_PREFIX + ".StaticAttributes";
 	public static final String COUNT_STATIC_METHODS =
 		COHESION_PREFIX + ".StaticMethods";
+	public static final String IGNORE_MEMBERS_PATTERN =
+		COHESION_PREFIX + ".IgnoreMembersPattern";
 
 	/**
 	 * The constructor.
@@ -103,6 +106,7 @@ implements IWorkbenchPreferencePage {
 		preferenceStore.setDefault(COUNT_PUBLIC_METHODS_ONLY, false);
 		preferenceStore.setDefault(COUNT_STATIC_ATTRIBUTES, false);
 		preferenceStore.setDefault(COUNT_STATIC_METHODS, false);
+		preferenceStore.setDefault(IGNORE_MEMBERS_PATTERN, "");
 	}
 
 	/**
@@ -141,6 +145,8 @@ implements IWorkbenchPreferencePage {
 				"Include static attributes", parent));
 		addField(new BooleanFieldEditor(COUNT_STATIC_METHODS,
 				"Include static methods", parent));
+		addField(new StringFieldEditor(IGNORE_MEMBERS_PATTERN,
+				"Ignore members matching (Java) pattern:", parent));
 	}
 
 }

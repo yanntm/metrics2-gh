@@ -252,6 +252,10 @@ public abstract class CohesionCalculator extends Calculator implements
 		 */
 		protected boolean countInners = false;
 
+		/** Members matching this pattern should not be considered in the cohesion
+		 * calculation.	 */
+		protected String ignoreMembersPattern = "";
+		
 		public CohesionPreferences() {
 			init();
 			getPreferences().addPropertyChangeListener(this);
@@ -283,6 +287,8 @@ public abstract class CohesionCalculator extends Calculator implements
 					CohesionPreferencePage.COUNT_STATIC_ATTRIBUTES);
 			countStaticMethods = preferences.getBoolean(
 					CohesionPreferencePage.COUNT_STATIC_METHODS);
+			ignoreMembersPattern = preferences.getString(
+					CohesionPreferencePage.IGNORE_MEMBERS_PATTERN);
 			useOriginalDefinitions = preferences.getBoolean(
 					CohesionPreferencePage.USE_ORIGINAL_DEFINITIONS);
 		}
@@ -339,6 +345,10 @@ public abstract class CohesionCalculator extends Calculator implements
 			return countStaticAttributes;
 		}
 
+		public String getIgnoreMembersPattern() {
+			return ignoreMembersPattern;
+		}
+
 		/**
 		 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 		 */
@@ -356,19 +366,22 @@ public abstract class CohesionCalculator extends Calculator implements
 		 */
 		@Override
 		public String toString() {
-			return "CohesionPreferences [countAbstractMethods=\t"
-					+ countAbstractMethods + "\n countConstructors=\t"
-					+ countConstructors + "\n countDeprecatedMethods=\t"
-					+ countDeprecatedMethods + "\n countInheritedAttributes=\t"
-					+ countInheritedAttributes + "\n countInheritedMethods=\t"
-					+ countInheritedMethods + "\n countInners=\t" + countInners
-					+ "\n countLoggers=\t" + countLoggers + "\n countObjectsMethods=\t"
-					+ countObjectsMethods + "\n countPublicMethodsOnly=\t"
-					+ countPublicMethodsOnly + "\n countStaticAttributes=\t"
-					+ countStaticAttributes + "\n countStaticMethods=\t"
-					+ countStaticMethods + "\n useOriginalDefinitions=\t"
-					+ useOriginalDefinitions + "]";
+			return "CohesionPreferences: "
+			+ "\n [countAbstractMethods=\t" + countAbstractMethods
+			+ "\n countConstructors=\t" + countConstructors
+			+ "\n countDeprecatedMethods=\t" + countDeprecatedMethods
+			+ "\n countInheritedAttributes=\t" + countInheritedAttributes
+			+ "\n countInheritedMethods=\t" + countInheritedMethods
+			+ "\n countInners=\t" + countInners
+			+ "\n countLoggers=\t" + countLoggers
+			+ "\n countObjectsMethods=\t" + countObjectsMethods
+			+ "\n countPublicMethodsOnly=\t" + countPublicMethodsOnly
+			+ "\n countStaticAttributes=\t" + countStaticAttributes
+			+ "\n countStaticMethods=\t" + countStaticMethods
+			+ "\n ignoreMembersPattern=\t" + ignoreMembersPattern
+			+ "\n useOriginalDefinitions=\t" + useOriginalDefinitions + "]";
 		}
+
 	}
 
 }

@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.sourceforge.metrics.calculators.CohesionCalculator.CohesionPreferences;
 import net.sourceforge.metrics.core.Log;
@@ -571,7 +573,10 @@ public class CallData {
 	 * NYI - Indicates whether members of inner classes should be treated the same as
 	 * members of the outer class. */
 	protected boolean countInners = false;
-
+	
+	/** Members matching a user specified pattern should not be considered
+	 *  in the cohesion calculation.	 */
+	protected Pattern ignoreMembersPattern = null;
 	
 	/**
 	 * Gathers call information about the given class and stores the information
@@ -612,6 +617,15 @@ public class CallData {
 			countPublicMethodsOnly = prefs.getCountPublicMethodsOnly();
 			countStaticAttributes = prefs.getCountStaticAttributes();
 			countStaticMethods = prefs.getCountStaticMethods();
+			String ignoreMembersString = prefs.getIgnoreMembersPattern();
+			
+			// If there is a pattern specified, build a Pattern for use later
+			if (ignoreMembersString != null) {
+				ignoreMembersString = ignoreMembersString.trim();
+				if (ignoreMembersString.length() > 0) {
+					ignoreMembersPattern = Pattern.compile(ignoreMembersString);
+				}
+			}
 		}
 	}
 
@@ -714,9 +728,26 @@ public class CallData {
 				// && (countInheritedMethods || !isInherited(method))
 				// && countInners
 				&& (countObjectsMethods || !CallData.isObjectMethod(method))
-				&& (countStaticMethods || !Flags.isStatic(flags));
+				&& (countStaticMethods || !Flags.isStatic(flags))
+				&& !toBeIgnored(method);
 			}
 		return accept;
+	}
+
+	/**
+	 * Members matching a user-specified pattern are to be ignored
+	 * @param member the method or attribute to check
+	 * @return true if the member is to be ignored; false otherwise
+	 */
+	private boolean toBeIgnored(IMember member) {
+		boolean ignore = false;
+		
+		if (ignoreMembersPattern != null) {
+			String handle = member.getElementName();
+			Matcher matcher = ignoreMembersPattern.matcher(handle);
+			ignore = matcher.find();
+		}
+		return ignore;
 	}
 
 	/**
@@ -783,7 +814,8 @@ public class CallData {
 				// (countInheritedAttributes || !isInherited(field))
 				// TODO countInners
 				(countLoggers || !isLogger(field))
-				&& (countStaticAttributes || !Flags.isStatic(flags));
+				&& (countStaticAttributes || !Flags.isStatic(flags))
+				&& !toBeIgnored(field);
 		}
 		return accept;
 	}
