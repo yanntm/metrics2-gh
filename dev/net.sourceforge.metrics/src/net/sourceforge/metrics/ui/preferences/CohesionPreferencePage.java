@@ -40,17 +40,19 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 public class CohesionPreferencePage extends FieldEditorPreferencePage
 implements IWorkbenchPreferencePage {
 
+	/** The beginning of all cohesion preference strings. */
+	public static final String COHESION_PREFIX = "Cohesion";
+	
 	/** If this is "true", the original metric definitions are
 	 * used; otherwise, the user has the options of deciding
 	 * which members are considered in the calculations by setting
 	 * the other preferences.
 	 */
 	public static final String USE_ORIGINAL_DEFINITIONS =
-		"Cohesion.UseOriginals";
+		COHESION_PREFIX + "UseOriginals";
 
-	/** The beginning of all cohesion preference strings. */
-	public static final String COHESION_PREFIX = "Cohesion";
-	
+	public static final String CONNECT_INTERFACE_METHODS =
+		COHESION_PREFIX + ".ConnectInterfaceMethods";
 	public static final String COUNT_ABSTRACT_METHODS =
 		COHESION_PREFIX + ".AbstractMethods";
 	public static final String COUNT_CONSTRUCTORS =
@@ -74,7 +76,6 @@ implements IWorkbenchPreferencePage {
 	public static final String COUNT_STATIC_METHODS =
 		COHESION_PREFIX + ".StaticMethods";
 
-
 	/**
 	 * The constructor.
 	 */
@@ -90,6 +91,7 @@ implements IWorkbenchPreferencePage {
 	public void init(IWorkbench workbench) {
 		IPreferenceStore preferenceStore = getPreferenceStore();
 		preferenceStore.setDefault(USE_ORIGINAL_DEFINITIONS, true);
+		preferenceStore.setDefault(CONNECT_INTERFACE_METHODS, false);
 		preferenceStore.setDefault(COUNT_ABSTRACT_METHODS, true);
 		preferenceStore.setDefault(COUNT_CONSTRUCTORS, false);
 		preferenceStore.setDefault(COUNT_DEPRECATED_METHODS, true);
@@ -117,6 +119,8 @@ implements IWorkbenchPreferencePage {
 		// the value stored in the originalDefinitionEditor
 //		if (originalDefinitionEditor.getPreferenceStore() != null)
 		addField(originalDefinitionEditor);
+		addField(new BooleanFieldEditor(CONNECT_INTERFACE_METHODS,
+				"Connect interface methods", parent));
 		addField(new BooleanFieldEditor(COUNT_ABSTRACT_METHODS,
 				"Abstract methods", parent));
 		addField(new BooleanFieldEditor(COUNT_CONSTRUCTORS,

@@ -210,6 +210,10 @@ public abstract class CohesionCalculator extends Calculator implements
 		 * the other preferences.  */
 		protected boolean useOriginalDefinitions = true;
 
+		/** Indicates whether methods imposed by interfaces should be
+		 * considered as connected (as though they called each other). */
+		protected boolean connectInterfaceMethods = false;
+
 		/** Indicates whether abstract methods should be considered. */
 		protected boolean countAbstractMethods = false;
 
@@ -255,6 +259,8 @@ public abstract class CohesionCalculator extends Calculator implements
 
 		protected void init() {
 			IPreferenceStore preferences = getPreferences();
+			connectInterfaceMethods = preferences.getBoolean(
+					CohesionPreferencePage.CONNECT_INTERFACE_METHODS);
 			countAbstractMethods = preferences.getBoolean(
 					CohesionPreferencePage.COUNT_ABSTRACT_METHODS);
 			countConstructors = preferences.getBoolean(
@@ -283,6 +289,10 @@ public abstract class CohesionCalculator extends Calculator implements
 
 		public boolean getUseOriginalDefinitions() {
 			return useOriginalDefinitions;
+		}
+
+		public boolean getConnectInterfaceMethods() {
+			return connectInterfaceMethods;
 		}
 
 		public boolean getCountAbstractMethods() {

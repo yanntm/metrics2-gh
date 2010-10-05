@@ -255,7 +255,7 @@ public class CallData {
 	     * included in this list.)
 	     * @return the matrix indicating methods that are directly connected
 	     */
-		public static ConnectivityMatrix buildDirectlyConnectedMatrix(
+		private static ConnectivityMatrix buildDirectlyConnectedMatrix(
 				CallData callData, List<Integer> methodsToEval) {
 			ConnectivityMatrix reachabilityMatrix = callData
 					.getReachabilityMatrix();
@@ -464,6 +464,10 @@ public class CallData {
 	 * the other preferences.  */
 	protected boolean useOriginalDefinitions = true;
 
+	/** Indicates whether methods imposed by interfaces should be
+	 * considered as connected (as though they called each other). */
+	protected boolean connectInterfaceMethods = false;
+
 	/** Indicates whether abstract methods should be considered. */
 	protected boolean countAbstractMethods = false;
 
@@ -529,6 +533,7 @@ public class CallData {
 		// Retrieve and cache the preferences
 		if (prefs != null) {
 			useOriginalDefinitions = prefs.getUseOriginalDefinitions();
+			connectInterfaceMethods = prefs.getConnectInterfaceMethods();
 			countAbstractMethods = prefs.getCountAbstractMethods();
 			countConstructors = prefs.getCountConstructors();
 			countDeprecatedMethods = prefs.getCountDeprecatedMethods();
@@ -793,7 +798,19 @@ public class CallData {
 		Set<IMethod> callers = methodCollector.getResults();
 		return callers;
 	}
-
+	
+	/**
+	 * Gets all the interfaces implemented by the type, either
+	 * directly or indirectly via a superclass.
+	 * @return the interfaces
+	 * @throws JavaModelException
+	 */
+	public IType[] getInterfaces() throws JavaModelException {
+		ITypeHierarchy typeHierarchy = type.newSupertypeHierarchy(null);
+		IType[] interfaces = typeHierarchy.getAllSuperInterfaces(type);
+		return interfaces;
+	}
+	
 	/**
 	 * Gets a human readable version of the method signature.
 	 */
