@@ -356,6 +356,7 @@ public abstract class CohesionCalculator extends Calculator implements
 			String property = event.getProperty();
 			if (property.startsWith(CohesionPreferencePage.COHESION_PREFERENCE_PREFIX)) {
 				init();
+				prefs = this;
 			}
 		}
 

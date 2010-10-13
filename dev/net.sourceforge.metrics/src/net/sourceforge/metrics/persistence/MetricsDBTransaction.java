@@ -10,13 +10,14 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sourceforge.metrics.calculators.CohesionCalculator;
+import net.sourceforge.metrics.calculators.CohesionCalculator.CohesionPreferences;
 import net.sourceforge.metrics.core.Metric;
 import net.sourceforge.metrics.core.MetricsPlugin;
 import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 import net.sourceforge.metrics.core.sources.Cache;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jface.preference.IPreferenceStore;
 
 public class MetricsDBTransaction implements IDatabaseConstants {
 	/** The singleton metrics plugin. */
@@ -88,11 +89,11 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 
 		String[] metricIDs = plugin.getMetricIds();
 		// TODO maybePrintCycles(root, pOut, monitor);
+		int prefKey = getPreferencesKey(connection, statements);
 		PreparedStatement deleteMetricValuesStatement =
 			addDeleteMetricValuesPreparedStatement(connection, statements);
 		PreparedStatement insertMetricValuesStatement =
 			addInsertMetricValuesPreparedStatement(connection, statements);
-		int prefKey = getPreferencesKey(connection, statements);
 
 		// Save all the metric values for all elements, starting at
 		// the root element
@@ -124,41 +125,27 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 					0, 0, 0, 0, "");
 			return key;
 		}
-		IPreferenceStore preferenceStore = plugin.getPreferenceStore();
-		int useOrig = getInt(preferenceStore.getBoolean(USE_ORIGINAL_DEFINITIONS));
-		int connectIfc = getInt(preferenceStore.getBoolean(CONNECT_INTERFACE_METHODS));
-		int countAbstract = getInt(preferenceStore.getBoolean(COUNT_ABSTRACT_METHODS));
-		int countConstructors = getInt(preferenceStore.getBoolean(COUNT_CONSTRUCTORS));
-		int countDeprecated = getInt(preferenceStore.getBoolean(COUNT_DEPRECATED_METHODS));
-		int countInheritedAttributes = getInt(preferenceStore.getBoolean(COUNT_INHERITED_ATTRIBUTES));
-		int countInheritedMethods = getInt(preferenceStore.getBoolean(COUNT_INHERITED_METHODS));
-		int countInners = getInt(preferenceStore.getBoolean(COUNT_INNERS));
-		int countLoggers = getInt(preferenceStore.getBoolean(COUNT_LOGGERS));
-		int countObjectsMethods = getInt(preferenceStore.getBoolean(COUNT_OBJECTS_METHODS));
-		int countPublicMethodsOnly = getInt(preferenceStore.getBoolean(COUNT_PUBLIC_METHODS_ONLY));
-		int countStaticAttributes = getInt(preferenceStore.getBoolean(COUNT_STATIC_ATTRIBUTES));
-		int countStaticMethods = getInt(preferenceStore.getBoolean(COUNT_STATIC_METHODS));
-		String ignoreMembersPattern = preferenceStore.getString(IGNORE_MEMBERS_PATTERN);
+		CohesionPreferences prefs = CohesionCalculator.getPrefs();
+		int useOrig = getInt(prefs.getUseOriginalDefinitions());
+		int connectIfc = getInt(prefs.getConnectInterfaceMethods());
+		int countAbstract = getInt(prefs.getCountAbstractMethods());
+		int countConstructors = getInt(prefs.getCountConstructors());
+		int countDeprecated = getInt(prefs.getCountDeprecatedMethods());
+		int countInheritedAttributes = getInt(prefs.getCountInheritedAttributes());
+		int countInheritedMethods = getInt(prefs.getCountInheritedMethods());
+		int countInners = getInt(prefs.getCountInners());
+		int countLoggers = getInt(prefs.getCountLoggers());
+		int countObjectsMethods = getInt(prefs.getCountObjectsMethods());
+		int countPublicMethodsOnly = getInt(prefs.getCountPublicMethodsOnly());
+		int countStaticAttributes = getInt(prefs.getCountStaticAttributes());
+		int countStaticMethods = getInt(prefs.getCountStaticMethods());
+		String ignoreMembersPattern = prefs.getIgnoreMembersPattern();
 
-		String selectString = SELECT + PREFERENCE_ID_FIELD +
-			FROM + USER_PREFERENCES_TABLE +
-			WHERE +
-			USE_ORIGINALS_PREF + " = " + useOrig + " " + AND +
-			CONNECT_INTERFACE_METHODS_PREF + " = " + connectIfc + " " + AND +
-			COUNT_ABSTRACT_METHODS_PREF + " = " + countAbstract + " " + AND +
-			COUNT_CONSTRUCTORS_PREF + " = " + countConstructors + " " + AND +
-			COUNT_DEPRECATED_PREF + " = " + countDeprecated + " " + AND +
-			COUNT_INHERITED_ATTRIBUTES_PREF + " = " + countInheritedAttributes + " " + AND +
-			COUNT_INHERITED_METHODS_PREF + " = " + countInheritedMethods + " " + AND +
-			COUNT_INNERS_PREF + " = " + countInners + " " + AND +
-			COUNT_LOGGERS_PREF + " = " + countLoggers + " " + AND +
-			COUNT_OBJECTS_METHODS_PREF + " = " + countObjectsMethods + " " + AND +
-			COUNT_PUBLIC_METHODS_ONLY_PREF + " = " + countPublicMethodsOnly + " " + AND +
-			COUNT_STATIC_ATTRIBUTES_PREF + " = " + countStaticAttributes + " " + AND +
-			COUNT_STATIC_METHODS_PREF + " = " + countStaticMethods + " " + AND +
-			IGNORE_MEMBERS_PATTERN_PREF + " = '" + ignoreMembersPattern + "'"
-			;
-		
+		String selectString = buildSelectPreferenceString(useOrig, connectIfc,
+				countAbstract, countConstructors, countDeprecated,
+				countInheritedAttributes, countInheritedMethods, countInners,
+				countLoggers, countObjectsMethods, countPublicMethodsOnly,
+				countStaticAttributes, countStaticMethods, ignoreMembersPattern);
 		Statement selectStatement = connection.createStatement();
 		statements.add(selectStatement);
 		ResultSet resultSet = selectStatement.executeQuery(selectString);
@@ -189,6 +176,33 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 		}
 		connection.commit();
 		return key;
+	}
+
+	private String buildSelectPreferenceString(int useOrig, int connectIfc,
+			int countAbstract, int countConstructors, int countDeprecated,
+			int countInheritedAttributes, int countInheritedMethods,
+			int countInners, int countLoggers, int countObjectsMethods,
+			int countPublicMethodsOnly, int countStaticAttributes,
+			int countStaticMethods, String ignoreMembersPattern) {
+		String selectString = SELECT + PREFERENCE_ID_FIELD +
+			FROM + USER_PREFERENCES_TABLE +
+			WHERE +
+			USE_ORIGINALS_PREF + " = " + useOrig + " " + AND +
+			CONNECT_INTERFACE_METHODS_PREF + " = " + connectIfc + " " + AND +
+			COUNT_ABSTRACT_METHODS_PREF + " = " + countAbstract + " " + AND +
+			COUNT_CONSTRUCTORS_PREF + " = " + countConstructors + " " + AND +
+			COUNT_DEPRECATED_PREF + " = " + countDeprecated + " " + AND +
+			COUNT_INHERITED_ATTRIBUTES_PREF + " = " + countInheritedAttributes + " " + AND +
+			COUNT_INHERITED_METHODS_PREF + " = " + countInheritedMethods + " " + AND +
+			COUNT_INNERS_PREF + " = " + countInners + " " + AND +
+			COUNT_LOGGERS_PREF + " = " + countLoggers + " " + AND +
+			COUNT_OBJECTS_METHODS_PREF + " = " + countObjectsMethods + " " + AND +
+			COUNT_PUBLIC_METHODS_ONLY_PREF + " = " + countPublicMethodsOnly + " " + AND +
+			COUNT_STATIC_ATTRIBUTES_PREF + " = " + countStaticAttributes + " " + AND +
+			COUNT_STATIC_METHODS_PREF + " = " + countStaticMethods + " " + AND +
+			IGNORE_MEMBERS_PATTERN_PREF + " = '" + ignoreMembersPattern + "'"
+			;
+		return selectString;
 	}
 
 	/**
@@ -266,7 +280,8 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 			Connection connection, ArrayList<Statement> statements)
 			throws SQLException {
 		String sqlString = DELETE + METRIC_VALUES_TABLE +
-		WHERE + HANDLE_FIELD + " = ? AND " + ACRONYM_FIELD + " = ?";
+		WHERE + HANDLE_FIELD + " = ? " + AND  + ACRONYM_FIELD + " = ? " +
+		AND + USER_PREFERENCES_FOREIGN_KEY + " = ?";
 		PreparedStatement statement =
 			connection.prepareStatement(sqlString);
 		statements.add(statement);
@@ -303,7 +318,7 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 			PreparedStatement insertStatement, String metricId,
 			AbstractMetricSource metricSource, String handle,
 			int prefKey) {
-		deleteOldMetricValue(deleteStatement, metricId, handle);
+		deleteOldMetricValue(deleteStatement, metricId, handle, prefKey);
 		insertNewMetricValue(insertStatement, metricId, metricSource,
 				handle, prefKey);
 	}
@@ -328,11 +343,12 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 	}
 
 	private void deleteOldMetricValue(PreparedStatement deleteStatement,
-			String metricId, String handle) {
+			String metricId, String handle, int prefKey) {
 		// Delete old metric values from prior runs
 		try {
 			deleteStatement.setString(1, handle);
 			deleteStatement.setString(2, metricId);
+			deleteStatement.setInt(3, prefKey);
 			deleteStatement.executeUpdate();
 		} catch (SQLException e) {
 			// quietly swallow the exception. In many cases, there will be
@@ -502,7 +518,8 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 		CONSTRAINT + "pref_foreign_key " + REFERENCES +
 		USER_PREFERENCES_TABLE + ", " +
 		CONSTRAINT + "pk_metricval " + PRIMARY_KEY +
-		"(" + HANDLE_FIELD + ", " + ACRONYM_FIELD + ")" +
+		  "(" + HANDLE_FIELD + ", " + ACRONYM_FIELD+ ", " + 
+		    USER_PREFERENCES_FOREIGN_KEY  + ")" +
 		")";
 		statement.executeUpdate(sqlString);
 	}
