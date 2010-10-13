@@ -150,7 +150,7 @@ public class MetricsActionGroup extends ActionGroup {
 			try {
 				// TODO select exports desired
 				try {
-				    getView().exportToDB();
+				    getView().exportMeasurementsToDB();
 				} catch (InvocationTargetException e) {
 				    // TODO Auto-generated catch block
 				    e.printStackTrace();

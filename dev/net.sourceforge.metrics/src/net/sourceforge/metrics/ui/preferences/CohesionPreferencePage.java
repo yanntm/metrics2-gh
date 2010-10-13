@@ -20,6 +20,7 @@
  */
 package net.sourceforge.metrics.ui.preferences;
 
+import net.sourceforge.metrics.core.Constants;
 import net.sourceforge.metrics.core.MetricsPlugin;
 
 import org.eclipse.jface.preference.BooleanFieldEditor;
@@ -39,45 +40,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
  * @author Frank Sauer
  */
 public class CohesionPreferencePage extends FieldEditorPreferencePage
-implements IWorkbenchPreferencePage {
-
-	/** The beginning of all cohesion preference strings. */
-	public static final String COHESION_PREFIX = "Cohesion";
-	
-	/** If this is "true", the original metric definitions are
-	 * used; otherwise, the user has the options of deciding
-	 * which members are considered in the calculations by setting
-	 * the other preferences.
-	 */
-	public static final String USE_ORIGINAL_DEFINITIONS =
-		COHESION_PREFIX + ".UseOriginals";
-
-	public static final String CONNECT_INTERFACE_METHODS =
-		COHESION_PREFIX + ".ConnectInterfaceMethods";
-	public static final String COUNT_ABSTRACT_METHODS =
-		COHESION_PREFIX + ".AbstractMethods";
-	public static final String COUNT_CONSTRUCTORS =
-		COHESION_PREFIX + ".Constructors";
-	public static final String COUNT_DEPRECATED_METHODS =
-		COHESION_PREFIX + ".Deprecated";
-	public static final String COUNT_INHERITED_ATTRIBUTES =
-		COHESION_PREFIX + ".InheritedAttributes";
-	public static final String COUNT_INHERITED_METHODS =
-		COHESION_PREFIX + ".InheritedMethods";
-	public static final String COUNT_INNERS =
-		COHESION_PREFIX + ".Inners";
-	public static final String COUNT_LOGGERS =
-		COHESION_PREFIX + ".Loggers";
-	public static final String COUNT_OBJECTS_METHODS =
-		COHESION_PREFIX + ".ObjectsMethods";
-	public static final String COUNT_PUBLIC_METHODS_ONLY =
-		COHESION_PREFIX + ".PublicMethodsOnly";
-	public static final String COUNT_STATIC_ATTRIBUTES =
-		COHESION_PREFIX + ".StaticAttributes";
-	public static final String COUNT_STATIC_METHODS =
-		COHESION_PREFIX + ".StaticMethods";
-	public static final String IGNORE_MEMBERS_PATTERN =
-		COHESION_PREFIX + ".IgnoreMembersPattern";
+implements Constants, IWorkbenchPreferencePage {
 
 	/**
 	 * The constructor.

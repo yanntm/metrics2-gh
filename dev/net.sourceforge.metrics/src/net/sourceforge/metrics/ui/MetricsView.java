@@ -488,11 +488,11 @@ public class MetricsView extends ViewPart implements ISelectionListener, IMetric
      * export the selected metrics to the database
      * @throws InvocationTargetException 
      */
-	public void exportToDB() throws InvocationTargetException {
+	public void exportMeasurementsToDB() throws InvocationTargetException {
 		if (selection != null) {
 			MetricsDBTransaction transaction = new MetricsDBTransaction();
 			try {
-				transaction.saveToDB(selection);
+				transaction.saveMeasurementsToDB(selection);
 			} catch (SQLException e) {
 				MessageDialog.openWarning(getSite().getShell(),
 						"Database Access Failed",

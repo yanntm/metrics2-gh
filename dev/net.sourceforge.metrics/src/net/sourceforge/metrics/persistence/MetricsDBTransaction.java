@@ -16,6 +16,7 @@ import net.sourceforge.metrics.core.sources.AbstractMetricSource;
 import net.sourceforge.metrics.core.sources.Cache;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jface.preference.IPreferenceStore;
 
 public class MetricsDBTransaction implements IDatabaseConstants {
 	/** The singleton metrics plugin. */
@@ -24,47 +25,38 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 	/**
 	 * Save metric values for the indicated Java element and all of its
 	 * subelements to a database.
-	 * 
 	 * @param element
 	 *            the highest level element to be saved, e.g. a project
 	 * @throws InvocationTargetException
 	 * @throws SQLException 
 	 */
-	public void saveToDB(IJavaElement element)
+	public void saveMeasurementsToDB(IJavaElement element)
 	// , IProgressMonitor monitor)
 			throws InvocationTargetException, SQLException {
 		Database db = new Database();
 		db.loadDriver();
 		Connection connection = null;
-		/*
-		 * We are storing the Statement and Prepared statement object references
-		 * in an array list for convenience.
-		 */
+		/* Store the Statement and Prepared statement object references
+		 * in a list for convenience. */
 		ArrayList<Statement> statements = new ArrayList<Statement>();
 		Statement statement = null;
 		ResultSet resultSet = null;
-		/*
-		 * We will be using Statement and PreparedStatement objects for
-		 * executing SQL. These objects, as well as Connections and ResultSets,
+		
+		/* Statements, PreparedStatements, Connections and ResultSets
 		 * are resources that should be released explicitly after use, hence the
-		 * try-catch-finally pattern used below.
-		 */
+		 * try-catch-finally pattern used below. */
 		try {
 			connection = db.prepareConnection();
 
-			/*
-			 * Creating a statement object that we can use for running various
-			 * SQL statements commands against the database.
-			 */
+			/* Creating a statement object that we can use for running various
+			 * SQL statements commands against the database. */
 			statement = connection.createStatement(
 			// ResultSet.TYPE_FORWARD_ONLY,
 					// ResultSet.CONCUR_READ_ONLY,
 					// ResultSet.CLOSE_CURSORS_AT_COMMIT
 					);
 			statements.add(statement);
-
-			saveAll(connection, statements, element);
-
+			saveAllMeasurements(connection, statements, element);
 			statement.close();
 			connection.commit();
 			System.out.println("Committed the transaction");
@@ -80,7 +72,15 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 		}
 	}
 
-	private void saveAll(Connection connection,
+	/**
+	 * Save all the metric values for all elements, starting at
+	 * the root element
+	 * @param connection
+	 * @param statements
+	 * @param element
+	 * @throws SQLException
+	 */
+	private void saveAllMeasurements(Connection connection,
 			ArrayList<Statement> statements, IJavaElement element)
 			throws SQLException {
 		String handle = element.getHandleIdentifier();
@@ -92,6 +92,7 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 			addDeleteMetricValuesPreparedStatement(connection, statements);
 		PreparedStatement insertMetricValuesStatement =
 			addInsertMetricValuesPreparedStatement(connection, statements);
+		int prefKey = getPreferencesKey(connection, statements);
 
 		// Save all the metric values for all elements, starting at
 		// the root element
@@ -100,17 +101,162 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 			// monitor.subTask("Exporting: " + names[i]);
 			// MetricDescriptor md = plugin.getMetricDescriptor(names[i]);
 			saveMetricValues(deleteMetricValuesStatement,
-					insertMetricValuesStatement, metricIDs[i], root, handle);
+					insertMetricValuesStatement, metricIDs[i], root, handle, prefKey);
 			connection.commit();
 			// monitor.worked(1);
 		}
 		// monitor.done();
 	}
 
+	/**
+	 * Gets the primary key for the row in the table corresponding
+	 * to the current user preferences.  If such a row does not already exist,
+	 * it is created.
+	 * @return the key
+	 */
+	private int getPreferencesKey(Connection connection,
+			ArrayList<Statement> statements)
+	throws SQLException {
+		int key = 1;
+		
+		if (plugin == null) {
+			insertPreference(connection, statements, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+					0, 0, 0, 0, "");
+			return key;
+		}
+		IPreferenceStore preferenceStore = plugin.getPreferenceStore();
+		int useOrig = getInt(preferenceStore.getBoolean(USE_ORIGINAL_DEFINITIONS));
+		int connectIfc = getInt(preferenceStore.getBoolean(CONNECT_INTERFACE_METHODS));
+		int countAbstract = getInt(preferenceStore.getBoolean(COUNT_ABSTRACT_METHODS));
+		int countConstructors = getInt(preferenceStore.getBoolean(COUNT_CONSTRUCTORS));
+		int countDeprecated = getInt(preferenceStore.getBoolean(COUNT_DEPRECATED_METHODS));
+		int countInheritedAttributes = getInt(preferenceStore.getBoolean(COUNT_INHERITED_ATTRIBUTES));
+		int countInheritedMethods = getInt(preferenceStore.getBoolean(COUNT_INHERITED_METHODS));
+		int countInners = getInt(preferenceStore.getBoolean(COUNT_INNERS));
+		int countLoggers = getInt(preferenceStore.getBoolean(COUNT_LOGGERS));
+		int countObjectsMethods = getInt(preferenceStore.getBoolean(COUNT_OBJECTS_METHODS));
+		int countPublicMethodsOnly = getInt(preferenceStore.getBoolean(COUNT_PUBLIC_METHODS_ONLY));
+		int countStaticAttributes = getInt(preferenceStore.getBoolean(COUNT_STATIC_ATTRIBUTES));
+		int countStaticMethods = getInt(preferenceStore.getBoolean(COUNT_STATIC_METHODS));
+		String ignoreMembersPattern = preferenceStore.getString(IGNORE_MEMBERS_PATTERN);
+
+		String selectString = SELECT + PREFERENCE_ID_FIELD +
+			FROM + USER_PREFERENCES_TABLE +
+			WHERE +
+			USE_ORIGINALS_PREF + " = " + useOrig + " " + AND +
+			CONNECT_INTERFACE_METHODS_PREF + " = " + connectIfc + " " + AND +
+			COUNT_ABSTRACT_METHODS_PREF + " = " + countAbstract + " " + AND +
+			COUNT_CONSTRUCTORS_PREF + " = " + countConstructors + " " + AND +
+			COUNT_DEPRECATED_PREF + " = " + countDeprecated + " " + AND +
+			COUNT_INHERITED_ATTRIBUTES_PREF + " = " + countInheritedAttributes + " " + AND +
+			COUNT_INHERITED_METHODS_PREF + " = " + countInheritedMethods + " " + AND +
+			COUNT_INNERS_PREF + " = " + countInners + " " + AND +
+			COUNT_LOGGERS_PREF + " = " + countLoggers + " " + AND +
+			COUNT_OBJECTS_METHODS_PREF + " = " + countObjectsMethods + " " + AND +
+			COUNT_PUBLIC_METHODS_ONLY_PREF + " = " + countPublicMethodsOnly + " " + AND +
+			COUNT_STATIC_ATTRIBUTES_PREF + " = " + countStaticAttributes + " " + AND +
+			COUNT_STATIC_METHODS_PREF + " = " + countStaticMethods + " " + AND +
+			IGNORE_MEMBERS_PATTERN_PREF + " = '" + ignoreMembersPattern + "'"
+			;
+		
+		Statement selectStatement = connection.createStatement();
+		statements.add(selectStatement);
+		ResultSet resultSet = selectStatement.executeQuery(selectString);
+
+		// If there is an existing row with these preferences, use the key
+		if (resultSet.next()) {
+			key = resultSet.getInt(1);
+			resultSet.close();
+		}
+		// If no existing row exists, insert one
+		else {
+			resultSet.close();
+			insertPreference(connection, statements, useOrig, connectIfc,
+					countAbstract, countConstructors, countDeprecated,
+					countInheritedAttributes, countInheritedMethods,
+					countInners, countLoggers, countObjectsMethods,
+					countPublicMethodsOnly, countStaticAttributes,
+					countStaticMethods, ignoreMembersPattern);
+			
+			// Get the newly created key
+			selectStatement = connection.createStatement();
+			statements.add(selectStatement);
+			resultSet = selectStatement.executeQuery(selectString);
+			if (resultSet.next()) {
+				key = resultSet.getInt(1);
+			}
+			resultSet.close();
+		}
+		connection.commit();
+		return key;
+	}
+
+	/**
+	 * Insert a row into the user preferences table.
+	 * @throws SQLException
+	 */
+	private void insertPreference(Connection connection,
+			ArrayList<Statement> statements, int useOrig, int connectIfc,
+			int countAbstract, int countConstructors, int countDeprecated,
+			int countInheritedAttributes, int countInheritedMethods,
+			int countInners, int countLoggers, int countObjectsMethods,
+			int countPublicMethodsOnly, int countStaticAttributes,
+			int countStaticMethods, String ignoreMembersPattern)
+			throws SQLException {
+		String insertString = INSERT + USER_PREFERENCES_TABLE +
+		"(" +
+		USE_ORIGINALS_PREF + ", " +
+		CONNECT_INTERFACE_METHODS_PREF + ", " +
+		COUNT_ABSTRACT_METHODS_PREF + ", " +
+		COUNT_CONSTRUCTORS_PREF + ", " +
+		COUNT_DEPRECATED_PREF + ", " +
+		COUNT_INHERITED_ATTRIBUTES_PREF + ", " +
+		COUNT_INHERITED_METHODS_PREF + ", " +
+		COUNT_INNERS_PREF + ", " +
+		COUNT_LOGGERS_PREF + ", " +
+		COUNT_OBJECTS_METHODS_PREF + ", " +
+		COUNT_PUBLIC_METHODS_ONLY_PREF + ", " +
+		COUNT_STATIC_ATTRIBUTES_PREF + ", " +
+		COUNT_STATIC_METHODS_PREF + ", " +
+		IGNORE_MEMBERS_PATTERN_PREF +
+		")" +
+		VALUES + 
+		"(" +
+		useOrig + ", " +
+		connectIfc + ", " +
+		countAbstract + ", " +
+		countConstructors + ", " +
+		countDeprecated + ", " +
+		countInheritedAttributes + ", " +
+		countInheritedMethods + ", " +
+		countInners + ", " +
+		countLoggers + ", " +
+		countObjectsMethods + ", " +
+		countPublicMethodsOnly + ", " +
+		countStaticAttributes + ", " +
+		countStaticMethods + ", " +
+		"'" + ignoreMembersPattern + "'" +
+		")";
+		Statement insertStatement = connection.createStatement();
+		statements.add(insertStatement);
+		insertStatement.executeUpdate(insertString);
+	}
+
+	/**
+	 * Converts a boolean into an integer for the database
+	 * @param bool the value to convert
+	 * @return 1 if bool is true; 0 otherwise
+	 */
+	private int getInt(boolean bool) {
+		int value = bool? 1 : 0;
+		return value;
+	}
+
 	private PreparedStatement addInsertMetricValuesPreparedStatement(
 			Connection connection, ArrayList<Statement> statements)
 			throws SQLException {
-		String sqlString = INSERT + METRIC_VALUES_TABLE + VALUES + "(?, ?, ?)";
+		String sqlString =
+			INSERT + METRIC_VALUES_TABLE + VALUES + "(?, ?, ?, ?)";
 		PreparedStatement statement = connection.prepareStatement(sqlString);
 		statements.add(statement);
 		return statement;
@@ -135,31 +281,36 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 	 * @param metricId
 	 * @param metricSource
 	 * @param parentHandle
+	 * @param prefKey the key into the preferences table listing the preferences
+	 * in effect when the measurements were taken
 	 * @throws SQLException
 	 */
 	private void saveMetricValues(PreparedStatement deleteStatement,
 			PreparedStatement insertStatement, String metricId,
-			AbstractMetricSource metricSource, String parentHandle)
+			AbstractMetricSource metricSource, String parentHandle, int prefKey)
 			throws SQLException {
 		saveMetricValue(deleteStatement, insertStatement, metricId,
-				metricSource, parentHandle);
+				metricSource, parentHandle, prefKey);
 		List<String> handles = metricSource.getChildHandles();
 		for (String handle : handles) {
 			AbstractMetricSource child = Cache.singleton.get(handle);
 			saveMetricValues(deleteStatement, insertStatement, metricId, child,
-					handle);
+					handle, prefKey);
 		}
 	}
 
 	private void saveMetricValue(PreparedStatement deleteStatement,
 			PreparedStatement insertStatement, String metricId,
-			AbstractMetricSource metricSource, String handle) {
+			AbstractMetricSource metricSource, String handle,
+			int prefKey) {
 		deleteOldMetricValue(deleteStatement, metricId, handle);
-		insertNewMetricValue(insertStatement, metricId, metricSource, handle);
+		insertNewMetricValue(insertStatement, metricId, metricSource,
+				handle, prefKey);
 	}
 
 	private void insertNewMetricValue(PreparedStatement insertStatement,
-			String metricId, AbstractMetricSource metricSource, String handle) {
+			String metricId, AbstractMetricSource metricSource, String handle,
+			int prefKey) {
 		// Insert the new values
 		Metric metric = metricSource.getValue(metricId);
 		if (metric != null) {
@@ -168,6 +319,7 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 				insertStatement.setString(1, handle);
 				insertStatement.setString(2, metricId);
 				insertStatement.setDouble(3, value);
+				insertStatement.setInt(4, prefKey);
 				insertStatement.executeUpdate();
 			} catch (SQLException e) {
 				Database.printSQLException(e);
@@ -199,6 +351,7 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 		executeAndIgnore(statement, DROP + METRIC_ID_TABLE);
 		executeAndIgnore(statement, DROP + METRIC_LEVELS_TABLE);
 		executeAndIgnore(statement, DROP + METRIC_VALUES_TABLE);
+		executeAndIgnore(statement, DROP + USER_PREFERENCES_TABLE);
 //		executeAndIgnore(statement, DROP + SOURCE_COMPOSED_OF_TABLE);
 //		executeAndIgnore(statement, DROP + SOURCE_ID_TABLE);
 		Connection connection = statement.getConnection();
@@ -219,6 +372,7 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 		populateMetricIdTable(connection);
 		createMetricLevelsTable(statement);
 		populateMetricLevelsTable(connection);
+		createPreferencesTable(statement);
 		createMetricValuesTable(statement);
 		connection.commit();
 	}
@@ -315,12 +469,40 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 		statement.executeUpdate(sqlString);
 	}
 
+	private void createPreferencesTable(Statement statement) throws SQLException {
+		String sqlString = CREATE + USER_PREFERENCES_TABLE +
+		"(" + PREFERENCE_ID_FIELD + GENERATED_INT_KEY + ", " +
+		USE_ORIGINALS_PREF + BOOLEAN_FIELD_TYPE + ", " +
+		IGNORE_MEMBERS_PATTERN_PREF + IGNORE_PATTERN_FIELD_TYPE + ", " +
+		COUNT_ABSTRACT_METHODS_PREF + BOOLEAN_FIELD_TYPE + ", " +
+		COUNT_CONSTRUCTORS_PREF + BOOLEAN_FIELD_TYPE + ", " +
+		COUNT_DEPRECATED_PREF + BOOLEAN_FIELD_TYPE + ", " +
+		COUNT_INHERITED_ATTRIBUTES_PREF + BOOLEAN_FIELD_TYPE + ", " +
+		COUNT_INHERITED_METHODS_PREF + BOOLEAN_FIELD_TYPE + ", " +
+		COUNT_INNERS_PREF + BOOLEAN_FIELD_TYPE + ", " +
+		COUNT_LOGGERS_PREF + BOOLEAN_FIELD_TYPE + ", " +
+		COUNT_OBJECTS_METHODS_PREF + BOOLEAN_FIELD_TYPE + ", " +
+		COUNT_PUBLIC_METHODS_ONLY_PREF + BOOLEAN_FIELD_TYPE + ", " +
+		COUNT_STATIC_ATTRIBUTES_PREF + BOOLEAN_FIELD_TYPE + ", " +
+		COUNT_STATIC_METHODS_PREF + BOOLEAN_FIELD_TYPE + ", " +
+		CONNECT_INTERFACE_METHODS_PREF + BOOLEAN_FIELD_TYPE + ", " +
+		CONSTRAINT + "pk_prefval " + PRIMARY_KEY +
+		"(" + PREFERENCE_ID_FIELD + ")" +
+		")";
+		statement.executeUpdate(sqlString);
+	}
+
+	/** Creates the table that will hold the metric values. */
 	private void createMetricValuesTable(Statement statement) throws SQLException {
 		String sqlString = CREATE + METRIC_VALUES_TABLE +
 		"(" + HANDLE_FIELD + HANDLE_FIELD_TYPE + ", " +
 		ACRONYM_FIELD + ACRONYM_FIELD_TYPE + ", " +
 		VALUE_FIELD + VALUE_FIELD_TYPE + ", " +
-		CONSTRAINT + "pk_metricval " + PRIMARY_KEY + "(" + HANDLE_FIELD + ", " + ACRONYM_FIELD + ")" +
+		USER_PREFERENCES_FOREIGN_KEY + INT_FIELD_TYPE +
+		CONSTRAINT + "pref_foreign_key " + REFERENCES +
+		USER_PREFERENCES_TABLE + ", " +
+		CONSTRAINT + "pk_metricval " + PRIMARY_KEY +
+		"(" + HANDLE_FIELD + ", " + ACRONYM_FIELD + ")" +
 		")";
 		statement.executeUpdate(sqlString);
 	}
@@ -398,10 +580,11 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 			transaction.initializeDatabase(connection);
 			resultSet = transaction.getMetricLevels(statement);
 			resultSet.close();
-			String sqlString = INSERT + METRIC_VALUES_TABLE + VALUES + "(?, ?, ?)";
+			String sqlString = INSERT + METRIC_VALUES_TABLE + VALUES + "(?, ?, ?, ?)";
 			PreparedStatement psInsert = connection.prepareStatement(sqlString);
 			statements.add(psInsert);
-			transaction.saveMetricValue(psInsert);
+			int key = transaction.getPreferencesKey(connection, statements);
+			transaction.saveMetricValue(psInsert, key);
 			connection.commit();
 			System.out.println("Committed the transaction");
 
@@ -434,11 +617,12 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 	}
 
 	// TODO remove - test only
-	private void saveMetricValue(PreparedStatement insertPreparedStatement)
+	private void saveMetricValue(PreparedStatement insertPreparedStatement, int key)
 			throws SQLException {
 		insertPreparedStatement.setString(1, "testClassName");
 		insertPreparedStatement.setString(2, "KAC");
 		insertPreparedStatement.setDouble(3, 666.6);
+		insertPreparedStatement.setInt(4, key);
 		insertPreparedStatement.executeUpdate();
 	}
 

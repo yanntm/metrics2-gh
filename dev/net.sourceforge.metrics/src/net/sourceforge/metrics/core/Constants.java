@@ -29,6 +29,8 @@ import org.eclipse.jdt.core.IJavaElement;
  * @author Frank Sauer
  */
 public interface Constants {
+	
+	/* Eclipse scopes. */
 
 	/** project level source */
     public final static int PROJECT = IJavaElement.JAVA_PROJECT; // now 2, formerly 6;
@@ -134,5 +136,82 @@ public interface Constants {
 	public final static String PLUGIN_ID = "net.sourceforge.metrics";
 
 	public final static int FRACTION_DIGITS = 3;
+	
+	
+	////////////////// Preferences
+	
+	
+	/** The beginning of all cohesion preference strings. */
+	public static final String COHESION_PREFERENCE_PREFIX = "Cohesion";
+	
+	/** The beginning of all metrics preference strings. */
+	public static final String METRICS_PREFERENCE_PREFIX = "METRICS";
+
+	/* Cohesion preferences.  Some of these are also used as the names of
+	 * columns of the preference table in the database.	 */
+	
+	public static final String USE_ORIGINALS_PREF = "UseOriginals";
+
+	public static final String IGNORE_MEMBERS_PATTERN_PREF = "IgnoreMembersPattern";
+
+	public static final String COUNT_STATIC_METHODS_PREF = "StaticMethods";
+
+	public static final String COUNT_STATIC_ATTRIBUTES_PREF = "StaticAttributes";
+
+	public static final String COUNT_PUBLIC_METHODS_ONLY_PREF = "PublicMethodsOnly";
+
+	public static final String COUNT_OBJECTS_METHODS_PREF = "ObjectsMethods";
+
+	public static final String COUNT_LOGGERS_PREF = "Loggers";
+
+	public static final String COUNT_INNERS_PREF = "Inners";
+
+	public static final String COUNT_INHERITED_METHODS_PREF = "InheritedMethods";
+
+	public static final String COUNT_INHERITED_ATTRIBUTES_PREF = "InheritedAttributes";
+
+	public static final String COUNT_DEPRECATED_PREF = "Deprecated";
+
+	public static final String COUNT_CONSTRUCTORS_PREF = "Constructors";
+
+	public static final String COUNT_ABSTRACT_METHODS_PREF = "AbstractMethods";
+
+	public static final String CONNECT_INTERFACE_METHODS_PREF = "ConnectInterfaceMethods";
+
+	/** If this is "true", the original metric definitions are
+	 * used; otherwise, the user has the options of deciding
+	 * which members are considered in the calculations by setting
+	 * the other preferences.
+	 */
+	public static final String USE_ORIGINAL_DEFINITIONS =
+		COHESION_PREFERENCE_PREFIX + "." + USE_ORIGINALS_PREF;
+
+	public static final String CONNECT_INTERFACE_METHODS =
+		COHESION_PREFERENCE_PREFIX + "." + CONNECT_INTERFACE_METHODS_PREF;
+	public static final String COUNT_ABSTRACT_METHODS =
+		COHESION_PREFERENCE_PREFIX + "." + COUNT_ABSTRACT_METHODS_PREF;
+	public static final String COUNT_CONSTRUCTORS =
+		COHESION_PREFERENCE_PREFIX + "." + COUNT_CONSTRUCTORS_PREF;
+	public static final String COUNT_DEPRECATED_METHODS =
+		COHESION_PREFERENCE_PREFIX + "." + COUNT_DEPRECATED_PREF;
+	public static final String COUNT_INHERITED_ATTRIBUTES =
+		COHESION_PREFERENCE_PREFIX + "." + COUNT_INHERITED_ATTRIBUTES_PREF;
+	public static final String COUNT_INHERITED_METHODS =
+		COHESION_PREFERENCE_PREFIX + "." + COUNT_INHERITED_METHODS_PREF;
+	public static final String COUNT_INNERS =
+		COHESION_PREFERENCE_PREFIX + "." + COUNT_INNERS_PREF;
+	public static final String COUNT_LOGGERS =
+		COHESION_PREFERENCE_PREFIX + "." + COUNT_LOGGERS_PREF;
+	public static final String COUNT_OBJECTS_METHODS =
+		COHESION_PREFERENCE_PREFIX + "." + COUNT_OBJECTS_METHODS_PREF;
+	public static final String COUNT_PUBLIC_METHODS_ONLY =
+		COHESION_PREFERENCE_PREFIX + "." + COUNT_PUBLIC_METHODS_ONLY_PREF;
+	public static final String COUNT_STATIC_ATTRIBUTES =
+		COHESION_PREFERENCE_PREFIX + "." + COUNT_STATIC_ATTRIBUTES_PREF;
+	public static final String COUNT_STATIC_METHODS =
+		COHESION_PREFERENCE_PREFIX + "." + COUNT_STATIC_METHODS_PREF;
+	public static final String IGNORE_MEMBERS_PATTERN =
+		COHESION_PREFERENCE_PREFIX + "." + IGNORE_MEMBERS_PATTERN_PREF;
+
 
 }
