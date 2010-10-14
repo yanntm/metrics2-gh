@@ -20,14 +20,19 @@
  */
 package net.sourceforge.metrics.ui.preferences;
 
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
 import net.sourceforge.metrics.core.Constants;
 import net.sourceforge.metrics.core.MetricsPlugin;
 
 import org.eclipse.jface.preference.BooleanFieldEditor;
+import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.preference.StringFieldEditor;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -41,6 +46,8 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
  */
 public class CohesionPreferencePage extends FieldEditorPreferencePage
 implements Constants, IWorkbenchPreferencePage {
+	
+	private StringFieldEditor ignorePatternEditor = null;
 
 	/**
 	 * The constructor.
@@ -108,8 +115,30 @@ implements Constants, IWorkbenchPreferencePage {
 				"Include static attributes", parent));
 		addField(new BooleanFieldEditor(COUNT_STATIC_METHODS,
 				"Include static methods", parent));
-		addField(new StringFieldEditor(IGNORE_MEMBERS_PATTERN,
-				"Ignore members matching (Java) pattern:", parent));
+		ignorePatternEditor = new StringFieldEditor(IGNORE_MEMBERS_PATTERN,
+				"Ignore members matching (Java) pattern:", parent);
+		addField(ignorePatternEditor);
 	}
+
+	/** Make sure the supplied pattern to be ignored is legal. */
+	protected void checkState() {
+		super.checkState();
+		String tentativePattern = ignorePatternEditor.getStringValue();
+		try {
+			Pattern.compile(tentativePattern);
+		} catch (PatternSyntaxException e) {
+			setValid(false);
+			setErrorMessage("Specified pattern to ignore is illegal: "
+					+ e.getMessage());
+		}
+	}
+
+	public void propertyChange(PropertyChangeEvent event) {
+		super.propertyChange(event);
+		if (event.getProperty().equals(FieldEditor.VALUE)) {
+			checkState();
+		}
+	}
+
 
 }
