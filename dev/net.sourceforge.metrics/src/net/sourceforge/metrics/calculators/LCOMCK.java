@@ -18,7 +18,6 @@
  */
 package net.sourceforge.metrics.calculators;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -69,7 +68,7 @@ public class LCOMCK extends CohesionCalculator {
 		CallData callData = getCallDataFromSource(source);
 		Set<IField> attributes = callData.getAttributes();
 		Set<IMethod> methods = callData.getMethods();
-		Map<IMethod, HashSet<IField>> accessedMap = callData
+		Map<IMethod, Set<IField>> accessedMap = callData
 				.getAttributesAccessedMap();
 		double value = 0;
 
@@ -98,7 +97,7 @@ public class LCOMCK extends CohesionCalculator {
 	 *         similar pairs of methods
 	 */
 	private double calculateCommonCase(Set<IMethod> methods,
-			Map<IMethod, HashSet<IField>> accessedMap) {
+			Map<IMethod, Set<IField>> accessedMap) {
 		double value = 0;
 		int similar = 0;
 		int dissimilar = 0;

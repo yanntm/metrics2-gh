@@ -133,7 +133,7 @@ public class CohesionTCC extends CohesionCalculator
 	List<IMember> headers = getMatrixHeaders(reachabilityMatrix, methodsToEval);
 	ConnectivityMatrix directlyConnectedMatrix =
 	    new ConnectivityMatrix(headers);
-	ArrayList<Integer> attributeIndices =
+	List<Integer> attributeIndices =
 	    getAttributeIndices(callData, reachabilityMatrix);
 	
 	for (int i = 0; i < methodsToEval.size(); i++) {
@@ -181,7 +181,7 @@ public class CohesionTCC extends CohesionCalculator
 	    ConnectivityMatrix connectityMatrix,
 	    List<Integer> methodsToEval) {
 	List<IMember> reachabilityHeaders = connectityMatrix.getHeaders();
-	ArrayList<IMember> headers = new ArrayList<IMember>();
+	List<IMember> headers = new ArrayList<IMember>();
 	for (int i = 0; i < methodsToEval.size(); i++) {
 	    Integer method = methodsToEval.get(i);
 	    IMember member = reachabilityHeaders.get(method.intValue());
@@ -199,9 +199,9 @@ public class CohesionTCC extends CohesionCalculator
      */
     private static Set<Integer> getAttributesAccessedBy(
 	    int methodIndex,
-	    ArrayList<Integer> attributeIndices,
+	    List<Integer> attributeIndices,
 	    ConnectivityMatrix reachabilityMatrix) {
-	HashSet<Integer> iFields = new HashSet<Integer>();
+	Set<Integer> iFields = new HashSet<Integer>();
 	for (Integer aIndex: attributeIndices) {
 	    if (reachabilityMatrix.matrix[methodIndex][aIndex.intValue()] ==
 	            CallData.ConnectivityMatrix.CONNECTED) {
@@ -219,9 +219,9 @@ public class CohesionTCC extends CohesionCalculator
      *   between methods and attributes
      * @return the indices of the attributes in the matrix
      */
-    private static ArrayList<Integer> getAttributeIndices(
+    private static List<Integer> getAttributeIndices(
 	    CallData callData, ConnectivityMatrix matrix) {
-	ArrayList<Integer> indices = new ArrayList<Integer>();
+	List<Integer> indices = new ArrayList<Integer>();
 	Set<IField> attributes = callData.getAttributes();
 	for (IField field : attributes) {
 	    int index = matrix.getIndex(field);
@@ -238,7 +238,7 @@ public class CohesionTCC extends CohesionCalculator
      *   of the visible, non-constructor methods
      */
     public static List<Integer> getEvaluableMethodReachabilityIndices(CallData callData) {
-	ArrayList<Integer> methodsToEval = new ArrayList<Integer>();
+	List<Integer> methodsToEval = new ArrayList<Integer>();
 	ConnectivityMatrix reachabilityMatrix = callData.getReachabilityMatrix();
 	
 	// Remove constructors from consideration

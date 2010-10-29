@@ -39,7 +39,7 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 		Connection connection = null;
 		/* Store the Statement and Prepared statement object references
 		 * in a list for convenience. */
-		ArrayList<Statement> statements = new ArrayList<Statement>();
+		List<Statement> statements = new ArrayList<Statement>();
 		Statement statement = null;
 		ResultSet resultSet = null;
 		
@@ -82,7 +82,7 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 	 * @throws SQLException
 	 */
 	private void saveAllMeasurements(Connection connection,
-			ArrayList<Statement> statements, IJavaElement element)
+			List<Statement> statements, IJavaElement element)
 			throws SQLException {
 		String handle = element.getHandleIdentifier();
 		AbstractMetricSource root = Cache.singleton.get(handle);
@@ -116,7 +116,7 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 	 * @return the key
 	 */
 	private int getPreferencesKey(Connection connection,
-			ArrayList<Statement> statements)
+			List<Statement> statements)
 	throws SQLException {
 		int key = 1;
 		
@@ -210,7 +210,7 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 	 * @throws SQLException
 	 */
 	private void insertPreference(Connection connection,
-			ArrayList<Statement> statements, int useOrig, int connectIfc,
+			List<Statement> statements, int useOrig, int connectIfc,
 			int countAbstract, int countConstructors, int countDeprecated,
 			int countInheritedAttributes, int countInheritedMethods,
 			int countInners, int countLoggers, int countObjectsMethods,
@@ -267,7 +267,7 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 	}
 
 	private PreparedStatement addInsertMetricValuesPreparedStatement(
-			Connection connection, ArrayList<Statement> statements)
+			Connection connection, List<Statement> statements)
 			throws SQLException {
 		String sqlString =
 			INSERT + METRIC_VALUES_TABLE + VALUES + "(?, ?, ?, ?)";
@@ -277,7 +277,7 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 	}
 
 	private PreparedStatement addDeleteMetricValuesPreparedStatement(
-			Connection connection, ArrayList<Statement> statements)
+			Connection connection, List<Statement> statements)
 			throws SQLException {
 		String sqlString = DELETE + METRIC_VALUES_TABLE +
 		WHERE + HANDLE_FIELD + " = ? " + AND  + ACRONYM_FIELD + " = ? " +
@@ -575,7 +575,7 @@ public class MetricsDBTransaction implements IDatabaseConstants {
 		 * We are storing the Statement and Prepared statement object references
 		 * in an array list for convenience.
 		 */
-		ArrayList<Statement> statements = new ArrayList<Statement>();
+		List<Statement> statements = new ArrayList<Statement>();
 		Statement statement = null;
 		ResultSet resultSet = null;
 		/*

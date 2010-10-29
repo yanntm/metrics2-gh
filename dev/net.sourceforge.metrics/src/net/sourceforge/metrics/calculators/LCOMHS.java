@@ -19,7 +19,6 @@
 package net.sourceforge.metrics.calculators;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -83,11 +82,11 @@ public class LCOMHS extends CohesionCalculator {
 	    
 	    if (numMethods > 1) {
 		int sum = 0;
-		Map<IField, HashSet<IMethod>> attributeAccessedByMap =
+		Map<IField, Set<IMethod>> attributeAccessedByMap =
 		    callData.getAttributeAccessedByMap();
-		Collection<HashSet<IMethod>> values = attributeAccessedByMap.values();
+		Collection<Set<IMethod>> values = attributeAccessedByMap.values();
 		int numAttributes = values.size();
-		Iterator<HashSet<IMethod>> valueIterator = values.iterator();
+		Iterator<Set<IMethod>> valueIterator = values.iterator();
 		
 		while (valueIterator.hasNext()) {
 		    Set<IMethod> methods = valueIterator.next();

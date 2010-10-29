@@ -23,6 +23,7 @@ package net.sourceforge.metrics.calculators;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import net.sourceforge.metrics.core.Constants;
@@ -53,7 +54,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
  */
 public class LackOfCohesion extends Calculator implements Constants {
 
-	private HashMap<String, Set<String>> buckets = new HashMap<String, Set<String>>();
+	private Map<String, Set<String>> buckets = new HashMap<String, Set<String>>();
 	private static Preferences prefs;
 
 	/**

@@ -86,7 +86,7 @@ public class CallData {
 		protected List<IMember> headers;
 
 		/** keeps track of which index in the array corresponds to each member. */
-		protected HashMap<IMember, Integer> memberIndex = new HashMap<IMember, Integer>();
+		protected Map<IMember, Integer> memberIndex = new HashMap<IMember, Integer>();
 
 		/**
 		 * Builds a connectivity matrix using the headers provided. All entries
@@ -155,12 +155,12 @@ public class CallData {
 		 */
 		private static ConnectivityMatrix buildAdjacencyMatrix(
 				CallData callData) {
-			Map<IField, HashSet<IMethod>> attributeAccessedByMap =
+			Map<IField, Set<IMethod>> attributeAccessedByMap =
 				callData.getAttributeAccessedByMap();
-			Map<IMethod, HashSet<IMethod>> methodCalledByMap =
+			Map<IMethod, Set<IMethod>> methodCalledByMap =
 				callData.getMethodCalledByMap();
 			Set<IField> attributeKeySet = attributeAccessedByMap.keySet();
-			ArrayList<IMember> headers = new ArrayList<IMember>(attributeKeySet);
+			List<IMember> headers = new ArrayList<IMember>(attributeKeySet);
 			Set<IMethod> methodKeySet = methodCalledByMap.keySet();
 			headers.addAll(methodKeySet);
 			ConnectivityMatrix matrix = new ConnectivityMatrix(headers);
@@ -194,14 +194,14 @@ public class CallData {
 		 * @param callData the class's call data
 		 */
 		private void markAccessedAttributesConnected(CallData callData) {
-			Map<IField, HashSet<IMethod>> attributeAccessedByMap =
+			Map<IField, Set<IMethod>> attributeAccessedByMap =
 				callData.getAttributeAccessedByMap();
-			Set<Entry<IField, HashSet<IMethod>>> attributeEntrySet =
+			Set<Entry<IField, Set<IMethod>>> attributeEntrySet =
 				attributeAccessedByMap.entrySet();
 
 			// Connect methods with the attributes they access
-			for (Entry<IField, HashSet<IMethod>> entry : attributeEntrySet) {
-				HashSet<IMethod> callers = entry.getValue();
+			for (Entry<IField, Set<IMethod>> entry : attributeEntrySet) {
+				Set<IMethod> callers = entry.getValue();
 				IField field = entry.getKey();
 				int fieldIndex = getIndex(field);
 
@@ -223,13 +223,13 @@ public class CallData {
 		 * @param callData the class's call data
 		 */
 		private void markCalledMethodsConnected(CallData callData) {
-			Map<IMethod, HashSet<IMethod>> methodCalledByMap =
+			Map<IMethod, Set<IMethod>> methodCalledByMap =
 				callData.getMethodCalledByMap();
-			Set<Entry<IMethod, HashSet<IMethod>>> methodEntrySet = methodCalledByMap
+			Set<Entry<IMethod, Set<IMethod>>> methodEntrySet = methodCalledByMap
 					.entrySet();
 
-			for (Entry<IMethod, HashSet<IMethod>> entry : methodEntrySet) {
-				HashSet<IMethod> callers = entry.getValue();
+			for (Entry<IMethod, Set<IMethod>> entry : methodEntrySet) {
+				Set<IMethod> callers = entry.getValue();
 				IMethod callee = entry.getKey();
 				int calleeIndex = getIndex(callee);
 
@@ -251,7 +251,7 @@ public class CallData {
 		 */
 		private void markInterfaceMethodsConnected(CallData callData) {
 			Set<IMethod> methodSet = callData.getMethods();
-			ArrayList<IMethod> methodList = new ArrayList<IMethod>(methodSet);
+			List<IMethod> methodList = new ArrayList<IMethod>(methodSet);
 			try {
 				IType[] interfaces = callData.getInterfaces();
 
@@ -363,7 +363,7 @@ public class CallData {
 		    ConnectivityMatrix connectityMatrix,
 		    List<Integer> methodsToEval) {
 		List<IMember> reachabilityHeaders = connectityMatrix.getHeaders();
-		ArrayList<IMember> headers = new ArrayList<IMember>();
+		List<IMember> headers = new ArrayList<IMember>();
 		for (int i = 0; i < methodsToEval.size(); i++) {
 		    Integer method = methodsToEval.get(i);
 		    IMember member = reachabilityHeaders.get(method.intValue());
@@ -385,7 +385,7 @@ public class CallData {
 		    Set<Integer> iMembers, int j, Set<Integer> jMembers) {
 		// Determine whether there are commonly accessed members
 		if (jMembers != null) {
-		    HashSet<Integer> intersection = new HashSet<Integer>(jMembers);
+		    Set<Integer> intersection = new HashSet<Integer>(jMembers);
 		    intersection.retainAll(iMembers);
 
 		    // Mark connected if the methods access some of the
@@ -408,7 +408,7 @@ public class CallData {
 	    private static Set<Integer> getMembersAccessedBy(
 		    int methodIndex,
 		    ConnectivityMatrix reachabilityMatrix) {
-		HashSet<Integer> memberIndices = new HashSet<Integer>();
+		Set<Integer> memberIndices = new HashSet<Integer>();
 		for (int i = 0; i < reachabilityMatrix.matrix.length; i++) {
 		    if (reachabilityMatrix.matrix[methodIndex][i] ==
 		            CallData.ConnectivityMatrix.CONNECTED) {
@@ -475,39 +475,39 @@ public class CallData {
 	protected IType type = null;
 	
 	/** The set of known attributes (fields). */
-	protected HashSet<IField> attributes = new HashSet<IField>();
+	protected Set<IField> attributes = new HashSet<IField>();
 
 	/** The set of known methods. */
-	protected HashSet<IMethod> methods = new HashSet<IMethod>();
+	protected Set<IMethod> methods = new HashSet<IMethod>();
 
 	/**
 	 * The methods directly called by a method. The key is the calling method.
 	 * The value is the set of methods that it calls.
 	 */
-	protected HashMap<IMethod, HashSet<IMethod>> methodsCalledMap =
-		new HashMap<IMethod, HashSet<IMethod>>();
+	protected Map<IMethod, Set<IMethod>> methodsCalledMap =
+		new HashMap<IMethod, Set<IMethod>>();
 
 	/**
 	 * The attributes directly accessed by a method. The key is the calling
 	 * method. The value is the set of attributes that it accesses.
 	 */
-	protected HashMap<IMethod, HashSet<IField>> attributesAccessedMap =
-		new HashMap<IMethod, HashSet<IField>>();
+	protected Map<IMethod, Set<IField>> attributesAccessedMap =
+		new HashMap<IMethod, Set<IField>>();
 
 	/**
 	 * The direct callers of a method. The key is a method that gets called by
 	 * some method. The value is the set of methods that directly call it.
 	 */
-	protected HashMap<IMethod, HashSet<IMethod>> methodCalledByMap =
-		new HashMap<IMethod, HashSet<IMethod>>();
+	protected Map<IMethod, Set<IMethod>> methodCalledByMap =
+		new HashMap<IMethod, Set<IMethod>>();
 
 	/**
 	 * The direct accessors of an attribute (field). The key is an attribute
 	 * that gets accessed by some method. The value is the set of methods that
 	 * directly access it.
 	 */
-	protected HashMap<IField, HashSet<IMethod>> attributeAccessedByMap =
-		new HashMap<IField, HashSet<IMethod>>();
+	protected Map<IField, Set<IMethod>> attributeAccessedByMap =
+		new HashMap<IField, Set<IMethod>>();
 
 	/**
 	 * Keeps track of the direct connections between methods and other methods
@@ -693,7 +693,7 @@ public class CallData {
 
 			// Update the methodsCalledMap for method
 			for (IMethod caller : callers) {
-				HashSet<IMethod> calleesL = methodsCalledMap.get(caller);
+				Set<IMethod> calleesL = methodsCalledMap.get(caller);
 				if (calleesL == null) {
 					calleesL = new HashSet<IMethod>();
 				}
@@ -788,7 +788,7 @@ public class CallData {
 
 			// Update the fieldsCalledMap for attribute
 			for (IMethod caller : callers) {
-				HashSet<IField> calleesL = attributesAccessedMap.get(caller);
+				Set<IField> calleesL = attributesAccessedMap.get(caller);
 				if (calleesL == null) {
 					calleesL = new HashSet<IField>();
 				}
@@ -961,28 +961,28 @@ public class CallData {
 	/**
 	 * @return the methodsCalledMap
 	 */
-	public Map<IMethod, HashSet<IMethod>> getMethodsCalledMap() {
+	public Map<IMethod, Set<IMethod>> getMethodsCalledMap() {
 		return methodsCalledMap;
 	}
 
 	/**
 	 * @return the attributesAccessedMap
 	 */
-	public Map<IMethod, HashSet<IField>> getAttributesAccessedMap() {
+	public Map<IMethod, Set<IField>> getAttributesAccessedMap() {
 		return attributesAccessedMap;
 	}
 
 	/**
 	 * @return the methodCalledByMap
 	 */
-	public Map<IMethod, HashSet<IMethod>> getMethodCalledByMap() {
+	public Map<IMethod, Set<IMethod>> getMethodCalledByMap() {
 		return methodCalledByMap;
 	}
 
 	/**
 	 * @return the attributeAccessedByMap
 	 */
-	public Map<IField, HashSet<IMethod>> getAttributeAccessedByMap() {
+	public Map<IField, Set<IMethod>> getAttributeAccessedByMap() {
 		return attributeAccessedByMap;
 	}
 
@@ -1056,7 +1056,7 @@ public class CallData {
 
 		for (IMethod caller : keySet) {
 			String sCaller = getSignature(caller);
-			HashSet<IMethod> callees = methodsCalledMap.get(caller);
+			Set<IMethod> callees = methodsCalledMap.get(caller);
 
 			for (IMethod callee : callees) {
 				buf.append(sCaller);
@@ -1085,7 +1085,7 @@ public class CallData {
 			} catch (JavaModelException e) {
 				sCaller = caller.toString();
 			}
-			HashSet<IMethod> callees = methodsCalledMap.get(caller);
+			Set<IMethod> callees = methodsCalledMap.get(caller);
 			buf.append(sCaller);
 			buf.append(": ");
 			buf.append(callees.toString());
@@ -1110,7 +1110,7 @@ public class CallData {
 
 		for (IMethod caller : keySet) {
 			String sCaller = getSignature(caller);
-			HashSet<IField> callees = attributesAccessedMap.get(caller);
+			Set<IField> callees = attributesAccessedMap.get(caller);
 
 			for (IField callee : callees) {
 				buf.append(sCaller);
@@ -1139,7 +1139,7 @@ public class CallData {
 			} catch (JavaModelException e) {
 				sCaller = caller.toString();
 			}
-			HashSet<IField> callees = attributesAccessedMap.get(caller);
+			Set<IField> callees = attributesAccessedMap.get(caller);
 			buf.append(sCaller);
 			buf.append(": ");
 			buf.append(callees.toString());
@@ -1220,7 +1220,7 @@ public class CallData {
 	 * @param member the method or attribute whose status we're checking
 	 * @return true if the member was declared on a supertype; false otherwise
 	 * @throws JavaModelException
-	 */
+	 * /
 	private boolean isInherited(IMember member)
 	throws JavaModelException {
 		// TODO determine whether this will be true for members
@@ -1235,7 +1235,7 @@ public class CallData {
 			i++;
 		}
 		return hasSuper;
-	}
+	} */
 	
 	/**
 	 * Determines whether this field is a (java.util) logger

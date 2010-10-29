@@ -121,7 +121,7 @@ public class CohesionDCD extends CohesionCalculator {
      */
 	public static List<Integer> getEvaluableMethodReachabilityIndices(
 			CallData callData) {
-		ArrayList<Integer> methodsToEval = new ArrayList<Integer>();
+		List<Integer> methodsToEval = new ArrayList<Integer>();
 		ConnectivityMatrix reachabilityMatrix = callData
 				.getReachabilityMatrix();
 

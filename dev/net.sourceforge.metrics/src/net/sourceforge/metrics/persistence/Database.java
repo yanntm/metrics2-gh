@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import net.sourceforge.metrics.core.Log;
@@ -295,7 +295,7 @@ public class Database
 	 * @param resultSet
 	 */
 	public void releaseResources(Connection connection,
-			ArrayList<Statement> statements, ResultSet resultSet) {
+			List<Statement> statements, ResultSet resultSet) {
 		// ResultSet
 		try {
 			if (resultSet != null) {
