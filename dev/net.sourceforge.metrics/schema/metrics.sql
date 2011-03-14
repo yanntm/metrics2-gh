@@ -1,5 +1,6 @@
 -- This is now obsolete and sitting around temporarily for reference.
--- The table creation is now being done in code.
+-- The table creation is now being done in code in
+net.sourceforge.metrics.persistence.MetricsDBTransaction.
 
 -- for server
 connect 'jdbc:derby://localhost:1527/metrics2DB;create=true';
