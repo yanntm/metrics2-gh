@@ -2,8 +2,8 @@
 <?eclipse version="3.4"?>
 <plugin>
   
-   <extension-point id="metrics" name="metrics" schema="schema/net.sourceforge.metrics.exsd"/>
-   <extension-point id="exporters" name="exporters" schema="schema/exporters.exsd"/>
+   <extension-point id="net.sourceforge.metrics.metrics" name="metrics" schema="schema/net.sourceforge.metrics.exsd"/>
+   <extension-point id="net.sourceforge.metrics.exporters" name="net.sourceforge.metrics.exporters" schema="schema/exporters.exsd"/>
 
    <extension
          point="org.eclipse.ui.views">
