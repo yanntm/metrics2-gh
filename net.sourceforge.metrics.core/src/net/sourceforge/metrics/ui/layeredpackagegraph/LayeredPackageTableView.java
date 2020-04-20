@@ -41,7 +41,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.custom.TableTreeItem;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.events.ArmListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -161,7 +161,7 @@ public class LayeredPackageTableView extends ViewPart implements ISelectionListe
 		table.addSelectionListener(new SelectionListener() {
 
 			public void widgetSelected(SelectionEvent e) {
-				TableTreeItem item = (TableTreeItem) e.item;
+				TreeItem item = (TreeItem) e.item;
 				if (item != null) {
 					supplementTitle(item);
 				}
@@ -187,9 +187,9 @@ public class LayeredPackageTableView extends ViewPart implements ISelectionListe
 	 * 
 	 * @param item
 	 */
-	private void supplementTitle(TableTreeItem item) {
+	private void supplementTitle(TreeItem item) {
 		StringBuffer b = getTitlePrefix(selection);
-		TableTreeItem root = item; // fix submitted by Jacob Eckel 5/27/03
+		TreeItem root = item; // fix submitted by Jacob Eckel 5/27/03
 		while (root.getParentItem() != null) {
 			root = root.getParentItem();
 		}
