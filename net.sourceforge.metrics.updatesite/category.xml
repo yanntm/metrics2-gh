@@ -3,7 +3,7 @@
    <description name="Metrics Update Site" url="https://github.com/yanntm/metrics2-gh">
       Metrics Updates Site
    </description>
-   <feature id="net.sourceforge.metrics">
+   <feature id="net.sourceforge.metrics.feature">
       <category name="Metrics"/>
    </feature>
    <category-def name="Metrics" label="Metrics"/>
