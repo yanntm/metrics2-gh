@@ -1,0 +1,17 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>net.sourceforge.metrics</groupId>
+    <artifactId>net.sourceforge.metrics.parent</artifactId>
+    <version>1.3.9-SNAPSHOT</version>
+    <relativePath>../net.sourceforge.metrics.parent/pom.xml</relativePath>
+  </parent>
+  
+    <artifactId>net.sourceforge.metrics.feature</artifactId>
+    <packaging>eclipse-feature</packaging>
+    <name>Features :: Metrics for Java feature</name>
+    <description>Support for computing diverse metrics of Java projects.</description>
+
+</project>
