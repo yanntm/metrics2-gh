@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description name="Metrics Update Site" url="https://github.com/yanntm/metrics2-gh">
+      Metrics Updates Site
+   </description>
+   <feature id="net.sourceforge.metrics">
+      <category name="Metrics"/>
+   </feature>
+   <category-def name="Metrics" label="Metrics"/>
+</site>

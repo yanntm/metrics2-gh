@@ -17,7 +17,7 @@
 	<url>https://sourceforge.net/projects/metrics2/</url>
 
 	<modules>
-		<module>../net.sourceforge.metrics</module>
+		<module>../net.sourceforge.metrics.core</module>
 		<module>../net.sourceforge.metrics.feature</module>
 		<module>../net.sourceforge.metrics.updatesite</module>
 	</modules>
