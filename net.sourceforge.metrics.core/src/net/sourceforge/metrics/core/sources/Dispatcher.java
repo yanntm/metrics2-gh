@@ -20,6 +20,7 @@
  */
 package net.sourceforge.metrics.core.sources;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -81,12 +82,11 @@ public class Dispatcher {
 			if (key.isInstance(input)) {
 				try {
 					Class<? extends AbstractMetricSource> msc = entry.getValue();
-					AbstractMetricSource ms = msc.newInstance();
+					AbstractMetricSource ms = msc.getDeclaredConstructor().newInstance();
 					return ms;
-				} catch (InstantiationException e) {
+				} catch (InvocationTargetException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException e) {
 					Log.logError("createNewSource for " + input.getHandleIdentifier(), e);
-				} catch (IllegalAccessException e) {
-					Log.logError("createNewSource for " + input.getHandleIdentifier(), e);
+					e.printStackTrace();
 				}
 			}
 		}
