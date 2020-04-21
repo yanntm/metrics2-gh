@@ -130,7 +130,7 @@ public class RangePage extends PreferencePage implements IWorkbenchPreferencePag
 			if (property.equals("MIN")) {
 				String minStr = (String) value;
 				try {
-					Double min = new Double(minStr);
+					Double min = Double.parseDouble(minStr);
 					md.setMin(min);
 					values[2] = minStr;
 				} catch (NumberFormatException e) {
@@ -139,7 +139,7 @@ public class RangePage extends PreferencePage implements IWorkbenchPreferencePag
 			} else if (property.equals("MAX")) {
 				String maxStr = (String) value;
 				try {
-					Double max = new Double(maxStr);
+					Double max = Double.parseDouble(maxStr);
 					md.setMax(max);
 					values[3] = maxStr;
 				} catch (NumberFormatException e) {
