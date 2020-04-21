@@ -165,7 +165,7 @@ public class MetricDescriptor {
 	private void setRange(String minStr, String maxStr, String hint) {
 		if (minStr != null) {
 			try {
-				min = new Double(minStr);
+				min = Double.parseDouble(minStr);
 				defaultMin = min;
 			} catch (NumberFormatException x) {
 				Log.logError("Non-numeric minimum specified by a metrics extension", x);
@@ -173,7 +173,7 @@ public class MetricDescriptor {
 		}
 		if (maxStr != null) {
 			try {
-				max = new Double(maxStr);
+				max = Double.parseDouble(maxStr);
 				defaultMax = max;
 			} catch (NumberFormatException x) {
 				Log.logError("Non-numeric maximum specified by a metrics extension", x);
@@ -343,7 +343,7 @@ public class MetricDescriptor {
 		if (max == IPreferenceStore.DOUBLE_DEFAULT_DEFAULT) {
 			return null;
 		}
-		return new Double(max);
+		return max;
 	}
 
 	/**
@@ -354,7 +354,7 @@ public class MetricDescriptor {
 		if (min == IPreferenceStore.DOUBLE_DEFAULT_DEFAULT) {
 			return null;
 		}
-		return new Double(min);
+		return min;
 	}
 
 	/**
